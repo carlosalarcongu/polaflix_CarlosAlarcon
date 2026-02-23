@@ -1,6 +1,8 @@
 # polaflix_CarlosAlarcon
 Repositorio para prácticas personales de 332 - Tecnologías para el Desarrollo de Aplicaciones Empresariales sobre Internet - Curso 2025-2026
 
+//Página para pasar a png el .puml
+# https://www.planttext.com/ 
 
 1. Clasificación de Elementos
 Entities (Entidades): Tienen identidad propia y un ciclo de vida que debe ser monitorizado.
@@ -40,7 +42,7 @@ Aggregate Root: Usuario.
 
 Elementos internos: RegistroVisualizacion (Value Object), IBAN (Value Object).
 
-Justificación: El usuario controla su propio ciclo de vida, su plan de suscripción y su historial de visualizaciones. Las listas de series (Empezadas, Pendientes, Terminadas) se gestionan guardando referencias (IDs) a las Series, nunca los objetos Serie completos, evitando así cruzar fronteras de agregados indebidamente.
+Justificación: El usuario controla su propio ciclo de vida, su plan de suscripción y su historial de visualizaciones. Las listas de series (Empezadas, Pendientes, Terminadas) se gestionan guardando referencias (IDs) a las Series, nunca los objetos Serie completos, así podemos evitar cruzar fronteras de agregados indebidamente.
 
 Aggregate: Serie
 
@@ -66,3 +68,4 @@ Evitar referencias directas entre objetos de distintos Aggregates: El Usuario no
 Operación "Agregar Serie al espacio personal": Es un método del Aggregate Root Usuario (ej. usuario.agregarSeriePendiente(serieId)).
 
 Operación "Anotar capítulo como reproducido": Dado que afecta al estado del Usuario (pasa la serie a Empezada/Terminada) y a la Facturación (genera un cargo), se gestiona a través de un VisualizacionService. Este servicio recupera el Usuario y la Serie de sus respectivos repositorios, anota la visualización en el Usuario y registra el cargo en la Factura del mes en curso.
+
