@@ -1,0 +1,88 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+
+package "Aggregate: Usuario" #E8F8F5 {
+    class Usuario <<Entity>> <<Aggregate Root>> {
+        - username: String
+        - contrasena: String
+        - iban: IBAN
+        - planSuscripcion: PlanSuscripcion
+        - seriesPendientes: List<String>
+        + agregarSeriePendiente(serieId: String)
+        + registrarVisualizacion(serieId: String, temp: int, cap: int)
+        + determinarEstadoSerie(serieId: String): EstadoSerie
+    }
+    
+    class RegistroVisualizacion <<Value Object>> {
+        - serieId: String
+        - numTemporada: int
+        - numCapitulo: int
+        - fecha: Date
+    }
+    
+    Usuario "1" *-- "0..*" RegistroVisualizacion : "historial visualizaciones"
+}
+
+package "Aggregate: Serie" #FEF9E7 {
+    class Serie <<Entity>> <<Aggregate Root>> {
+        - id: String
+        - titulo: String
+        - inicial: char
+        - sinopsis: String
+        - creadores: List<String>
+        - actores: List<String>
+        - categoria: CategoriaSerie
+        + getTemporada(numero: int): Temporada
+    }
+    
+    class Temporada <<Entity>> {
+        - numero: int
+    }
+    
+    class Capitulo <<Entity>> {
+        - numero: int
+        - titulo: String
+        - descripcion: String
+    }
+    
+    Serie "1" *-- "1..*" Temporada
+    Temporada "1" *-- "1..*" Capitulo
+}
+
+package "Aggregate: Facturacion" #F5EEF8 {
+    class Factura <<Entity>> <<Aggregate Root>> {
+        - id: String
+        - username: String
+        - mes: int
+        - anio: int
+        - importeTotal: double
+        + anadirCargo(linea: LineaFactura)
+        + calcularTotal(plan: PlanSuscripcion)
+    }
+    
+    class LineaFactura <<Value Object>> {
+        - fecha: Date
+        - serieNombre: String
+        - temporadaCapitulo: String
+        - cargo: double
+    }
+    
+    Factura "1" *-- "0..*" LineaFactura
+}
+
+class VisualizacionService <<Domain Service>> {
+    + anotarCapituloReproducido(username: String, serieId: String, numTemp: int, numCap: int)
+}
+
+VisualizacionService ..> Usuario : "Usa"
+VisualizacionService ..> Serie : "Usa"
+VisualizacionService ..> Factura : "Usa"
+
+note right of VisualizacionService
+  Garantiza la transacción:
+  1. Anota reproducido en Usuario
+  2. Genera LineaFactura
+end note
+
+@enduml
