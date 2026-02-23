@@ -4,6 +4,12 @@ Repositorio para prácticas personales de 332 - Tecnologías para el Desarrollo 
 //Página para pasar a png el .puml
 # https://www.planttext.com/ 
 
+### FASE 1.1 : Modelo de dominio
+
+png's visibles en el repo, carpeta "DiagramaDeClasesUML".
+
+### FASE 1.2 : Domain-Driven Design
+
 1. Clasificación de Elementos
 Entities (Entidades): Tienen identidad propia y un ciclo de vida que debe ser monitorizado.
 
