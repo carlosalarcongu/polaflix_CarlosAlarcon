@@ -1,31 +1,52 @@
-package com.polaflix.domain;
+package es.unican.carlosalarcon.polaflix.domain;
 
+import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@Entity
+@Table(name = "usuario")
 public class Usuario {
-    private String username; 
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id; // Clave primaria subrogada y autogenerada
+
+    @Column(unique = true, nullable = false)
+    private String username; // Identificador natural y único
     private String contrasena;
+    
+    @Embedded
     private IBAN iban;
+    @Embedded
     private PlanSuscripcion planSuscripcion;
     
-    private List<String> seriesPendientes;
-    private List<String> seriesEmpezadas;
-    private List<String> seriesTerminadas;
-    private List<RegistroVisualizacion> historialVisualizaciones;
+    // JPA creará tablas auxiliares para guardar estas listas de Strings
+    @ElementCollection
+    private List<String> seriesPendientes = new ArrayList<>();
+    @ElementCollection
+    private List<String> seriesEmpezadas = new ArrayList<>();
+    @ElementCollection
+    private List<String> seriesTerminadas = new ArrayList<>();
+    
+    // RegistroVisualizacion es un @Embeddable (Value Object)
+    @ElementCollection 
+    private List<RegistroVisualizacion> historialVisualizaciones = new ArrayList<>();
+
+    protected Usuario() {}
 
     public Usuario(String username, String contrasena, IBAN iban, PlanSuscripcion planSuscripcion) {
         this.username = username;
         this.contrasena = contrasena;
         this.iban = iban;
         this.planSuscripcion = planSuscripcion;
-        this.seriesPendientes = new ArrayList<>();
-        this.seriesEmpezadas = new ArrayList<>();
-        this.seriesTerminadas = new ArrayList<>();
-        this.historialVisualizaciones = new ArrayList<>();
     }
+
+    public Long getId() { return id; }
+    public String getUsername() { return username; }
+    
 
     @Override
     public boolean equals(Object o) {
@@ -44,7 +65,6 @@ public class Usuario {
         return planSuscripcion;
     }
 
-    // Getters y Setters ... TODO
 
     public void agregarSeriePendiente(String serieId) {
         if (!seriesPendientes.contains(serieId) && 

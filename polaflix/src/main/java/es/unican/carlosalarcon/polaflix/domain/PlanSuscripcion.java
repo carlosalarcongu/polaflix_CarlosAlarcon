@@ -1,7 +1,8 @@
-package com.polaflix.domain;
+package es.unican.carlosalarcon.polaflix.domain;
 
 import java.util.Objects;
-
+import jakarta.persistence.*;
+@Embeddable
 public class PlanSuscripcion {
     private final boolean tarifaPlana;
     private final double cuotaMensual;

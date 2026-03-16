@@ -1,8 +1,9 @@
-package com.polaflix.domain;
+package es.unican.carlosalarcon.polaflix.domain;
 
 import java.time.LocalDate;
 import java.util.Objects;
-
+import jakarta.persistence.*;
+@Embeddable
 public class LineaFactura {
     private final LocalDate fecha;
     private final String serieNombre;

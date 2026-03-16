@@ -1,4 +1,4 @@
-package com.polaflix.domain;
+package es.unican.carlosalarcon.polaflix.domain;
 
 import java.util.ArrayList;
 import java.util.List;
