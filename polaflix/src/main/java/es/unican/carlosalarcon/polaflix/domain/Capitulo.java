@@ -1,11 +1,21 @@
 package es.unican.carlosalarcon.polaflix.domain;
 
+import jakarta.persistence.*;
 import java.util.Objects;
 
+@Entity 
+@Table(name = "capitulos")
 public class Capitulo {
-    private final int numero;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id; 
+
+    private int numero;
     private String titulo;
     private String descripcion;
+
+    protected Capitulo() {}
 
     public Capitulo(int numero, String titulo, String descripcion) {
         this.numero = numero;
@@ -13,7 +23,10 @@ public class Capitulo {
         this.descripcion = descripcion;
     }
 
+    // Getters necesarios?
     public int getNumero() { return numero; }
+    public String getTitulo() { return titulo; }
+    public String getDescripcion() { return descripcion; }
 
     @Override
     public boolean equals(Object o) {

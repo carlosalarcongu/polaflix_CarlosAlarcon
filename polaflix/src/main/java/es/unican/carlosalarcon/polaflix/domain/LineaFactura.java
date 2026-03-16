@@ -1,14 +1,18 @@
 package es.unican.carlosalarcon.polaflix.domain;
 
+import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
 import java.util.Objects;
-import jakarta.persistence.*;
-@Embeddable
+
+@Embeddable 
 public class LineaFactura {
-    private final LocalDate fecha;
-    private final String serieNombre;
-    private final String temporadaCapitulo;
-    private final double cargo;
+    
+    private LocalDate fecha;
+    private String serieNombre;
+    private String temporadaCapitulo;
+    private double cargo;
+
+    protected LineaFactura() {} 
 
     public LineaFactura(LocalDate fecha, String serieNombre, String temporadaCapitulo, double cargo) {
         this.fecha = fecha;
@@ -17,7 +21,7 @@ public class LineaFactura {
         this.cargo = cargo;
     }
 
-    // Getters ...
+    public double getCargo() { return cargo; }
 
     @Override
     public boolean equals(Object o) {
