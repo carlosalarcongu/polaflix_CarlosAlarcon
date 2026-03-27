@@ -1,0 +1,98 @@
+Recurso: /series
+Verbos Aceptados: GET
+
+GET /series - Devuelve el catálogo de series. Si hay parámetros, filtra la búsqueda.
+
+Parámetros:
+	inicial - Carácter por el que empieza el título de la serie.
+	titulo  - Fragmento de texto para buscar coincidencias en el título.
+	NOTA: Sólo se debe usar un parámetro de filtrado a la vez, o ninguno para obtener todo el catálogo.
+
+Respuestas: 200 Ok, 400 Bad Request
+	
+Modelo de Respuesta (Lista simplificada para no saturar la red):
+[
+    {
+        "id": "S01",
+        "titulo": "Juego de Tronos",
+        "sinopsis": "Fantasía épica medieval.",
+        "categoria": "GOLD",
+        "costeVisionado": 1.50
+    },
+    {
+        "id": "S02",
+        "titulo": "Los Serrano",
+        "sinopsis": "Comedia española.",
+        "categoria": "ESTANDAR",
+        "costeVisionado": 0.50
+    }
+]
+
+----------------------------------------------------------------------
+
+Recurso: /series/{id}
+Verbos Aceptados: GET
+
+GET /series/{id} - Devuelve los detalles completos de una serie concreta, incluyendo sus temporadas, capítulos, actores y creadores.
+
+Respuestas: 200 Ok, 404 Not Found
+
+Modelo de Respuesta:
+{
+    "id": "S01",
+    "titulo": "Juego de Tronos",
+    "sinopsis": "Fantasía épica medieval.",
+    "categoria": "GOLD",
+    "costeVisionado": 1.50,
+    "creadores": [ {"nombre": "George R.R. Martin"} ],
+    "actores": [ {"nombre": "Peter Dinklage"}, {"nombre": "Nicolas"} ],
+    "temporadas": [
+        {
+            "numero": 1,
+            "capitulos": [
+                {
+                    "id": 1,
+                    "numero": 1,
+                    "titulo": "Se acerca el invierno",
+                    "descripcion": "Piloto de la serie."
+                }
+            ]
+        }
+    ]
+}
+
+----------------------------------------------------------------------
+
+Recurso: /usuarios/{username}
+Verbos Aceptados: GET
+
+GET /usuarios/{username} - Devuelve el perfil del usuario, su plan de suscripción y el estado actual de sus series (pendientes, empezadas, terminadas).
+
+Respuestas: 200 Ok, 404 Not Found
+
+Modelo de Respuesta:
+{
+    "username": "pacopolaciones",
+    "iban": "ES1234567890123456789012",
+    "planSuscripcion": {
+        "tarifaPlana": false,
+        "cuotaMensual": 0.0
+    },
+    "estadoSeries": {
+        "Juego de Tronos": "EMPEZADA",
+        "Los Serrano": "PENDIENTE"
+    }
+}
+
+----------------------------------------------------------------------
+
+Recurso: /usuarios/{username}/capitulos-vistos/{idCapitulo}
+Verbos Aceptados: PUT
+
+PUT /usuarios/{username}/capitulos-vistos/{idCapitulo} - Registra la visualización de un capítulo por parte de un usuario. Modifica el estado interno del usuario y añade cargos a su factura mensual si corresponde.
+
+Respuestas: 
+- 200 Ok (Visualización registrada con éxito)
+- 404 Not Found (Usuario o Capítulo no existen)
+
+Modelo de Respuesta: (Sin cuerpo, se confirma con el código de estado 200 Ok).
