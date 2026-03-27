@@ -17,7 +17,13 @@ public class RegistroVisualizacion {
         this.fecha = fecha;
     }
 
-    // Getters ...
+    protected RegistroVisualizacion() {
+        this.serieId = null;
+        this.numTemporada = 0;
+        this.numCapitulo = 0;
+        this.fecha = null;
+    }
+
 
     @Override
     public boolean equals(Object o) {

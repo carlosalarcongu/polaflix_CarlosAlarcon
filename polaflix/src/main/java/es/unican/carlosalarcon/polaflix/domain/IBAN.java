@@ -1,9 +1,15 @@
 package es.unican.carlosalarcon.polaflix.domain;
+
 import jakarta.persistence.*;
 import java.util.Objects;
+
 @Embeddable
 public class IBAN {
     private final String numeroCuenta;
+
+    protected IBAN() { 
+        this.numeroCuenta = null; 
+    }
 
     public IBAN(String numeroCuenta) {
         this.numeroCuenta = numeroCuenta;
