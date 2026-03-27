@@ -15,24 +15,28 @@ public class Temporada {
     
     private int numero;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "temporada_id")
+    @ManyToOne
+    private Serie serie;
+
+    @OneToMany(mappedBy = "temporada", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Capitulo> capitulos = new ArrayList<>();
 
     protected Temporada() {}
 
     public Temporada(int numero) {
         this.numero = numero;
-        this.capitulos = new ArrayList<>();
     }
 
-    public List<Capitulo> getCapitulos() {
-        return capitulos;
+    public void setSerie(Serie serie) { this.serie = serie; }
+    public Serie getSerie() { return serie; }
+
+    public void addCapitulo(Capitulo capitulo) {
+        this.capitulos.add(capitulo);
+        capitulo.setTemporada(this);
     }
 
-    public int getNumero() {
-        return numero;
-    }
+    public List<Capitulo> getCapitulos() { return capitulos; }
+    public int getNumero() { return numero; }
 
     @Override
     public boolean equals(Object o) {
@@ -43,7 +47,5 @@ public class Temporada {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(numero);
-    }
+    public int hashCode() { return Objects.hash(numero); }
 }

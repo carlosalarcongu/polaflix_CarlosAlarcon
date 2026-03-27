@@ -15,8 +15,6 @@ public class Factura {
     private String username; 
     private int mes;
     private int anio;
-    private double importeTotal;
-    
     
     @ElementCollection
     private List<LineaFactura> lineas = new ArrayList<>();
@@ -28,7 +26,6 @@ public class Factura {
         this.username = username;
         this.mes = mes;
         this.anio = anio;
-        this.importeTotal = 0.0;
     }
 
     public String getUsername() { return username; }
@@ -38,7 +35,11 @@ public class Factura {
 
     public void anadirCargo(LineaFactura linea) {
         this.lineas.add(linea);
-        this.importeTotal += linea.getCargo();
+    }
+
+    // CORRECCIÓN: Propiedad derivada. Se calcula al vuelo en lugar de ocupar espacio y desincronizarse.
+    public double getImporteTotal() {
+        return lineas.stream().mapToDouble(LineaFactura::getCargo).sum();
     }
 
     @Override
@@ -50,7 +51,5 @@ public class Factura {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
+    public int hashCode() { return Objects.hash(id); }
 }

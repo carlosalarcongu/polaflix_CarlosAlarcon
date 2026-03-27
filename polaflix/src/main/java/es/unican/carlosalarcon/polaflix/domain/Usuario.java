@@ -1,9 +1,10 @@
 package es.unican.carlosalarcon.polaflix.domain;
 
 import jakarta.persistence.*;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.Objects;
 
 @Entity
@@ -12,10 +13,10 @@ public class Usuario {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // Clave primaria subrogada y autogenerada
+    private Long id;
 
     @Column(unique = true, nullable = false)
-    private String username; // Identificador natural y único
+    private String username;
     private String contrasena;
     
     @Embedded
@@ -23,17 +24,17 @@ public class Usuario {
     @Embedded
     private PlanSuscripcion planSuscripcion;
     
-    // JPA creará tablas auxiliares para guardar estas listas de Strings
     @ElementCollection
-    private List<String> seriesPendientes = new ArrayList<>();
-    @ElementCollection
-    private List<String> seriesEmpezadas = new ArrayList<>();
-    @ElementCollection
-    private List<String> seriesTerminadas = new ArrayList<>();
+    @MapKeyJoinColumn(name = "serie_id")
+    @Enumerated(EnumType.STRING)
+    private Map<Serie, EstadoSerie> estadoSeries = new HashMap<>();
     
-    // RegistroVisualizacion es un @Embeddable (Value Object)
-    @ElementCollection 
-    private List<RegistroVisualizacion> historialVisualizaciones = new ArrayList<>();
+    @ManyToMany
+    private Set<Capitulo> capitulosVistos = new HashSet<>();
+
+    @ManyToMany
+    @MapKeyJoinColumn(name = "serie_id")
+    private Map<Serie, Capitulo> ultimoCapituloVisto = new HashMap<>();
 
     protected Usuario() {}
 
@@ -46,7 +47,28 @@ public class Usuario {
 
     public Long getId() { return id; }
     public String getUsername() { return username; }
-    
+    public PlanSuscripcion getPlanSuscripcion() { return planSuscripcion; }
+
+    // CORRECCIÓN: "Los servicios a nivel de dominio aceptan objetos, no identificadores"
+    public void agregarSeriePendiente(Serie serie) {
+        if (!this.estadoSeries.containsKey(serie)) {
+            this.estadoSeries.put(serie, EstadoSerie.PENDIENTE);
+        }
+    }
+
+    // CORRECCIÓN: "registrar Visualización debería aceptar un único objeto"
+    public void verCapitulo(Capitulo capitulo) {
+        Serie serie = capitulo.getTemporada().getSerie();
+        
+        this.capitulosVistos.add(capitulo);
+        this.ultimoCapituloVisto.put(serie, capitulo);
+
+        if (serie.esUltimoCapitulo(capitulo)) {
+            this.estadoSeries.put(serie, EstadoSerie.TERMINADA);
+        } else {
+            this.estadoSeries.put(serie, EstadoSerie.EMPEZADA);
+        }
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -57,39 +79,5 @@ public class Usuario {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(username);
-    }
-
-    public PlanSuscripcion getPlanSuscripcion() {
-        return planSuscripcion;
-    }
-
-
-    public void agregarSeriePendiente(String serieId) {
-        if (!seriesPendientes.contains(serieId) && 
-            !seriesEmpezadas.contains(serieId) && 
-            !seriesTerminadas.contains(serieId)) {
-            
-            this.seriesPendientes.add(serieId);
-        }
-    }
-
-    public void registrarVisualizacionANivelUsuario(String serieId, int numTemporada, int numCapitulo, boolean esUltimoCapituloSerie) {
-        
-        this.historialVisualizaciones.add(new RegistroVisualizacion(serieId, numTemporada, numCapitulo, LocalDate.now()));
-
-        this.seriesPendientes.remove(serieId); 
-
-        if (!this.seriesEmpezadas.contains(serieId) && !this.seriesTerminadas.contains(serieId)) {
-            this.seriesEmpezadas.add(serieId);
-        }
-
-        if (esUltimoCapituloSerie) {
-            this.seriesEmpezadas.remove(serieId); // La quitamos de empezadas
-            if (!this.seriesTerminadas.contains(serieId)) {
-                this.seriesTerminadas.add(serieId); // La movemos a terminadas
-            }
-        }
-    }
+    public int hashCode() { return Objects.hash(username); }
 }

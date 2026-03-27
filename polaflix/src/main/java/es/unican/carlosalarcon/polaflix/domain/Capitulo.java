@@ -15,6 +15,9 @@ public class Capitulo {
     private String titulo;
     private String descripcion;
 
+    @ManyToOne
+    private Temporada temporada;
+
     protected Capitulo() {}
 
     public Capitulo(int numero, String titulo, String descripcion) {
@@ -23,7 +26,9 @@ public class Capitulo {
         this.descripcion = descripcion;
     }
 
-    // Getters necesarios?
+    public void setTemporada(Temporada temporada) { this.temporada = temporada; }
+    public Temporada getTemporada() { return temporada; }
+
     public int getNumero() { return numero; }
     public String getTitulo() { return titulo; }
     public String getDescripcion() { return descripcion; }
@@ -37,7 +42,5 @@ public class Capitulo {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(numero);
-    }
+    public int hashCode() { return Objects.hash(numero); }
 }

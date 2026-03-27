@@ -5,8 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-
 @Component
 public class AppFeeder implements CommandLineRunner {
     
@@ -19,19 +17,25 @@ public class AppFeeder implements CommandLineRunner {
     public void run(String... args) throws Exception {
         feedSeries();
         feedUsuarios();
-
     }
 
     private void feedSeries() {
-        SerieGold got = new SerieGold("S01", "Juego de Tronos", "Fantasía épica medieval.");
-        got.getActores().addAll(Arrays.asList("Nicolas", "AJ", "Peter Dinklage"));
+        Persona george = new Persona("George R.R. Martin");
+        Persona nicolas = new Persona("Nicolas");
+        Persona aj = new Persona("AJ");
+        Persona dinklage = new Persona("Peter Dinklage");
+        Persona pina = new Persona("Alex Pina");
+
+        SerieGold got = new SerieGold("S01", "Juego de Tronos", "Fantasía épica.", george);
+        got.getActores().add(nicolas);
+        got.getActores().add(aj);
+        got.getActores().add(dinklage);
         
-        SerieEstandar serrano = new SerieEstandar("S02", "Los Serrano", "Comedia española.");
+        SerieEstandar serrano = new SerieEstandar("S02", "Los Serrano", "Comedia española.", pina);
         
-        // Añadir una temporada y un capítulo de prueba a GOT
         Temporada t1 = new Temporada(1);
-        t1.getCapitulos().add(new Capitulo(1, "Se acerca el invierno", "Piloto de la serie."));
-        got.getTemporadas().add(t1);
+        t1.addCapitulo(new Capitulo(1, "Se acerca el invierno", "Piloto."));
+        got.addTemporada(t1); // Uso de la relación bidireccional
 
         sr.save(got);
         sr.save(serrano);
