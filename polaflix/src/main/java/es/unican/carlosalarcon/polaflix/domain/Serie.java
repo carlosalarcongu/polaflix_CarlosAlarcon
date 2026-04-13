@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonView;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -14,27 +15,32 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 public abstract class Serie {
     
     @Id 
+    @JsonView(Views.SerieResumida.class)
     private String id; 
+    @JsonView(Views.SerieResumida.class)
     private String titulo;
+    @JsonView(Views.SerieResumida.class)
     private char inicial;
     
     @Lob
+    @JsonView(Views.SerieResumida.class)
     private String sinopsis;
     
-    // CORRECCIÓN: Usar Persona evita duplicidades si alguien es Actor y Creador
     @ManyToMany(cascade = CascadeType.ALL)
+    @JsonView(Views.SerieDetallada.class)
     private Set<Persona> creadores = new HashSet<>();
     
     @ManyToMany(cascade = CascadeType.ALL)
+    @JsonView(Views.SerieDetallada.class)
     private Set<Persona> actores = new HashSet<>();
     
     @JsonManagedReference
     @OneToMany(mappedBy = "serie", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonView(Views.SerieDetallada.class)
     private List<Temporada> temporadas = new ArrayList<>();
     
     protected Serie() {}
 
-    // CORRECCIÓN: Obligamos a pasar al menos un creador para que no haya series huérfanas
     public Serie(String id, String titulo, String sinopsis, Persona creadorPrincipal) {
         this.id = id;
         this.titulo = titulo;
@@ -43,6 +49,7 @@ public abstract class Serie {
         this.creadores.add(creadorPrincipal);
     }
     
+    @JsonView(Views.SerieResumida.class)
     public abstract double getCosteVisionado();
 
     public Set<Persona> getActores() { return actores; }
@@ -50,13 +57,11 @@ public abstract class Serie {
     public List<Temporada> getTemporadas() { return temporadas; }
     public String getTitulo() { return titulo; }
 
-    // Método helper para mantener la relación bidireccional
     public void addTemporada(Temporada temporada) {
         this.temporadas.add(temporada);
         temporada.setSerie(this);
     }
 
-    // Lógica inteligente de la entidad
     public boolean esUltimoCapitulo(Capitulo c) {
         if (temporadas.isEmpty()) return false;
         Temporada ultimaTemp = temporadas.get(temporadas.size() - 1);
