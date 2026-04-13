@@ -1,0 +1,48 @@
+### =========================================================================
+### 1. PRUEBAS DE CATÁLOGO (Jackson Views)
+### =========================================================================
+
+### Obtener el catálogo completo (Debería mostrar solo el DTO resumido)
+GET http://localhost:8080/series
+Accept: application/json
+
+###
+
+### Obtener el detalle de Peaky Blinders (Debería desplegar temporadas, capítulos y actores)
+GET http://localhost:8080/series/S01
+Accept: application/json
+
+
+### =========================================================================
+### 2. PRUEBAS DE USUARIO (Perfiles y contraseñas ocultas)
+### =========================================================================
+
+### Ver el perfil de Cristiano Ronaldo (La contraseña NO debe aparecer)
+GET http://localhost:8080/usuarios/cr7bicho
+Accept: application/json
+
+###
+
+### Ver el perfil de Mariano Rajoy
+GET http://localhost:8080/usuarios/mrajoy
+Accept: application/json
+
+
+### =========================================================================
+### 3. LÓGICA TRANSACCIONAL Y DE NEGOCIO (Domain-Driven Design)
+### =========================================================================
+
+### Pepe Reina añade "Peaky Blinders" (S01) a su lista de series pendientes
+PUT http://localhost:8080/usuarios/pepereina/series-pendientes/S01
+
+###
+
+### Mariano Rajoy ve el Episodio 2 de Prison Break. 
+### IMPORTANTE: Sustituye el "5" por el ID real del capítulo que verás al hacer el GET /series/S02
+PUT http://localhost:8080/usuarios/mrajoy/capitulos-vistos/5
+
+###
+
+### Carlos Alarcón (Tarifa Plana) ve un capítulo de Peaky Blinders.
+### IMPORTANTE: Sustituye el "2" por el ID real de un capítulo de Peaky Blinders
+PUT http://localhost:8080/usuarios/carlosalarcon/capitulos-vistos/2
