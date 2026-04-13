@@ -19,119 +19,168 @@ public class AppFeeder implements CommandLineRunner {
     protected SerieRepository sr;
 
     @Autowired
-    protected FacturaRepository fr; // Añadido para guardar las facturas generadas
+    protected FacturaRepository fr;
 
     @Override
     @Transactional
     public void run(String... args) throws Exception {
-        // El orden es importante: primero series (recursos), luego usuarios (clientes), luego facturas
         feedSeries();
         feedUsuariosYVisualizaciones();
         
         System.out.println("===================================================================");
-        System.out.println("✅ Base de datos de Polaflix poblada con catálogo, usuarios y facturas.");
+        System.out.println("✅ Base de datos de Polaflix poblada con MEGA catálogo VIP, usuarios y facturas.");
         System.out.println("===================================================================");
     }
 
     private void feedSeries() {
-        // 1. Crear el talento (Personas)
-        Persona george = new Persona("George R.R. Martin");
-        Persona nicolas = new Persona("Nicolas");
-        Persona aj = new Persona("AJ");
-        Persona dinklage = new Persona("Peter Dinklage");
-        
-        Persona pina = new Persona("Alex Pina");
-        Persona resines = new Persona("Antonio Resines");
-        
-        Persona vince = new Persona("Vince Gilligan");
-        Persona bryan = new Persona("Bryan Cranston");
-        Persona aaron = new Persona("Aaron Paul");
+        // ==========================================
+        // 1. ELENCO DE TALENTO (Personas)
+        // ==========================================
+        Persona steven = new Persona("Steven Knight");
+        Persona cillian = new Persona("Cillian Murphy");
+        Persona paul = new Persona("Paul Anderson");
+        Persona tom = new Persona("Tom Hardy");
 
-        // 2. Crear Series GOLD
-        SerieGold got = new SerieGold("S01", "Juego de Tronos", "Fantasía épica y traiciones.", george);
-        got.getActores().addAll(Arrays.asList(nicolas, aj, dinklage));
-        
-        Temporada gotT1 = new Temporada(1);
-        gotT1.addCapitulo(new Capitulo(1, "Se acerca el invierno", "El rey visita Invernalia."));
-        gotT1.addCapitulo(new Capitulo(2, "El Camino Real", "Jon Nieve viaja al muro."));
-        Temporada gotT2 = new Temporada(2);
-        gotT2.addCapitulo(new Capitulo(1, "El Norte recuerda", "Robb Stark en guerra."));
-        
-        got.addTemporada(gotT1);
-        got.addTemporada(gotT2);
+        Persona alberto = new Persona("Alberto Caballero");
+        Persona laura = new Persona("Laura Caballero");
+        Persona pablo = new Persona("Pablo Chiapella");
+        Persona jordi = new Persona("Jordi Sánchez");
 
-        // 3. Crear Series SILVER
-        SerieSilver bb = new SerieSilver("S02", "Breaking Bad", "Profesor de química cambia de vida.", vince);
-        bb.getActores().addAll(Arrays.asList(bryan, aaron));
-        
-        Temporada bbT1 = new Temporada(1);
-        bbT1.addCapitulo(new Capitulo(1, "Piloto", "El diagnóstico de Walter."));
-        bbT1.addCapitulo(new Capitulo(2, "El gato está en la bolsa", "Problemas con Krazy-8."));
-        
-        bb.addTemporada(bbT1);
+        Persona paulScheuring = new Persona("Paul Scheuring");
+        Persona wentworth = new Persona("Wentworth Miller");
+        Persona dominic = new Persona("Dominic Purcell");
 
-        // 4. Crear Series ESTANDAR
-        SerieEstandar serrano = new SerieEstandar("S03", "Los Serrano", "Comedia sobre una familia ensamblada.", pina);
-        serrano.getActores().add(resines);
+        // ==========================================
+        // 2. PEAKY BLINDERS (Categoría GOLD)
+        // ==========================================
+        SerieGold peaky = new SerieGold("S01", "Peaky Blinders", "Familia de gánsteres en Birmingham tras la Primera Guerra Mundial.", steven);
+        peaky.getActores().addAll(Arrays.asList(cillian, paul, tom));
         
-        Temporada serT1 = new Temporada(1);
-        serT1.addCapitulo(new Capitulo(1, "Ya s'han casao", "La boda de Diego y Lucía."));
-        serT1.addCapitulo(new Capitulo(2, "Un padre perfecto", "Conflictos en casa."));
+        Temporada pbT1 = new Temporada(1);
+        pbT1.addCapitulo(new Capitulo(1, "Episodio 1", "Thomas Shelby encuentra armas perdidas."));
+        pbT1.addCapitulo(new Capitulo(2, "Episodio 2", "La policía presiona a los Peaky Blinders."));
         
-        serrano.addTemporada(serT1);
+        Temporada pbT2 = new Temporada(2);
+        pbT2.addCapitulo(new Capitulo(1, "Episodio 1", "Los Shelby se expanden a Londres."));
+        pbT2.addCapitulo(new Capitulo(2, "Episodio 2", "Nuevos enemigos italianos."));
 
-        // 5. Guardar en el repositorio (La cascada JPA guardará temporadas, capítulos y personas automáticamente)
-        sr.saveAll(Arrays.asList(got, bb, serrano));
+        Temporada pbT6 = new Temporada(6); // Saltamos a la última para simular catálogo extenso
+        pbT6.addCapitulo(new Capitulo(1, "Día Negro", "Las consecuencias del atentado fallido."));
+
+        peaky.addTemporada(pbT1);
+        peaky.addTemporada(pbT2);
+        peaky.addTemporada(pbT6);
+
+        // ==========================================
+        // 3. PRISON BREAK (Categoría SILVER)
+        // ==========================================
+        SerieSilver prison = new SerieSilver("S02", "Prison Break", "Un hombre entra a la cárcel para salvar a su hermano condenado a muerte.", paulScheuring);
+        prison.getActores().addAll(Arrays.asList(wentworth, dominic));
+        
+        Temporada prT1 = new Temporada(1);
+        prT1.addCapitulo(new Capitulo(1, "Piloto", "Michael atraca un banco para entrar en Fox River."));
+        prT1.addCapitulo(new Capitulo(2, "Allen", "Comienzan los preparativos de la fuga."));
+        prT1.addCapitulo(new Capitulo(3, "Cell Test", "Prueba de las tijeras en la celda."));
+        
+        Temporada prT2 = new Temporada(2);
+        prT2.addCapitulo(new Capitulo(1, "Manhunt", "Comienza la cacería tras la fuga."));
+        
+        prison.addTemporada(prT1);
+        prison.addTemporada(prT2);
+
+        // ==========================================
+        // 4. LA QUE SE AVECINA (Categoría ESTANDAR)
+        // ==========================================
+        SerieEstandar lqsa = new SerieEstandar("S03", "La que se avecina", "Aventuras y locuras de los vecinos de Mirador de Montepinar.", alberto);
+        lqsa.getCreadores().add(laura); // Co-creadora
+        lqsa.getActores().addAll(Arrays.asList(pablo, jordi));
+        
+        Temporada lqsaT1 = new Temporada(1);
+        lqsaT1.addCapitulo(new Capitulo(1, "Mirador de Montepinar", "Llegan los primeros vecinos al edificio."));
+        lqsaT1.addCapitulo(new Capitulo(2, "Okupas, secuestros y un golpe", "Caos en las zonas comunes."));
+        
+        Temporada lqsaT10 = new Temporada(10);
+        lqsaT10.addCapitulo(new Capitulo(1, "Un tróspido, un mayorista...", "Fermín Trujillo asume la presidencia."));
+        
+        Temporada lqsaT13 = new Temporada(13); // Última temporada
+        lqsaT13.addCapitulo(new Capitulo(1, "Contubernio 49", "Mudanza al nuevo edificio céntrico."));
+
+        lqsa.addTemporada(lqsaT1);
+        lqsa.addTemporada(lqsaT10);
+        lqsa.addTemporada(lqsaT13);
+
+        // Guardamos todo el catálogo de golpe
+        sr.saveAll(Arrays.asList(peaky, prison, lqsa));
     }
 
     private void feedUsuariosYVisualizaciones() {
-        IBAN ibanPrueba = new IBAN("ES1234567890123456789012");
+        IBAN ibanPrueba = new IBAN("ES0011112222333344445555");
         
-        // Recuperamos las series de la base de datos para simular las visualizaciones
-        Serie got = sr.findById("S01").orElseThrow();
-        Serie bb = sr.findById("S02").orElseThrow();
-        Serie serrano = sr.findById("S03").orElseThrow();
+        // Recuperamos las series de BBDD
+        Serie peaky = sr.findById("S01").orElseThrow();
+        Serie prison = sr.findById("S02").orElseThrow();
+        Serie lqsa = sr.findById("S03").orElseThrow();
 
-        // Extraemos capítulos concretos para que los vean
-        Capitulo gotS1E1 = got.getTemporadas().get(0).getCapitulos().get(0);
-        Capitulo bbS1E1 = bb.getTemporadas().get(0).getCapitulos().get(0);
-        Capitulo bbS1E2 = bb.getTemporadas().get(0).getCapitulos().get(1);
-        Capitulo serS1E1 = serrano.getTemporadas().get(0).getCapitulos().get(0);
-
-        // --- USUARIO 1: PACO (Pago por Visión) ---
-        Usuario paco = new Usuario("pacopolaciones", "1234", ibanPrueba, new PlanSuscripcion(false, 0.0));
-        paco.agregarSeriePendiente(got); // Añade Juego de Tronos a su lista para verla en el futuro
-        paco.verCapitulo(bbS1E1); // Ve el primer capítulo de Breaking Bad (Pasa a EMPEZADA)
-        paco.verCapitulo(bbS1E2); // Ve el segundo capítulo de Breaking Bad
-        ur.save(paco);
+        // Extraemos algunos capítulos de muestra
+        Capitulo peakyS1E1 = peaky.getTemporadas().get(0).getCapitulos().get(0);
+        Capitulo peakyS1E2 = peaky.getTemporadas().get(0).getCapitulos().get(1);
         
-        // Generar Factura de Pago por Visión para Paco (Mes actual)
-        Factura facPaco = new Factura("F-PACO-001", paco.getUsername(), LocalDate.now().getMonthValue(), LocalDate.now().getYear());
-        facPaco.anadirCargo(new LineaFactura(LocalDate.now(), bb.getTitulo(), "T1xC1", bb.getCosteVisionado()));
-        facPaco.anadirCargo(new LineaFactura(LocalDate.now(), bb.getTitulo(), "T1xC2", bb.getCosteVisionado()));
-        fr.save(facPaco);
+        Capitulo prisonS1E1 = prison.getTemporadas().get(0).getCapitulos().get(0);
+        
+        Capitulo lqsaS1E1 = lqsa.getTemporadas().get(0).getCapitulos().get(0);
+        Capitulo lqsaS10E1 = lqsa.getTemporadas().get(1).getCapitulos().get(0); // T10 E1
 
-        // --- USUARIO 2: LOLA (Tarifa Plana) ---
-        Usuario lola = new Usuario("lolapolaciones", "1234", ibanPrueba, new PlanSuscripcion(true, 20.0));
-        lola.verCapitulo(gotS1E1); // Ve Juego de Tronos
-        ur.save(lola);
+        // ==========================================
+        // CARLOS ALARCON (Suscripción Tarifa Plana)
+        // Viendo LQSA para relajarse y Peaky Blinders
+        // ==========================================
+        Usuario carlos = new Usuario("carlosalarcon", "pass123", ibanPrueba, new PlanSuscripcion(true, 20.0));
+        carlos.verCapitulo(lqsaS1E1); 
+        carlos.verCapitulo(lqsaS10E1);
+        carlos.verCapitulo(peakyS1E1);
+        ur.save(carlos);
 
-        // Generar Factura de Tarifa Plana para Lola
-        Factura facLola = new Factura("F-LOLA-001", lola.getUsername(), LocalDate.now().getMonthValue(), LocalDate.now().getYear());
-        facLola.anadirCargo(new LineaFactura(LocalDate.now(), "Cuota Mensual Tarifa Plana", "N/A", lola.getPlanSuscripcion().getCuotaMensual()));
-        // (Nota: No se le cobran los visionados individuales porque tiene tarifa plana)
-        fr.save(facLola);
+        Factura facCarlos = new Factura("F-CAR-001", carlos.getUsername(), LocalDate.now().getMonthValue(), LocalDate.now().getYear());
+        facCarlos.anadirCargo(new LineaFactura(LocalDate.now(), "Cuota Mensual Tarifa Plana VIP", "N/A", carlos.getPlanSuscripcion().getCuotaMensual()));
+        fr.save(facCarlos);
 
-        // --- USUARIO 3: MAXIM (Pago por Visión - Gran Consumidor) ---
-        Usuario maxim = new Usuario("maxim", "pass", ibanPrueba, new PlanSuscripcion(false, 0.0));
-        maxim.verCapitulo(serS1E1); // Ve Los Serrano
-        maxim.verCapitulo(gotS1E1); // Ve Juego de Tronos
-        ur.save(maxim);
+        // ==========================================
+        // MARIANO RAJOY (Pago por Visión - Básico)
+        // Ha visto un poco de Prison Break y luego lo dejó
+        // ==========================================
+        Usuario mariano = new Usuario("mrajoy", "finfin", ibanPrueba, new PlanSuscripcion(false, 0.0));
+        mariano.verCapitulo(prisonS1E1);
+        mariano.agregarSeriePendiente(lqsa); // La añade a su lista para verla después
+        ur.save(mariano);
 
-        // Generar Factura para Maxim
-        Factura facMaxim = new Factura("F-MAX-001", maxim.getUsername(), LocalDate.now().getMonthValue(), LocalDate.now().getYear());
-        facMaxim.anadirCargo(new LineaFactura(LocalDate.now(), serrano.getTitulo(), "T1xC1", serrano.getCosteVisionado()));
-        facMaxim.anadirCargo(new LineaFactura(LocalDate.now(), got.getTitulo(), "T1xC1", got.getCosteVisionado()));
-        fr.save(facMaxim);
+        Factura facMariano = new Factura("F-MR-001", mariano.getUsername(), LocalDate.now().getMonthValue(), LocalDate.now().getYear());
+        facMariano.anadirCargo(new LineaFactura(LocalDate.now(), prison.getTitulo(), "T1xC1", prison.getCosteVisionado()));
+        fr.save(facMariano);
+
+        // ==========================================
+        // CRISTIANO RONALDO (Pago por Visión - Consumidor Elite)
+        // Enganchado a Peaky Blinders
+        // ==========================================
+        Usuario cristiano = new Usuario("cr7bicho", "siiii", ibanPrueba, new PlanSuscripcion(false, 0.0));
+        cristiano.verCapitulo(peakyS1E1);
+        cristiano.verCapitulo(peakyS1E2);
+        ur.save(cristiano);
+
+        Factura facCR7 = new Factura("F-CR7-001", cristiano.getUsername(), LocalDate.now().getMonthValue(), LocalDate.now().getYear());
+        facCR7.anadirCargo(new LineaFactura(LocalDate.now(), peaky.getTitulo(), "T1xC1", peaky.getCosteVisionado()));
+        facCR7.anadirCargo(new LineaFactura(LocalDate.now(), peaky.getTitulo(), "T1xC2", peaky.getCosteVisionado()));
+        fr.save(facCR7);
+
+        // ==========================================
+        // PEPE REINA (Suscripción Tarifa Plana)
+        // Usuario que aún no ha visto nada este mes
+        // ==========================================
+        Usuario pepe = new Usuario("pepereina", "camarero", ibanPrueba, new PlanSuscripcion(true, 20.0));
+        pepe.agregarSeriePendiente(prison);
+        ur.save(pepe);
+
+        Factura facPepe = new Factura("F-PEPE-001", pepe.getUsername(), LocalDate.now().getMonthValue(), LocalDate.now().getYear());
+        facPepe.anadirCargo(new LineaFactura(LocalDate.now(), "Cuota Mensual Tarifa Plana", "N/A", pepe.getPlanSuscripcion().getCuotaMensual()));
+        fr.save(facPepe);
     }
 }

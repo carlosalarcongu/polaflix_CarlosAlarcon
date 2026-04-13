@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Objects;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -27,7 +28,7 @@ public abstract class Serie {
     @ManyToMany(cascade = CascadeType.ALL)
     private Set<Persona> actores = new HashSet<>();
     
-    // CORRECCIÓN: mappedBy establece la relación bidireccional limpia con Temporada
+    @JsonManagedReference
     @OneToMany(mappedBy = "serie", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Temporada> temporadas = new ArrayList<>();
     

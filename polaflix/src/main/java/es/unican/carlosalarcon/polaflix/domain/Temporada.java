@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity 
 @Table(name = "temporadas")
@@ -15,9 +17,11 @@ public class Temporada {
     
     private int numero;
 
+    @JsonBackReference
     @ManyToOne
     private Serie serie;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "temporada", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Capitulo> capitulos = new ArrayList<>();
 

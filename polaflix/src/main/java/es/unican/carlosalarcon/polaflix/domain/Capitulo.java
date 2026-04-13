@@ -2,6 +2,7 @@ package es.unican.carlosalarcon.polaflix.domain;
 
 import jakarta.persistence.*;
 import java.util.Objects;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity 
 @Table(name = "capitulos")
@@ -15,6 +16,7 @@ public class Capitulo {
     private String titulo;
     private String descripcion;
 
+    @JsonBackReference
     @ManyToOne
     private Temporada temporada;
 
