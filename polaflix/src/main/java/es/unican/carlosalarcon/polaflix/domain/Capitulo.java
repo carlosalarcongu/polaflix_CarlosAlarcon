@@ -34,6 +34,7 @@ public class Capitulo {
     public int getNumero() { return numero; }
     public String getTitulo() { return titulo; }
     public String getDescripcion() { return descripcion; }
+    public Long getId() { return id; }
 
     @Override
     public boolean equals(Object o) {
