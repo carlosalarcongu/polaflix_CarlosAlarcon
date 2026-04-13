@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 
 @Entity
@@ -31,7 +33,6 @@ public class Usuario {
     @ElementCollection
     @MapKeyJoinColumn(name = "serie_id")
     @Enumerated(EnumType.STRING)
-    @JsonView(Views.UsuarioBasico.class)
     private Map<Serie, EstadoSerie> estadoSeries = new HashMap<>();
     
     @ManyToMany
@@ -85,4 +86,14 @@ public class Usuario {
 
     @Override
     public int hashCode() { return Objects.hash(username); }
+
+    @JsonProperty("estadoSeries") // Le decimos a Jackson que llame a esto "estadoSeries" en el JSON
+    @JsonView(Views.UsuarioBasico.class) // Solo se ve en la vista básica
+    public Map<String, EstadoSerie> getEstadoSeriesParaJson() {
+        Map<String, EstadoSerie> formatoLimpio = new HashMap<>();
+        for (Map.Entry<Serie, EstadoSerie> entrada : estadoSeries.entrySet()) {
+            formatoLimpio.put(entrada.getKey().getTitulo(), entrada.getValue());
+        }
+        return formatoLimpio;
+    }
 }
