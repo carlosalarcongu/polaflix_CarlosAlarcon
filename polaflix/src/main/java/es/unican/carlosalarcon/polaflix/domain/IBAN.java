@@ -3,8 +3,11 @@ package es.unican.carlosalarcon.polaflix.domain;
 import jakarta.persistence.*;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonView;
+
 @Embeddable
 public class IBAN {
+    @JsonView(Views.UsuarioBasico.class)
     private final String numeroCuenta;
 
     protected IBAN() { 

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.Objects;
+import com.fasterxml.jackson.annotation.JsonView;
 
 @Entity
 @Table(name = "usuario")
@@ -16,17 +17,21 @@ public class Usuario {
     private Long id;
 
     @Column(unique = true, nullable = false)
+    @JsonView(Views.UsuarioBasico.class)
     private String username;
     private String contrasena;
     
     @Embedded
+    @JsonView(Views.UsuarioBasico.class)
     private IBAN iban;
     @Embedded
+    @JsonView(Views.UsuarioBasico.class)
     private PlanSuscripcion planSuscripcion;
     
     @ElementCollection
     @MapKeyJoinColumn(name = "serie_id")
     @Enumerated(EnumType.STRING)
+    @JsonView(Views.UsuarioBasico.class)
     private Map<Serie, EstadoSerie> estadoSeries = new HashMap<>();
     
     @ManyToMany

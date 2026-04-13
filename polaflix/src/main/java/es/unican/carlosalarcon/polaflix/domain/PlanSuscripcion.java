@@ -1,11 +1,16 @@
 package es.unican.carlosalarcon.polaflix.domain;
 
 import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonView;
+
 import jakarta.persistence.*;
 
 @Embeddable
 public class PlanSuscripcion {
+    @JsonView(Views.UsuarioBasico.class)
     private final boolean tarifaPlana;
+    @JsonView(Views.UsuarioBasico.class)
     private final double cuotaMensual;
 
     protected PlanSuscripcion() {
