@@ -1,127 +1,55 @@
-1. Clasificación de Elementos
+1. Clasificación de Elementos del Dominio
+Entities (Entidades)
+Tienen una identidad continua a lo largo del tiempo y un ciclo de vida propio.
 
-Entities (Entidades): Tienen identidad propia y un ciclo de vida que debe ser monitorizado.
+Usuario: Identificado por su username. Posee el estado de sus visualizaciones y su plan.
 
+Serie: Identificada por un ID único. Es la raíz de la información de catálogo.
 
+Temporada: Entidad con identidad local dentro de una serie.
 
-Usuario: Identificado unívocamente por su username.
+Capítulo: Entidad con identidad local. Es la unidad mínima de contenido.
 
+Factura: Identificada por un código único. Representa la obligación de pago de un periodo.
 
+Persona: Identificada por su nombre. Representa a los actores y creadores (evita duplicidad si alguien cumple ambos roles).
 
-Serie: Identificada por un id o titulo.
+Value Objects (Objetos de Valor)
+Representan atributos descriptivos. No tienen identidad y son inmutables.
 
+IBAN: Define una cuenta bancaria válida.
 
+PlanSuscripcion: Define las reglas de coste (Tarifa Plana vs. Pago por Visión).
 
-Temporada: Identidad local dentro de la Serie (número de temporada).
-
-
-
-Capitulo: Identidad local dentro de la Temporada (número de capítulo).
-
-
-
-Factura: Identificada por un id único o la tupla (Usuario, Mes, Año).
-
-
-
-Value Objects (Objetos de Valor): No tienen identidad conceptual; importan por los valores de sus atributos. Son inmutables.
-
-
-
-IBAN: Representa la cuenta bancaria.
-
-
-
-CategoriaSerie: Enum o clase inmutable (Estándar, Silver, Gold) que encapsula el coste por visionado.
-
-
-
-PlanSuscripcion: Define si el usuario paga por visión o tiene tarifa plana (20€).
-
-
-
-LineaFactura: Registro inmutable del visionado de un capítulo para el cobro.
-
-
-
-RegistroVisualizacion: Guarda el momento exacto y el identificador del capítulo que un usuario ha visto.
-
-
-
-Services (Servicios de Dominio): Operaciones que involucran múltiples Aggregates y no pertenecen naturalmente a una sola entidad.
-
-
-
-VisualizacionService: Orquesta la acción de "Anotar un capítulo como reproducido", ya que requiere modificar el historial del Usuario y, potencialmente, generar un cargo para la Factura.
-
-
+LineaFactura: Describe un cargo concreto (fecha, concepto, importe).
 
 2. Aggregates y Aggregate Roots
-
-Siguiendo la regla de que los elementos externos solo pueden referenciar al Aggregate Root y que al eliminar el Root se elimina el resto en cascada, hemos identificado los siguientes clústeres:
-
-
-
 Aggregate: Usuario
-
-
-
 Aggregate Root: Usuario.
 
+Descripción: Es el núcleo de la actividad del cliente.
 
-
-Elementos internos: RegistroVisualizacion (Value Object), IBAN (Value Object).
-
-
-
-Justificación: El usuario controla su propio ciclo de vida, su plan de suscripción y su historial de visualizaciones. Las listas de series (Empezadas, Pendientes, Terminadas) se gestionan guardando referencias (IDs) a las Series, nunca los objetos Serie completos, así podemos evitar cruzar fronteras de agregados indebidamente.
-
-
+Justificación: El Usuario debe garantizar que su estado de visualización sea coherente (p.ej., que el "último capítulo visto" sea efectivamente el de mayor numeración visto hasta la fecha). Posee referencias a las Series (como Aggregate Roots externos) para gestionar sus listas de favoritos y estados.
 
 Aggregate: Serie
-
-
-
 Aggregate Root: Serie.
 
+Elementos internos: Temporada, Capítulo.
 
-
-Elementos internos: Temporada (Entity), Capitulo (Entity), CategoriaSerie (Value Object).
-
-
-
-Justificación: Una temporada o un capítulo no tienen sentido conceptual ni existencia sin la serie a la que pertenecen. Si se elimina "Juego de Tronos", se eliminan todos sus capítulos.
-
-
+Justificación: La Serie es la frontera de consistencia del catálogo. Una temporada o capítulo no existen sin su serie. La raíz garantiza que el acceso a un capítulo se haga siempre a través de la estructura jerárquica de la serie, manteniendo la integridad del orden de los episodios.
 
 Aggregate: Facturación
-
-
-
 Aggregate Root: Factura.
 
+Elementos internos: LineaFactura.
 
+Justificación: La Factura protege la invariante de facturación mensual. En un sistema de pago por visión, la factura garantiza que cada visualización de un capítulo genere exactamente una línea de cargo y que el importe total sea siempre la suma exacta de sus líneas. Al ser el Root, evita que se añadan cargos a meses ya cerrados o para usuarios inexistentes.
 
-Elementos internos: LineaFactura (Value Object).
+3. Justificaciones de Diseño (DDD)
+Referencias entre Aggregates
+Contrario a la primera versión, se utilizan referencias a objetos (asociaciones) en lugar de solo identificadores de texto (Strings). Esto permite un dominio más rico donde el Usuario puede interaccionar directamente con la Serie y el Capítulo. JPA gestiona la carga de estas relaciones de forma eficiente.
 
+Invariantes y Acoplamiento
+Protección de Invariantes (Factura): La factura actúa como una "Unidad de Trabajo" para el cobro. Al centralizar las LineaFactura, aseguramos que no haya discrepancias entre lo que el usuario ve y lo que se le reclama económicamente.
 
-
-Justificación: La factura mensual protege la invariante de los cobros de un usuario en un mes concreto. Contiene el desglose de los cargos inmutables de ese periodo.
-
-
-
-3. Refactorización DDD (Operaciones de Negocio)
-
-Para cumplir con DDD, el modelo inicial ha sido modificado de la siguiente forma:
-
-
-
-Evitar referencias directas entre objetos de distintos Aggregates: El Usuario no tiene una lista de objetos Serie para sus "Pendientes". Tiene una lista de SerieID (Strings). Esto reduce el acoplamiento y facilita la carga desde los Repositorios.
-
-
-
-Operación "Agregar Serie al espacio personal": Es un método del Aggregate Root Usuario (ej. usuario.agregarSeriePendiente(serieId)).
-
-
-
-Operación "Anotar capítulo como reproducido": Dado que afecta al estado del Usuario (pasa la serie a Empezada/Terminada) y a la Facturación (genera un cargo), se gestiona a través de un VisualizacionService. Este servicio recupera el Usuario y la Serie de sus respectivos repositorios, anota la visualización en el Usuario y registra el cargo en la Factura del mes en curso.
+Reducción de Acoplamiento: Al utilizar asociaciones bien definidas en el modelo (UML) y no depender de "IDs sueltos", el código es más legible y menos propenso a errores de integridad referencial. La carga desde repositorios se facilita mediante el uso de JOIN FETCH o carga perezosa (Lazy), permitiendo recuperar solo la información necesaria del grafo de objetos.
