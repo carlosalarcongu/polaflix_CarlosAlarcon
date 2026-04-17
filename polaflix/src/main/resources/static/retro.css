@@ -1,0 +1,70 @@
+/* Estética general de los 90 */
+* {
+    font-family: "Comic Sans MS", "Chalkboard SE", "Marker Felt", sans-serif;
+}
+
+body {
+    margin: 20px;
+}
+
+.neon-title {
+    color: #FF00FF;
+    font-size: 50px;
+    text-shadow: 0 0 10px #FF00FF, 0 0 20px #FF00FF, 0 0 30px #ffffff;
+    margin: 10px;
+}
+
+.neon-subtitle {
+    color: #00FFFF;
+    text-shadow: 0 0 5px #00FFFF;
+}
+
+.marquesina {
+    background-color: yellow;
+    color: red;
+    font-size: 24px;
+    font-weight: bold;
+    padding: 5px;
+    border: 3px solid red;
+    margin-bottom: 20px;
+}
+
+/* Tablas infames de los 90 */
+table.retro-table {
+    background-color: #000000;
+    border-collapse: collapse;
+    width: 80%;
+    margin-top: 20px;
+}
+
+table.retro-table th {
+    background-color: #0000FF;
+    color: yellow;
+    font-size: 20px;
+}
+
+table.retro-table td {
+    color: #00FF00;
+    text-align: center;
+}
+
+.caja-perfil {
+    background-color: #222;
+    border: 4px dashed lime;
+    padding: 15px;
+    margin-top: 20px;
+    width: 50%;
+    color: white;
+}
+
+.boton-retro {
+    background-color: silver;
+    border: 4px outset white;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 5px;
+}
+.boton-retro:active {
+    border-style: inset;
+}

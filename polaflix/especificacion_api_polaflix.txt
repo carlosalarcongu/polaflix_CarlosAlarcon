@@ -96,3 +96,16 @@ Respuestas:
 - 404 Not Found (Usuario o Capítulo no existen)
 
 Modelo de Respuesta: (Sin cuerpo, se confirma con el código de estado 200 Ok).
+
+----------------------------------------------------------------------
+
+Recurso: /usuarios/{username}/series-pendientes/{idSerie}
+Verbos Aceptados: PUT
+
+PUT /usuarios/{username}/series-pendientes/{idSerie} - Añade una serie al catálogo personal del usuario marcándola con el estado PENDIENTE. Si la serie ya estaba en el catálogo, no realiza cambios.
+
+Respuestas: 
+- 200 Ok (Serie añadida correctamente)
+- 404 Not Found (El usuario o la serie no existen en la base de datos)
+
+Modelo de Respuesta: (Sin cuerpo, se confirma con el código de estado 200 Ok).

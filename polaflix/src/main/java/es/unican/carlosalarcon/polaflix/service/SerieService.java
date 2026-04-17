@@ -15,10 +15,16 @@ public class SerieService {
     private SerieRepository serieRepository;
 
     // =========================================================================
-    // Obtener todo el catálogo (Transacción de solo lectura)
+    // Obtener catálogo (Con soporte para filtrado opcional)
     // =========================================================================
     @Transactional(readOnly = true)
-    public List<Serie> obtenerTodasLasSeries() {
+    public List<Serie> obtenerSeries(String inicial, String titulo) {
+        if (inicial != null && !inicial.isEmpty()) {
+            return serieRepository.findByInicialOrderByTituloAsc(inicial.charAt(0));
+        } else if (titulo != null && !titulo.isEmpty()) {
+            return serieRepository.findByTituloContainingIgnoreCase(titulo);
+        }
+        // Si no hay parámetros, devuelve todo
         return serieRepository.findAll();
     }
 

@@ -18,12 +18,21 @@ public class SerieController {
     private SerieService serieService;
 
     // =========================================================================
-    // GET /series - Devuelve el catálogo resumido (DTO ligero)
+    // GET /series - Devuelve el catálogo resumido (Soporta filtrado opcional)
+    // ÚNICO MÉTODO PARA LA RAÍZ /series
     // =========================================================================
     @GetMapping
     @JsonView(Views.SerieResumida.class)
-    public ResponseEntity<List<Serie>> obtenerCatalogo() {
-        List<Serie> catalogo = serieService.obtenerTodasLasSeries();
+    public ResponseEntity<List<Serie>> obtenerCatalogo(
+            @RequestParam(required = false) String inicial,
+            @RequestParam(required = false) String titulo) {
+        
+        // Regla de negocio de la API: Solo un filtro a la vez
+        if (inicial != null && titulo != null) {
+            return ResponseEntity.badRequest().build(); // 400 Bad Request
+        }
+
+        List<Serie> catalogo = serieService.obtenerSeries(inicial, titulo);
         
         if (!catalogo.isEmpty()) {
             return ResponseEntity.ok(catalogo); // 200 OK
