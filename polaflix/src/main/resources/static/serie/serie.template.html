@@ -1,0 +1,26 @@
+<div>
+    <p ng-if="$ctrl.cargando">Cargando datos de la serie...</p>
+    
+    <p ng-if="$ctrl.mensajeError" class="error">{{$ctrl.mensajeError}}</p>
+    <p ng-if="$ctrl.mensajeExito" class="success">{{$ctrl.mensajeExito}}</p>
+
+    <div ng-if="!$ctrl.cargando && $ctrl.serie">
+        <h2>{{$ctrl.serie.titulo}} (Cat: {{$ctrl.serie.categoria}})</h2>
+        <p><i>{{$ctrl.serie.sinopsis}}</i></p>
+        <p><b>Coste por visionado:</b> {{$ctrl.serie.costeVisionado}} €</p>
+
+        <h3>Temporadas y Capítulos:</h3>
+        
+        <div ng-repeat="temporada in $ctrl.serie.temporadas">
+            <h4>Temporada {{temporada.numero}}</h4>
+            
+            <div class="capitulo" ng-repeat="capitulo in temporada.capitulos">
+                <b>Capítulo {{capitulo.numero}}:</b> {{capitulo.titulo}}
+                <br>
+                <button ng-click="$ctrl.marcarVisto(capitulo.id)">
+                    👁️ Ver este capítulo
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
