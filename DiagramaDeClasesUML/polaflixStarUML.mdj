@@ -266,7 +266,7 @@
 											"top": 295,
 											"width": 371.07470703125,
 											"height": 13,
-											"text": "-seriesPendientes: List<Serie>",
+											"text": "-seriesPendientes: Serie[*]",
 											"horizontalAlignment": 0
 										}
 									],
@@ -323,7 +323,7 @@
 											"top": 333,
 											"width": 371.07470703125,
 											"height": 13,
-											"text": "+registrarVisualizacion(serie: Serie, temporada: Int, capitulo: Int)",
+											"text": "+registrarVisualizacion(capitulo: Capitulo)",
 											"horizontalAlignment": 0
 										},
 										{
@@ -1853,12 +1853,12 @@
 									},
 									"font": "Arial;13;0",
 									"parentStyle": false,
-									"left": 568,
-									"top": 460,
+									"left": 576,
+									"top": 464,
 									"width": 76.24169921875,
 									"height": 13,
-									"alpha": 1.2338187852912563,
-									"distance": 38.63935817272331,
+									"alpha": 1.403095329674111,
+									"distance": 31.953090617340916,
 									"hostEdge": {
 										"$ref": "AAAAAAGcrzvM6HfNW7A="
 									},
@@ -2143,11 +2143,11 @@
 									"font": "Arial;13;0",
 									"parentStyle": false,
 									"left": 552,
-									"top": 575,
+									"top": 624,
 									"width": 58.89990234375,
 									"height": 13,
-									"alpha": 1.5707963267948966,
-									"distance": 15,
+									"alpha": -2.196969531330418,
+									"distance": 35.6931365951495,
 									"hostEdge": {
 										"$ref": "AAAAAAGcrzxeQ3wxwqQ="
 									},
@@ -3690,16 +3690,16 @@
 									},
 									"font": "Arial;13;0",
 									"parentStyle": false,
-									"left": 536,
+									"left": 529,
 									"top": 141,
-									"width": 5.05908203125,
+									"width": 19.5126953125,
 									"height": 13,
 									"alpha": 0.5235987755982988,
 									"distance": 25,
 									"hostEdge": {
 										"$ref": "AAAAAAGdP3GUEboEBT8="
 									},
-									"text": "*"
+									"text": "1..*"
 								},
 								{
 									"_type": "UMLQualifierCompartmentView",
@@ -3936,7 +3936,7 @@
 									"parentStyle": false,
 									"left": 564,
 									"top": 146,
-									"width": 12.65087890625,
+									"width": 13.83154296875,
 									"height": 13,
 									"alpha": -0.5235987755982988,
 									"distance": 30,
@@ -3977,9 +3977,9 @@
 									},
 									"font": "Arial;13;0",
 									"parentStyle": false,
-									"left": 586,
+									"left": 585,
 									"top": 125,
-									"width": 5.05908203125,
+									"width": 6.5,
 									"height": 13,
 									"alpha": 0.5235987755982988,
 									"distance": 25,
@@ -4086,12 +4086,12 @@
 									},
 									"font": "Arial;13;0",
 									"parentStyle": false,
-									"left": 322,
-									"top": 470,
+									"left": 423,
+									"top": 560,
 									"width": 118.63134765625,
 									"height": 13,
-									"alpha": 1.5707963267948966,
-									"distance": 15,
+									"alpha": 0.2917268017128065,
+									"distance": 138.45215780189199,
 									"hostEdge": {
 										"$ref": "AAAAAAGdP3l1OdfsHmk="
 									},
@@ -4347,6 +4347,20 @@
 							"headQualifiersCompartment": {
 								"$ref": "AAAAAAGdP3l1Odf37mM="
 							}
+						},
+						{
+							"_type": "UMLTextView",
+							"_id": "AAAAAAGdnF5s6M8G2RM=",
+							"_parent": {
+								"$ref": "AAAAAAFF+qBtyKM79qY="
+							},
+							"font": "Arial;13;0",
+							"parentStyle": false,
+							"left": 96,
+							"top": 80,
+							"width": 112,
+							"height": 48,
+							"text": "menos primitivos todo flechas"
 						}
 					]
 				},
@@ -4439,7 +4453,10 @@
 							},
 							"name": "seriesPendientes",
 							"visibility": "private",
-							"type": "List<Serie>"
+							"type": {
+								"$ref": "AAAAAAGcrxUnG3LfGpU="
+							},
+							"multiplicity": "*"
 						}
 					],
 					"operations": [
@@ -4476,28 +4493,8 @@
 									"_parent": {
 										"$ref": "AAAAAAGcryFQpHQAmyM="
 									},
-									"name": "serie",
-									"type": {
-										"$ref": "AAAAAAGcrxUnG3LfGpU="
-									}
-								},
-								{
-									"_type": "UMLParameter",
-									"_id": "AAAAAAGcryKnqHQIXFo=",
-									"_parent": {
-										"$ref": "AAAAAAGcryFQpHQAmyM="
-									},
-									"name": "temporada",
-									"type": "Int"
-								},
-								{
-									"_type": "UMLParameter",
-									"_id": "AAAAAAGcryKnqHQJ2mc=",
-									"_parent": {
-										"$ref": "AAAAAAGcryFQpHQAmyM="
-									},
 									"name": "capitulo",
-									"type": "Int"
+									"type": "Capitulo"
 								}
 							]
 						},
@@ -4588,7 +4585,7 @@
 									"$ref": "AAAAAAGdP2scaKds1So="
 								},
 								"navigable": "navigable",
-								"multiplicity": "*"
+								"multiplicity": "1..*"
 							}
 						},
 						{
