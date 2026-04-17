@@ -2,6 +2,7 @@ package es.unican.carlosalarcon.polaflix.domain;
 
 import jakarta.persistence.*;
 import java.util.HashSet;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -15,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 public class Usuario {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
     @Column(unique = true, nullable = false)
@@ -55,24 +56,44 @@ public class Usuario {
     public String getUsername() { return username; }
     public PlanSuscripcion getPlanSuscripcion() { return planSuscripcion; }
 
-    // CORRECCIÓN: "Los servicios a nivel de dominio aceptan objetos, no identificadores"
+    
     public void agregarSeriePendiente(Serie serie) {
         if (!this.estadoSeries.containsKey(serie)) {
             this.estadoSeries.put(serie, EstadoSerie.PENDIENTE);
         }
     }
 
-    // CORRECCIÓN: "registrar Visualización debería aceptar un único objeto"
-    public void verCapitulo(Capitulo capitulo) {
+    public void verCapitulo(Capitulo capitulo, Factura facturaActual) {
         Serie serie = capitulo.getTemporada().getSerie();
         
         this.capitulosVistos.add(capitulo);
-        this.ultimoCapituloVisto.put(serie, capitulo);
+
+        // Solo actualiz si el capítulo es "más avanzado"
+        Capitulo ultimoVisto = this.ultimoCapituloVisto.get(serie);
+        if (ultimoVisto == null) {
+            this.ultimoCapituloVisto.put(serie, capitulo);
+        } else {
+            int tempNuevo = capitulo.getTemporada().getNumero();
+            int capNuevo = capitulo.getNumero();
+            int tempViejo = ultimoVisto.getTemporada().getNumero();
+            int capViejo = ultimoVisto.getNumero();
+
+            
+            if (tempNuevo > tempViejo || (tempNuevo == tempViejo && capNuevo > capViejo)) {
+                this.ultimoCapituloVisto.put(serie, capitulo);
+            }
+        }
 
         if (serie.esUltimoCapitulo(capitulo)) {
             this.estadoSeries.put(serie, EstadoSerie.TERMINADA);
         } else {
             this.estadoSeries.put(serie, EstadoSerie.EMPEZADA);
+        }
+
+        
+        if (!this.planSuscripcion.isTarifaPlana() && facturaActual != null && serie.getCosteVisionado() > 0) {
+            String tempCap = "T" + capitulo.getTemporada().getNumero() + "xC" + capitulo.getNumero();
+            facturaActual.anadirCargo(new LineaFactura(LocalDate.now(), serie.getTitulo(), tempCap, serie.getCosteVisionado()));
         }
     }
 
@@ -87,8 +108,8 @@ public class Usuario {
     @Override
     public int hashCode() { return Objects.hash(username); }
 
-    @JsonProperty("estadoSeries") // Le decimos a Jackson que llame a esto "estadoSeries" en el JSON
-    @JsonView(Views.UsuarioBasico.class) // Solo se ve en la vista básica
+    @JsonProperty("estadoSeries")
+    @JsonView(Views.UsuarioBasico.class) 
     public Map<String, EstadoSerie> getEstadoSeriesParaJson() {
         Map<String, EstadoSerie> formatoLimpio = new HashMap<>();
         for (Map.Entry<Serie, EstadoSerie> entrada : estadoSeries.entrySet()) {

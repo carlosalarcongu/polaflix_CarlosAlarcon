@@ -41,33 +41,27 @@ public class UsuarioService {
 
         Serie serie = serieRepository.findSerieByCapituloId(idCapitulo)
                 .orElseThrow(() -> new IllegalArgumentException("Capítulo no encontrado con ID: " + idCapitulo));
-
                 
         Capitulo capitulo = serie.getTemporadas().stream()
                 .flatMap(t -> t.getCapitulos().stream())
                 .filter(c -> c.getId().equals(idCapitulo))
                 .findFirst().orElseThrow();
 
-                
-        usuario.verCapitulo(capitulo);
-        
+        Factura factura = null;
         if (!usuario.getPlanSuscripcion().isTarifaPlana() && serie.getCosteVisionado() > 0) {
             int mesActual = LocalDate.now().getMonthValue();
             int anioActual = LocalDate.now().getYear();
-
+            factura = facturaRepository.findByUsernameAndMesAndAnio(username, mesActual, anioActual);
             
-            Factura factura = facturaRepository.findByUsernameAndMesAndAnio(username, mesActual, anioActual);
-            
-            
-
-
             if (factura == null) {
                 String idFactura = "F-" + username + "-" + mesActual + "-" + anioActual;
                 factura = new Factura(idFactura, username, mesActual, anioActual);
             }
+        }
 
-            String tempCap = "T" + capitulo.getTemporada().getNumero() + "xC" + capitulo.getNumero();
-            factura.anadirCargo(new LineaFactura(LocalDate.now(), serie.getTitulo(), tempCap, serie.getCosteVisionado()));
+        usuario.verCapitulo(capitulo, factura);
+        
+        if (factura != null) {
             facturaRepository.save(factura);
         }
     }

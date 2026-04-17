@@ -22,7 +22,7 @@ public abstract class Serie {
     @JsonView(Views.SerieResumida.class)
     private char inicial;
     
-    @Lob
+    @Lob //TODO: Cambiar etiqueta: No usar large object: Consultarlo con Pablo
     @JsonView(Views.SerieResumida.class)
     private String sinopsis;
     

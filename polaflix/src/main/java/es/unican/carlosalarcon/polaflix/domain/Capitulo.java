@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 public class Capitulo {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id; 
 
     private int numero;
