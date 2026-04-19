@@ -15,7 +15,9 @@ public class Temporada {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id; 
     
+    private String titulo;
     private int numero;
+    private String descripcion;
 
     @JsonBackReference
     @ManyToOne

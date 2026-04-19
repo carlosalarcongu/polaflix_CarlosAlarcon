@@ -22,7 +22,10 @@ public class Usuario {
     @Column(unique = true, nullable = false)
     @JsonView(Views.UsuarioBasico.class)
     private String username;
-    private String contrasena;
+    private String contrasenha;
+
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
+    private Set<Factura> facturas = new HashSet<>();
     
     @Embedded
     @JsonView(Views.UsuarioBasico.class)
@@ -45,9 +48,9 @@ public class Usuario {
 
     protected Usuario() {}
 
-    public Usuario(String username, String contrasena, IBAN iban, PlanSuscripcion planSuscripcion) {
+    public Usuario(String username, String contrasenha, IBAN iban, PlanSuscripcion planSuscripcion) {
         this.username = username;
-        this.contrasena = contrasena;
+        this.contrasenha = contrasenha;
         this.iban = iban;
         this.planSuscripcion = planSuscripcion;
     }

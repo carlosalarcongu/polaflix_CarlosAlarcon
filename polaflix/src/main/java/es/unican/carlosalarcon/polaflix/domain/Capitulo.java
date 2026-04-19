@@ -15,6 +15,10 @@ public class Capitulo {
     private int numero;
     private String titulo;
     private String descripcion;
+    
+    @JsonBackReference
+    @ManyToOne
+    private Serie serie;
 
     @JsonBackReference
     @ManyToOne

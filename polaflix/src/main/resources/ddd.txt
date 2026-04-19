@@ -1,0 +1,55 @@
+1. Clasificación de Elementos del Dominio
+Entities (Entidades)
+Tienen una identidad continua a lo largo del tiempo y un ciclo de vida propio.
+
+Usuario: Identificado por su username. Posee el estado de sus visualizaciones y su plan.
+
+Serie: Identificada por un ID único. Es la raíz de la información de catálogo.
+
+Temporada: Entidad con identidad local dentro de una serie.
+
+Capítulo: Entidad con identidad local. Es la unidad mínima de contenido.
+
+Factura: Identificada por un código único. Representa la obligación de pago de un periodo.
+
+Persona: Identificada por su nombre. Representa a los actores y creadores (evita duplicidad si alguien cumple ambos roles).
+
+Value Objects (Objetos de Valor)
+Representan atributos descriptivos. No tienen identidad y son inmutables.
+
+IBAN: Define una cuenta bancaria válida.
+
+PlanSuscripcion: Define las reglas de coste (Tarifa Plana vs. Pago por Visión).
+
+LineaFactura: Describe un cargo concreto (fecha, concepto, importe).
+
+2. Aggregates y Aggregate Roots
+Aggregate: Usuario
+Aggregate Root: Usuario.
+
+Descripción: Es el núcleo de la actividad del cliente.
+
+Justificación: El Usuario debe garantizar que su estado de visualización sea coherente (p.ej., que el "último capítulo visto" sea efectivamente el de mayor numeración visto hasta la fecha). Posee referencias a las Series (como Aggregate Roots externos) para gestionar sus listas de favoritos y estados.
+
+Aggregate: Serie
+Aggregate Root: Serie.
+
+Elementos internos: Temporada, Capítulo.
+
+Justificación: La Serie es la frontera de consistencia del catálogo. Una temporada o capítulo no existen sin su serie. La raíz garantiza que el acceso a un capítulo se haga siempre a través de la estructura jerárquica de la serie, manteniendo la integridad del orden de los episodios.
+
+Aggregate: Facturación
+Aggregate Root: Factura.
+
+Elementos internos: LineaFactura.
+
+Justificación: La Factura protege la invariante de facturación mensual. En un sistema de pago por visión, la factura garantiza que cada visualización de un capítulo genere exactamente una línea de cargo y que el importe total sea siempre la suma exacta de sus líneas. Al ser el Root, evita que se añadan cargos a meses ya cerrados o para usuarios inexistentes.
+
+3. Justificaciones de Diseño (DDD)
+Referencias entre Aggregates
+Contrario a la primera versión, se utilizan referencias a objetos (asociaciones) en lugar de solo identificadores de texto (Strings). Esto permite un dominio más rico donde el Usuario puede interaccionar directamente con la Serie y el Capítulo. JPA gestiona la carga de estas relaciones de forma eficiente.
+
+Invariantes y Acoplamiento
+Protección de Invariantes (Factura): La factura actúa como una "Unidad de Trabajo" para el cobro. Al centralizar las LineaFactura, aseguramos que no haya discrepancias entre lo que el usuario ve y lo que se le reclama económicamente.
+
+Reducción de Acoplamiento: Al utilizar asociaciones bien definidas en el modelo (UML) y no depender de "IDs sueltos", el código es más legible y menos propenso a errores de integridad referencial. La carga desde repositorios se facilita mediante el uso de JOIN FETCH o carga perezosa (Lazy), permitiendo recuperar solo la información necesaria del grafo de objetos.

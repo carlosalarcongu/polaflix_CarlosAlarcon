@@ -1,0 +1,41 @@
+--Aggregate: Usuario (El núcleo de actividad)
+
+Este agregado gestiona la identidad del cliente y su progreso en la plataforma.
+
+Usuario (Aggregate Root): Entidad principal identificada por username.
+
+Propiedades: Gestiona el acceso (contrasenha), sus identificadores bancarios (IBAN) y su suscripción (PlanSuscripcion).
+
+Métodos Clave: verCapitulo(capitulo, factura) contiene la lógica inteligente para actualizar el progreso solo si el capítulo es posterior al visto anteriormente y delega el cargo a la factura si no hay tarifa plana.
+
+IBAN & PlanSuscripcion (Value Objects): Clases inmutables (@Embeddable) que definen datos del usuario sin identidad propia.
+
+EstadoSerie (Enumeration): Define si una serie está PENDIENTE, EMPEZADA o TERMINADA.
+
+
+
+--Aggregate: Serie (El catálogo de contenidos)
+
+Protege la integridad de la jerarquía de las series. No se puede acceder a un capítulo sin pasar por la serie.
+
+Serie (Aggregate Root - Abstracta): Define la información base (título, sinopsis).
+
+Herencia: Se divide en SerieGold, SerieSilver y SerieEstandar para aplicar diferentes costes de visionado polimórficamente.
+
+Propiedades Derivadas: /inicial se calcula al vuelo para el filtrado alfabético.
+
+Temporada & Capitulo (Entities): Componentes internos con identidad local. El capítulo ahora incluye descripcion y titulo.
+
+Persona (Entity): Representa tanto a actores como a creadores, permitiendo que una misma persona cumpla varios roles en el sistema.
+
+
+
+--Aggregate: Facturacion (El control económico)
+
+Garantiza que cada visualización se traduzca en un cobro coherente.
+
+Factura (Aggregate Root): Vinculada directamente al Usuario (relación ManyToOne).
+
+Propiedades Derivadas: +/importeTotal es un método que suma el coste de todas sus líneas en tiempo real, garantizando la consistencia del cobro.
+
+LineaFactura (Value Object): Registro inmutable de un cargo específico. Contiene la foto fija de lo que costó una serie en el momento exacto en que se vio.

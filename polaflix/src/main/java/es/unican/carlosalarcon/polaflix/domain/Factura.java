@@ -12,7 +12,9 @@ public class Factura {
     @Id
     private String id;
     
-    private String username; 
+    @ManyToOne 
+    @JoinColumn(name = "usuario_id")
+    private Usuario usuario;
     private int mes;
     private int anio;
     
@@ -21,14 +23,14 @@ public class Factura {
 
     protected Factura() {} 
 
-    public Factura(String id, String username, int mes, int anio) {
+    public Factura(String id, Usuario usuario, int mes, int anio) {
         this.id = id;
-        this.username = username;
+        this.usuario = usuario;
         this.mes = mes;
         this.anio = anio;
     }
 
-    public String getUsername() { return username; }
+    public Usuario getUsuario() { return usuario; }
     public int getMes() { return mes; }
     public int getAnio() { return anio; }
     public String getId() { return id; }
