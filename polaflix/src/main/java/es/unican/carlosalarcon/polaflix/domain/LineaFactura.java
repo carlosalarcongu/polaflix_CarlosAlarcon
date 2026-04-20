@@ -4,12 +4,18 @@ import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonView;
+
 @Embeddable 
 public class LineaFactura {
     
+    @JsonView(Views.UsuarioBasico.class)
     private LocalDate fecha;
+    @JsonView(Views.UsuarioBasico.class)
     private String serieNombre;
+    @JsonView(Views.UsuarioBasico.class)
     private String temporadaCapitulo;
+    @JsonView(Views.UsuarioBasico.class)
     private double cargo;
 
     protected LineaFactura() {} 

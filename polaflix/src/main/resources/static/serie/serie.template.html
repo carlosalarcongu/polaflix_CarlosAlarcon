@@ -29,7 +29,8 @@
                             title="{{cap.titulo}}" 
                             ng-repeat="cap in temp.capitulos | orderBy:'numero'" 
                             ng-click="$ctrl.marcarVisto(cap.id)">
-                        {{cap.numero}}
+                        <span class="num-gigante">{{cap.numero}}</span>
+                        <span class="texto-pequeno">{{cap.titulo}}</span>
                     </button>
                 </div>
             </div>

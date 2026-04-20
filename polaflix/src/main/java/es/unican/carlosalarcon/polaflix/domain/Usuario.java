@@ -25,6 +25,7 @@ public class Usuario {
     private String contrasenha;
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
+    @JsonView(Views.UsuarioBasico.class)
     private Set<Factura> facturas = new HashSet<>();
     
     @Embedded
@@ -40,6 +41,7 @@ public class Usuario {
     private Map<Serie, EstadoSerie> estadoSeries = new HashMap<>();
     
     @ManyToMany
+    @JsonView(Views.UsuarioBasico.class)
     private Set<Capitulo> capitulosVistos = new HashSet<>();
 
     @ManyToMany

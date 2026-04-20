@@ -8,7 +8,6 @@ angular.module('polaflixApp').component('catalogoSeries', {
         ctrl.$onInit = function() {
             if (!ctrl.username) { $location.path('/login'); return; }
             
-            // $q.all espera a que el catálogo y el perfil lleguen para procesarlos juntos
             $q.all([
                 PolaflixService.getSeries(),
                 PolaflixService.getUsuario(ctrl.username)
@@ -16,9 +15,7 @@ angular.module('polaflixApp').component('catalogoSeries', {
                 var catalogoData = respuestas[0];
                 var usuarioData = respuestas[1];
                 
-                // Mapeamos cada serie para inyectarle el estado que tiene para este usuario
                 ctrl.series = catalogoData.map(function(serie) {
-                    // El JSON de usuario tiene: "estadoSeries": { "Peaky Blinders": "EMPEZADA" }
                     serie.estadoPersonal = usuarioData.estadoSeries[serie.titulo] || null;
                     return serie;
                 });
@@ -27,7 +24,6 @@ angular.module('polaflixApp').component('catalogoSeries', {
 
         ctrl.addPendiente = function(idSerie) {
             PolaflixService.agregarAPendientes(ctrl.username, idSerie).then(function() {
-                // Actualizamos la vista localmente sin recargar la página entera
                 var serieAfectada = ctrl.series.find(s => s.id === idSerie);
                 if (serieAfectada) serieAfectada.estadoPersonal = 'PENDIENTE';
             });
@@ -35,9 +31,9 @@ angular.module('polaflixApp').component('catalogoSeries', {
 
         ctrl.getPosterGeneral = function(idSerie) {
             if (idSerie === 'S01') return 'images/PeakyBlinders.png';
-            if (idSerie === 'S02') return 'images/PrisonBreakS01.png'; // Usamos la T1 como principal
-            if (idSerie === 'S03') return 'images/LQSAS01.png'; // Usamos la T1 como principal
-            return 'images/polaflix-logo.png'; // Fallback
+            if (idSerie === 'S02') return 'images/PrisonBreakS01.png'; 
+            if (idSerie === 'S03') return 'images/LQSAS01.png'; 
+            return 'images/polaflix-logo.png'; 
         };
 
     }]

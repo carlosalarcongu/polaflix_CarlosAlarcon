@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 
 @Entity
@@ -49,6 +50,7 @@ public abstract class Serie {
         this.creadores.add(creadorPrincipal);
     }
     
+    @JsonProperty("costeVisionado")
     @JsonView(Views.SerieResumida.class)
     public abstract double getCosteVisionado();
 
@@ -68,6 +70,12 @@ public abstract class Serie {
         if (ultimaTemp.getCapitulos().isEmpty()) return false;
         Capitulo ultimoCap = ultimaTemp.getCapitulos().get(ultimaTemp.getCapitulos().size() - 1);
         return c.equals(ultimoCap);
+    }
+
+    @JsonProperty("categoria") 
+    @JsonView(Views.SerieResumida.class)
+    public String getCategoria() {
+        return this.getClass().getAnnotation(DiscriminatorValue.class).value();
     }
 
     @Override

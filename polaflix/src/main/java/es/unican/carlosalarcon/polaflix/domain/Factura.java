@@ -5,20 +5,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonView;
+
 @Entity 
 @Table(name = "facturas")
 public class Factura {
     
     @Id
+    @JsonView(Views.UsuarioBasico.class)
     private String id;
     
     @ManyToOne 
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
+    @JsonView(Views.UsuarioBasico.class)
     private int mes;
+    @JsonView(Views.UsuarioBasico.class)
     private int anio;
     
     @ElementCollection
+    @JsonView(Views.UsuarioBasico.class)
     private List<LineaFactura> lineas = new ArrayList<>();
 
     protected Factura() {} 

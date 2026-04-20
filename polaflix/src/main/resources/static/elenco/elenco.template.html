@@ -1,0 +1,17 @@
+<section class="fade-in">
+    <h2 style="font-size: 2em; color: white;">🎭 Directorio de Actores</h2>
+    <p style="color: #b3b3b3;">Descubre en qué series del catálogo de Polaflix participan tus actores favoritos.</p>
+
+    <div ng-if="$ctrl.cargando">
+        <h3 style="color: var(--pola-red);"><blink>Revisando los contratos de los actores...</blink></h3>
+    </div>
+
+    <div ng-if="!$ctrl.cargando" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 30px;">
+        <div class="temporada-card" style="display: block; padding: 15px;" ng-repeat="(actor, listaSeries) in $ctrl.actoresMap">
+            <h3 style="margin-top: 0; color: white; border-bottom: 1px solid #444; padding-bottom: 10px;">{{actor}}</h3>
+            <ul style="color: #bbb; padding-left: 20px;">
+                <li ng-repeat="tituloSerie in listaSeries" style="margin-bottom: 5px;">{{tituloSerie}}</li>
+            </ul>
+        </div>
+    </div>
+</section>
