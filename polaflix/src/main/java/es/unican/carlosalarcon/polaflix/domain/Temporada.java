@@ -38,12 +38,23 @@ public class Temporada {
 
     protected Temporada() {}
 
+    // 1. El constructor se queda solo con el número (como estaba originalmente)
     public Temporada(int numero) {
         this.numero = numero;
-        this.titulo = serie.getTitulo() + numero;
     }
 
-    public void setSerie(Serie serie) { this.serie = serie; }
+    // 2. Modificamos el setter para que genere el título automáticamente cuando se enlaza
+    public void setSerie(Serie serie) { 
+        this.serie = serie; 
+        
+        // Ahora sí podemos acceder a serie.getTitulo() porque ya no es null
+        if (this.titulo == null) {
+            this.titulo = "Temporada " + this.numero + " de " + serie.getTitulo();
+        }
+        if (this.descripcion == null) {
+            this.descripcion = "Descripción pendiente..."; // Un valor por defecto
+        }
+    }
     public Serie getSerie() { return serie; }
 
     public void addCapitulo(Capitulo capitulo) {
