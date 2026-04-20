@@ -1,19 +1,51 @@
-/* Layout Principal */
-.header-main { text-align: center; padding: 30px 0 10px 0; background: #000; }
-.main-logo { height: 120px; transition: transform 0.3s; }
-.main-logo:hover { transform: scale(1.05); }
+:root { --pola-red: #E50914; --dark-bg: #141414; --shelf-wood: #3e2723; }
+body { margin: 0; background-color: var(--dark-bg); color: white; display: flex; height: 100vh; overflow: hidden; font-family: 'Segoe UI', Tahoma, sans-serif; }
 
-/* Navbar */
-.navbar { background: #111; border-top: 1px solid #333; border-bottom: 3px solid var(--pola-red); position: sticky; top: 0; z-index: 100; }
-.nav-container { display: flex; justify-content: center; gap: 40px; padding: 15px; }
-.nav-container a { color: #fff; text-decoration: none; font-size: 1.1em; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; transition: color 0.3s; }
-.nav-container a:hover { color: var(--pola-red); }
+/* --- SIDEBAR MENU (Módulo Lateral) --- */
+.sidebar { width: 260px; background: #000; border-right: 1px solid #333; display: flex; flex-direction: column; padding: 30px 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.5); z-index: 100; }
+.sidebar-logo { width: 100%; margin-bottom: 50px; cursor: pointer; transition: transform 0.2s; }
+.sidebar-logo:hover { transform: scale(1.05); }
+.sidebar nav { display: flex; flex-direction: column; gap: 20px; }
+.sidebar nav a { color: #b3b3b3; text-decoration: none; font-size: 1.2em; font-weight: bold; transition: color 0.3s; display: flex; align-items: center; gap: 10px; }
+.sidebar nav a:hover { color: var(--pola-red); }
 
-/* Badges para el estado de las series */
-.card-serie { position: relative; background: var(--card-bg); border-radius: 4px; overflow: hidden; transition: transform 0.3s; }
-.badge { position: absolute; top: 10px; right: 10px; padding: 6px 12px; font-size: 0.8em; font-weight: bold; border-radius: 4px; z-index: 10; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+/* --- CONTENIDO PRINCIPAL --- */
+.main-content { flex-grow: 1; padding: 40px; overflow-y: auto; background: linear-gradient(to bottom, #1f1f1f, var(--dark-bg)); }
+
+/* --- LOGIN (Logo centrado y panel) --- */
+.login-wrapper { display: flex; justify-content: center; align-items: center; height: 100%; flex-direction: column; }
+.login-box { background: rgba(0,0,0,0.85); padding: 50px 60px; border-radius: 8px; text-align: center; border: 1px solid #333; width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+.login-logo { width: 100%; max-width: 300px; margin-bottom: 40px; }
+.login-input { padding: 15px; width: 100%; box-sizing: border-box; margin-bottom: 25px; border-radius: 5px; border: none; font-size: 1.1em; background: #333; color: white; }
+.login-btn { background: var(--pola-red); color: white; padding: 15px; width: 100%; border: none; border-radius: 5px; font-size: 1.2em; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+.login-btn:hover { background: #b20710; }
+
+/* --- ESTANTERÍAS DEL CATÁLOGO --- */
+.shelf-container { margin-top: 20px; margin-bottom: 60px; }
+.shelf { display: flex; gap: 25px; padding-bottom: 10px; border-bottom: 15px solid var(--shelf-wood); box-shadow: inset 0 -5px 10px rgba(0,0,0,0.6); }
+.card-serie { width: 220px; position: relative; transition: transform 0.3s; background: #111; border-radius: 4px; overflow: hidden; }
+.card-serie:hover { transform: translateY(-15px); box-shadow: 0 15px 20px rgba(0,0,0,0.5); }
+.serie-poster { width: 100%; height: 310px; object-fit: cover; }
+.card-info { padding: 15px; text-align: center; }
+.card-info h4 { margin: 0 0 10px 0; font-size: 1.1em; color: #fff; }
+
+/* --- BADGES Y BOTONES --- */
+.badge { position: absolute; top: 10px; right: 10px; padding: 5px 10px; font-size: 0.8em; font-weight: bold; border-radius: 3px; z-index: 10; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
 .badge-pendiente { background: #f39c12; color: #000; }
 .badge-empezada { background: #3498db; color: #fff; }
 .badge-terminada { background: #2ecc71; color: #fff; }
 
-.btn-sm { padding: 8px; font-size: 0.85em; }
+.btn-primary { background: var(--pola-red); color: white; padding: 8px 12px; text-decoration: none; border-radius: 3px; font-weight: bold; border: none; cursor: pointer; }
+.btn-secondary { background: #555; color: white; padding: 8px 12px; border: none; border-radius: 3px; font-weight: bold; cursor: pointer; }
+.btn-secondary:hover { background: #777; }
+
+/* --- DISEÑO DE LA SERIE Y CAPÍTULOS GIGANTES --- */
+.header-detalle { display: flex; gap: 40px; margin-bottom: 40px; }
+.poster-detalle { width: 300px; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+.temporada-card { display: flex; gap: 25px; background: #1a1a1a; padding: 25px; border-radius: 8px; margin-bottom: 25px; border-left: 5px solid var(--pola-red); }
+.temporada-poster { width: 160px; height: 240px; border-radius: 6px; object-fit: cover; box-shadow: 0 4px 8px rgba(0,0,0,0.5); }
+.capitulos-grid { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 20px; }
+.capitulo-btn { font-size: 32px; font-weight: bold; width: 80px; height: 80px; border-radius: 12px; background-color: #222; color: #fff; border: 3px solid #555; cursor: pointer; transition: all 0.2s ease-in-out; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+.capitulo-btn:hover { background-color: var(--pola-red); border-color: #fff; transform: scale(1.1); box-shadow: 0 6px 12px rgba(229, 9, 20, 0.5); }
+.error { color: #ff6b6b; font-weight: bold; }
+.success { color: #46d369; font-weight: bold; }

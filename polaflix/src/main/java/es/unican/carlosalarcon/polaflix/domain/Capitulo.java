@@ -3,6 +3,7 @@ package es.unican.carlosalarcon.polaflix.domain;
 import jakarta.persistence.*;
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonView;
 
 @Entity 
 @Table(name = "capitulos")
@@ -10,10 +11,15 @@ public class Capitulo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @JsonView(Views.SerieDetallada.class)
     private Long id; 
 
+
+    @JsonView(Views.SerieDetallada.class)
     private int numero;
+    @JsonView(Views.SerieDetallada.class)
     private String titulo;
+    @JsonView(Views.SerieDetallada.class)
     private String descripcion;
     
     @JsonBackReference

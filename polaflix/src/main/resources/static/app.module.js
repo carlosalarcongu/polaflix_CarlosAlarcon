@@ -4,10 +4,20 @@ angular.module('polaflixApp', ['ngRoute'])
             $locationProvider.hashPrefix('!');
 
             $routeProvider
-                .when('/login', { template: '<login-polaflix></login-polaflix>' })
-                .when('/catalogo', { template: '<catalogo-series></catalogo-series>' })
-                .when('/series/:serieId', { template: '<detalle-serie></detalle-serie>' })
-                .when('/perfil', { template: '<perfil-usuario></perfil-usuario>' }) // NUEVA RUTA
+                .when('/login', {
+                    template: '<login-polaflix></login-polaflix>'
+                })
+                .when('/series/:serieId', {
+                    // USO CORRECTO DE PARÁMETROS EN URL (:serieId)
+                    template: '<detalle-serie></detalle-serie>'
+                })
                 .otherwise('/login');
         }
     ]);
+    
+angular.module('polaflixApp').controller('MainController', ['$scope', '$location', function($scope, $location) {
+    $scope.mostrarMenu = function() {
+        // Solo mostramos la barra lateral si no estamos en la pantalla de login
+        return $location.path() !== '/login';
+    };
+}]);

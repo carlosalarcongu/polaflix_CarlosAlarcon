@@ -1,6 +1,9 @@
-<div>
-    <h2>Acceso al Sistema</h2>
-    <p>Introduce tu nombre de usuario (Ej: cr7bicho):</p>
-    <input type="text" ng-model="$ctrl.username" placeholder="Username">
-    <button ng-click="$ctrl.entrar()">Entrar a Polaflix</button>
+<div class="login-wrapper">
+    <div class="login-box">
+        <img src="images/polaflix-logo.png" class="login-logo" alt="Polaflix Logo">
+        
+        <input type="text" class="login-input" ng-model="$ctrl.username" placeholder="Introduce tu usuario (ej: cr7bicho)">
+        
+        <button class="login-btn" ng-click="$ctrl.entrar()">ENTRAR AL SISTEMA</button>
+    </div>
 </div>

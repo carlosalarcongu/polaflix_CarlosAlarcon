@@ -3,19 +3,15 @@ angular.module('polaflixApp').component('detalleSerie', {
     controller: ['$routeParams', 'PolaflixService', function SerieController($routeParams, PolaflixService) {
         var ctrl = this;
         
-        // Variables Observadas para la interfaz (Programación Reactiva)
         ctrl.serie = null;
         ctrl.cargando = true;
         ctrl.mensajeError = null;
         ctrl.mensajeExito = null;
         
-        // Recuperar usuario logueado o poner uno por defecto
         ctrl.username = sessionStorage.getItem('usuarioLogueado') || 'cr7bicho'; 
 
-        // Recuperar parámetro de la URL
         var serieId = $routeParams.serieId;
 
-        // Llamada asíncrona al servicio al iniciar el componente
         ctrl.$onInit = function() {
             PolaflixService.getSerie(serieId).then(function(data) {
                 ctrl.serie = data;
@@ -26,7 +22,6 @@ angular.module('polaflixApp').component('detalleSerie', {
             });
         };
 
-        // Lógica para marcar capítulo visto
         ctrl.marcarVisto = function(idCapitulo) {
             ctrl.mensajeError = null;
             ctrl.mensajeExito = null;
@@ -36,6 +31,25 @@ angular.module('polaflixApp').component('detalleSerie', {
             }).catch(function(error) {
                 ctrl.mensajeError = error;
             });
+        };
+
+
+        ctrl.getPosterGeneral = function(idSerie) {
+            if (idSerie === 'S01') return 'images/PeakyBlinders.png';
+            if (idSerie === 'S02') return 'images/PrisonBreakS01.png';
+            if (idSerie === 'S03') return 'images/LQSAS01.png';
+            return 'images/polaflix-logo.png';
+        };
+
+        ctrl.getPosterTemporada = function(idSerie, numTemporada) {
+            var safeNum = numTemporada > 4 ? 1 : numTemporada;
+            var sufijo = 'S0' + safeNum + '.png';
+
+            if (idSerie === 'S01') return 'images/PeakyBlinders' + sufijo;
+            if (idSerie === 'S02') return 'images/PrisonBreak' + sufijo;
+            if (idSerie === 'S03') return 'images/LQSA' + sufijo;
+            
+            return 'images/polaflix-logo.png';
         };
     }]
 });

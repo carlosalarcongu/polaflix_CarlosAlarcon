@@ -32,5 +32,13 @@ angular.module('polaflixApp').component('catalogoSeries', {
                 if (serieAfectada) serieAfectada.estadoPersonal = 'PENDIENTE';
             });
         };
+
+        ctrl.getPosterGeneral = function(idSerie) {
+            if (idSerie === 'S01') return 'images/PeakyBlinders.png';
+            if (idSerie === 'S02') return 'images/PrisonBreakS01.png'; // Usamos la T1 como principal
+            if (idSerie === 'S03') return 'images/LQSAS01.png'; // Usamos la T1 como principal
+            return 'images/polaflix-logo.png'; // Fallback
+        };
+
     }]
 });

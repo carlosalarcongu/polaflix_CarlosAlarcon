@@ -6,6 +6,7 @@ import java.util.Objects;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonView;
 
 @Entity 
 @Table(name = "temporadas")
@@ -13,10 +14,17 @@ public class Temporada {
     
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @JsonView(Views.SerieDetallada.class)
     private Long id; 
-    
+
+
+    @JsonView(Views.SerieDetallada.class)
     private String titulo;
+
+    @JsonView(Views.SerieDetallada.class)
     private int numero;
+
+    @JsonView(Views.SerieDetallada.class)
     private String descripcion;
 
     @JsonBackReference
@@ -25,12 +33,14 @@ public class Temporada {
 
     @JsonManagedReference
     @OneToMany(mappedBy = "temporada", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonView(Views.SerieDetallada.class)
     private List<Capitulo> capitulos = new ArrayList<>();
 
     protected Temporada() {}
 
     public Temporada(int numero) {
         this.numero = numero;
+        this.titulo = serie.getTitulo() + numero;
     }
 
     public void setSerie(Serie serie) { this.serie = serie; }
