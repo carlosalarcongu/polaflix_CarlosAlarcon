@@ -1,28 +1,36 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" ng-app="polaflixApp">
 <head>
     <meta charset="UTF-8">
-    <title>Polaflix Web</title>
+    <title>Polaflix - Tu Cine en Casa</title>
+    <link rel="stylesheet" href="polaflix.css">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-route.js"></script>
     
     <script src="app.module.js"></script>
     <script src="polaflix.service.js"></script>
     <script src="login/login.component.js"></script>
+    <script src="catalogo/catalogo.component.js"></script>
     <script src="serie/serie.component.js"></script>
-    
-    <style>
-        body { font-family: Arial, sans-serif; padding: 20px; }
-        .error { color: red; font-weight: bold; }
-        .success { color: green; font-weight: bold; }
-        .capitulo { border: 1px solid #ccc; padding: 10px; margin-bottom: 5px; }
-    </style>
+    <script src="perfil/perfil.component.js"></script>
 </head>
-<body ng-app="polaflixApp">
-    
-    <h1 style="border-bottom: 2px solid black;">🎬 POLAFLIX</h1>
-    
-    <div ng-view></div>
+<body>
+    <header class="header-main">
+        <a href="#!/catalogo">
+            <img src="images/polaflix-logo.png" alt="Polaflix" class="main-logo">
+        </a>
+    </header>
 
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#!/catalogo">📺 Catálogo</a>
+            <a href="#!/perfil">👤 Mi Perfil y Series</a>
+            <a href="#!/login" class="user-link">🚪 Cambiar Usuario</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div ng-view class="fade-in"></div>
+    </main>
 </body>
 </html>

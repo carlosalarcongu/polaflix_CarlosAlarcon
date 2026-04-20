@@ -4,13 +4,10 @@ angular.module('polaflixApp', ['ngRoute'])
             $locationProvider.hashPrefix('!');
 
             $routeProvider
-                .when('/login', {
-                    template: '<login-polaflix></login-polaflix>'
-                })
-                .when('/series/:serieId', {
-                    // USO CORRECTO DE PARÁMETROS EN URL (:serieId)
-                    template: '<detalle-serie></detalle-serie>'
-                })
+                .when('/login', { template: '<login-polaflix></login-polaflix>' })
+                .when('/catalogo', { template: '<catalogo-series></catalogo-series>' })
+                .when('/series/:serieId', { template: '<detalle-serie></detalle-serie>' })
+                .when('/perfil', { template: '<perfil-usuario></perfil-usuario>' }) // NUEVA RUTA
                 .otherwise('/login');
         }
     ]);

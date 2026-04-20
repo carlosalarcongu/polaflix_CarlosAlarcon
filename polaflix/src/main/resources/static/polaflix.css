@@ -1,0 +1,19 @@
+/* Layout Principal */
+.header-main { text-align: center; padding: 30px 0 10px 0; background: #000; }
+.main-logo { height: 120px; transition: transform 0.3s; }
+.main-logo:hover { transform: scale(1.05); }
+
+/* Navbar */
+.navbar { background: #111; border-top: 1px solid #333; border-bottom: 3px solid var(--pola-red); position: sticky; top: 0; z-index: 100; }
+.nav-container { display: flex; justify-content: center; gap: 40px; padding: 15px; }
+.nav-container a { color: #fff; text-decoration: none; font-size: 1.1em; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; transition: color 0.3s; }
+.nav-container a:hover { color: var(--pola-red); }
+
+/* Badges para el estado de las series */
+.card-serie { position: relative; background: var(--card-bg); border-radius: 4px; overflow: hidden; transition: transform 0.3s; }
+.badge { position: absolute; top: 10px; right: 10px; padding: 6px 12px; font-size: 0.8em; font-weight: bold; border-radius: 4px; z-index: 10; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+.badge-pendiente { background: #f39c12; color: #000; }
+.badge-empezada { background: #3498db; color: #fff; }
+.badge-terminada { background: #2ecc71; color: #fff; }
+
+.btn-sm { padding: 8px; font-size: 0.85em; }

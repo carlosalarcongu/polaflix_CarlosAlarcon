@@ -1,26 +1,30 @@
-<div>
-    <p ng-if="$ctrl.cargando">Cargando datos de la serie...</p>
-    
-    <p ng-if="$ctrl.mensajeError" class="error">{{$ctrl.mensajeError}}</p>
-    <p ng-if="$ctrl.mensajeExito" class="success">{{$ctrl.mensajeExito}}</p>
+<div ng-if="$ctrl.serie" class="fade-in">
+    <div class="header-detalle">
+        <img ng-src="images/{{$ctrl.serie.id}}.jpg" class="poster-detalle">
+        <div class="info-texto">
+            <h1 style="color: var(--pola-red); margin-top: 0;">{{$ctrl.serie.titulo}}</h1>
+            <p class="sinopsis">{{$ctrl.serie.sinopsis}}</p>
+            <p><strong>Categoría:</strong> <span class="tag">{{$ctrl.serie.categoria}}</span></p>
+        </div>
+    </div>
 
-    <div ng-if="!$ctrl.cargando && $ctrl.serie">
-        <h2>{{$ctrl.serie.titulo}} (Cat: {{$ctrl.serie.categoria}})</h2>
-        <p><i>{{$ctrl.serie.sinopsis}}</i></p>
-        <p><b>Coste por visionado:</b> {{$ctrl.serie.costeVisionado}} €</p>
-
-        <h3>Temporadas y Capítulos:</h3>
-        
-        <div ng-repeat="temporada in $ctrl.serie.temporadas">
-            <h4>Temporada {{temporada.numero}}</h4>
-            
-            <div class="capitulo" ng-repeat="capitulo in temporada.capitulos">
-                <b>Capítulo {{capitulo.numero}}:</b> {{capitulo.titulo}}
-                <br>
-                <button ng-click="$ctrl.marcarVisto(capitulo.id)">
-                    👁️ Ver este capítulo
-                </button>
+    <div class="listado-episodios">
+        <div class="temp-block" ng-repeat="temp in $ctrl.serie.temporadas | orderBy:'numero'">
+            <div class="temp-header">
+                <h3>Temporada {{temp.numero}}</h3>
             </div>
+            <ul class="cap-list">
+                <li class="cap-item" ng-repeat="cap in temp.capitulos | orderBy:'numero'">
+                    <div>
+                        <span style="color: #888; margin-right: 10px;">{{cap.numero}}.</span>
+                        <strong>{{cap.titulo}}</strong>
+                        <p style="margin: 5px 0 0 25px; font-size: 0.9em; color: #bbb;">{{cap.descripcion}}</p>
+                    </div>
+                    <button ng-click="$ctrl.marcarVisto(cap.id)">
+                        ▶ Reproducir
+                    </button>
+                </li>
+            </ul>
         </div>
     </div>
 </div>

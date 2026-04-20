@@ -1,25 +1,36 @@
 angular.module('polaflixApp').factory('PolaflixService', ['$http', '$q', function($http, $q) {
     return {
-        // Recuperar una serie completa
-        getSerie: function(idSerie) {
-            return $http.get('/series/' + idSerie)
-                .then(function(response) {
-                    return response.data; // 200 OK
-                })
-                .catch(function(error) {
-                    return $q.reject("Error al cargar la serie. Código: " + error.status); // 404 u otros
-                });
+        // Recuperar todo el catálogo
+        getSeries: function() {
+            return $http.get('/series')
+                .then(res => res.data)
+                .catch(err => $q.reject("No se pudo cargar el catálogo."));
         },
-        
+
+        // Recuperar una serie por ID
+        getSerie: function(id) {
+            return $http.get('/series/' + id)
+                .then(res => res.data)
+                .catch(err => $q.reject("Serie no encontrada."));
+        },
+
         // Marcar capítulo como visto (PUT)
-        verCapitulo: function(username, idCapitulo) {
-            return $http.put('/usuarios/' + username + '/capitulos-vistos/' + idCapitulo)
-                .then(function(response) {
-                    return "Capítulo marcado como visto con éxito.";
-                })
-                .catch(function(error) {
-                    return $q.reject("No se pudo registrar la visualización. Verifica el usuario/capítulo.");
-                });
+        verCapitulo: function(user, capId) {
+            return $http.put(`/usuarios/${user}/capitulos-vistos/${capId}`)
+                .catch(err => $q.reject("Error al registrar visualización."));
+        },
+
+        // Agregar a pendientes (PUT) - NUEVO
+        agregarAPendientes: function(user, serieId) {
+            return $http.put(`/usuarios/${user}/series-pendientes/${serieId}`)
+                .catch(err => $q.reject("No se pudo añadir a pendientes."));
+        },
+
+        // Añade este método dentro del 'return' de PolaflixService
+        getUsuario: function(username) {
+            return $http.get('/usuarios/' + username)
+                .then(function(response) { return response.data; })
+                .catch(function(error) { return $q.reject("No se pudo cargar el perfil."); });
         }
     };
 }]);
