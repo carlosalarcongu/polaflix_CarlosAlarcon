@@ -51,11 +51,11 @@ public class UsuarioService {
         if (!usuario.getPlanSuscripcion().isTarifaPlana() && serie.getCosteVisionado() > 0) {
             int mesActual = LocalDate.now().getMonthValue();
             int anioActual = LocalDate.now().getYear();
-            factura = facturaRepository.findByUsernameAndMesAndAnio(username, mesActual, anioActual);
+            factura = facturaRepository.findByUsuarioUsernameAndMesAndAnio(username, mesActual, anioActual);
             
             if (factura == null) {
-                String idFactura = "F-" + username + "-" + mesActual + "-" + anioActual;
-                factura = new Factura(idFactura, username, mesActual, anioActual);
+                String idFactura = "F-" + usuario.getUsername() + "-" + mesActual + "-" + anioActual;
+                factura = new Factura(idFactura, usuario, mesActual, anioActual);
             }
         }
 

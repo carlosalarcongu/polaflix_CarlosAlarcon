@@ -140,7 +140,7 @@ public class AppFeeder implements CommandLineRunner {
         carlos.verCapitulo(peakyS1E1, null);
         ur.save(carlos);
 
-        Factura facCarlos = new Factura("F-CAR-001", carlos.getUsername(), LocalDate.now().getMonthValue(), LocalDate.now().getYear());
+        Factura facCarlos = new Factura("F-CAR-001", carlos, LocalDate.now().getMonthValue(), LocalDate.now().getYear());
         // facCarlos.anadirCargo(new LineaFactura(LocalDate.now(), "Cuota Mensual Tarifa Plana VIP", "N/A", carlos.getPlanSuscripcion().getCuotaMensual()));
         fr.save(facCarlos);
 
@@ -153,7 +153,7 @@ public class AppFeeder implements CommandLineRunner {
         mariano.agregarSeriePendiente(lqsa); // La añade a su lista para verla después
         ur.save(mariano);
 
-        Factura facMariano = new Factura("F-MR-001", mariano.getUsername(), LocalDate.now().getMonthValue(), LocalDate.now().getYear());
+        Factura facMariano = new Factura("F-MR-001", mariano, LocalDate.now().getMonthValue(), LocalDate.now().getYear());
         // facMariano.anadirCargo(new LineaFactura(LocalDate.now(), prison.getTitulo(), "T1xC1", prison.getCosteVisionado()));
         fr.save(facMariano);
 
@@ -166,7 +166,7 @@ public class AppFeeder implements CommandLineRunner {
         cristiano.verCapitulo(peakyS1E2, null);
         ur.save(cristiano);
 
-        Factura facCR7 = new Factura("F-CR7-001", cristiano.getUsername(), LocalDate.now().getMonthValue(), LocalDate.now().getYear());
+        Factura facCR7 = new Factura("F-CR7-001", cristiano, LocalDate.now().getMonthValue(), LocalDate.now().getYear());
         // facCR7.anadirCargo(new LineaFactura(LocalDate.now(), peaky.getTitulo(), "T1xC1", peaky.getCosteVisionado()));
         // facCR7.anadirCargo(new LineaFactura(LocalDate.now(), peaky.getTitulo(), "T1xC2", peaky.getCosteVisionado()));
         fr.save(facCR7);
@@ -179,7 +179,7 @@ public class AppFeeder implements CommandLineRunner {
         pepe.agregarSeriePendiente(prison);
         ur.save(pepe);
 
-        Factura facPepe = new Factura("F-PEPE-001", pepe.getUsername(), LocalDate.now().getMonthValue(), LocalDate.now().getYear());
+        Factura facPepe = new Factura("F-PEPE-001", pepe, LocalDate.now().getMonthValue(), LocalDate.now().getYear());
         // facPepe.anadirCargo(new LineaFactura(LocalDate.now(), "Cuota Mensual Tarifa Plana", "N/A", pepe.getPlanSuscripcion().getCuotaMensual()));
         fr.save(facPepe);
     }
