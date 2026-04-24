@@ -1,0 +1,994 @@
+﻿========== src/main/java/es/unican/carlosalarcon/polaflix/controller/SerieController.java ==========
+package es.unican.carlosalarcon.polaflix.controller;
+
+import es.unican.carlosalarcon.polaflix.domain.Serie;
+import es.unican.carlosalarcon.polaflix.domain.Views;
+import es.unican.carlosalarcon.polaflix.service.SerieService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import com.fasterxml.jackson.annotation.JsonView;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/series")
+public class SerieController {
+
+    @Autowired
+    private SerieService serieService;
+
+    // =========================================================================
+    // GET /series - Devuelve el catÃ¡logo resumido (Soporta filtrado opcional)
+    // ÃšNICO MÃ‰TODO PARA LA RAÃZ /series
+    // =========================================================================
+    @GetMapping
+    @JsonView(Views.SerieResumida.class)
+    public ResponseEntity<List<Serie>> obtenerCatalogo(
+            @RequestParam(required = false) String inicial,
+            @RequestParam(required = false) String titulo) {
+        
+        // Regla de negocio de la API: Solo un filtro a la vez
+        if (inicial != null && titulo != null) {
+            return ResponseEntity.badRequest().build(); // 400 Bad Request
+        }
+
+        List<Serie> catalogo = serieService.obtenerSeries(inicial, titulo);
+        
+        if (!catalogo.isEmpty()) {
+            return ResponseEntity.ok(catalogo); // 200 OK
+        } else {
+            return ResponseEntity.noContent().build(); // 204 No Content
+        }
+    }
+
+    // =========================================================================
+    // GET /series/{id} - Devuelve la serie con todo lujo de detalles
+    // =========================================================================
+    @GetMapping("/{id}")
+    @JsonView(Views.SerieDetallada.class)
+    public ResponseEntity<Serie> obtenerDetalleSerie(@PathVariable("id") String id) {
+        Serie serie = serieService.obtenerSeriePorId(id);
+        
+        if (serie != null) {
+            return ResponseEntity.ok(serie); // 200 OK
+        } else {
+            return ResponseEntity.notFound().build(); // 404 Not Found
+        }
+    }
+}
+
+
+========== src/main/java/es/unican/carlosalarcon/polaflix/controller/UsuarioController.java ==========
+package es.unican.carlosalarcon.polaflix.controller;
+
+import es.unican.carlosalarcon.polaflix.domain.Usuario;
+import es.unican.carlosalarcon.polaflix.domain.Views;
+import es.unican.carlosalarcon.polaflix.service.UsuarioService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import com.fasterxml.jackson.annotation.JsonView;
+
+@RestController
+@RequestMapping("/usuarios")
+public class UsuarioController {
+
+    @Autowired
+    private UsuarioService usuarioService;
+
+    // =========================================================================
+    // GET /usuarios/{username} - Obtiene el perfil bÃ¡sico del usuario
+    // =========================================================================
+    @GetMapping("/{username}")
+    @JsonView(Views.UsuarioBasico.class)
+    public ResponseEntity<Usuario> obtenerUsuario(@PathVariable("username") String username) {
+        Usuario usuario = usuarioService.obtenerUsuario(username);
+        
+        if (usuario != null) {
+            return ResponseEntity.ok(usuario); 
+        } else {
+            return ResponseEntity.notFound().build(); 
+        }
+    }
+
+    // =========================================================================
+    // PUT /usuarios/{username}/capitulos-vistos/{idCapitulo} - Ve un capÃ­tulo
+    // =========================================================================
+    @PutMapping("/{username}/capitulos-vistos/{idCapitulo}")
+    public ResponseEntity<Void> verCapitulo(
+            @PathVariable("username") String username,
+            @PathVariable("idCapitulo") Long idCapitulo) {
+        
+        try {
+            usuarioService.verCapitulo(username, idCapitulo);
+            return ResponseEntity.ok().build();
+            
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+            
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build(); 
+        }
+    }
+
+    // =========================================================================
+    // PUT /usuarios/{username}/series-pendientes/{idSerie} - AÃ±ade a pendientes
+    // =========================================================================
+    @PutMapping("/{username}/series-pendientes/{idSerie}")
+    public ResponseEntity<Void> agregarSeriePendiente(
+            @PathVariable("username") String username,
+            @PathVariable("idSerie") String idSerie) {
+        
+        try {
+            usuarioService.agregarSeriePendiente(username, idSerie);
+            return ResponseEntity.ok().build();
+            
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+}
+
+
+========== src/main/java/es/unican/carlosalarcon/polaflix/domain/FacturaRepository.java ==========
+package es.unican.carlosalarcon.polaflix.domain;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
+
+public interface FacturaRepository extends JpaRepository<Factura, String> {
+    
+    Factura findByUsuarioUsernameAndMesAndAnio(String username, int mes, int anio);
+    
+    List<Factura> findByUsuarioUsernameOrderByAnioDescMesDesc(String username);
+}
+
+
+========== src/main/java/es/unican/carlosalarcon/polaflix/domain/SerieRepository.java ==========
+package es.unican.carlosalarcon.polaflix.domain;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+import java.util.Optional;
+
+public interface SerieRepository extends JpaRepository<Serie, String> {
+    List<Serie> findByInicialOrderByTituloAsc(char inicial);
+    List<Serie> findByTituloContainingIgnoreCase(String titulo);
+    @Query("SELECT s FROM Serie s JOIN s.temporadas t JOIN t.capitulos c WHERE c.id = :capituloId")
+    Optional<Serie> findSerieByCapituloId(@Param("capituloId") Long capituloId);
+}
+
+
+========== src/main/java/es/unican/carlosalarcon/polaflix/domain/UsuarioRepository.java ==========
+package es.unican.carlosalarcon.polaflix.domain;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
+    
+    // Spring Boot generarÃ¡ automÃ¡ticamente el cÃ³digo de esta consulta por nosotros
+    Usuario findByUsername(String username);
+}
+
+
+========== src/main/java/es/unican/carlosalarcon/polaflix/domain/Capitulo.java ==========
+package es.unican.carlosalarcon.polaflix.domain;
+
+import jakarta.persistence.*;
+import java.util.Objects;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonView;
+
+@Entity 
+@Table(name = "capitulos")
+public class Capitulo {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @JsonView(Views.SerieDetallada.class)
+    private Long id; 
+
+
+    @JsonView(Views.SerieDetallada.class)
+    private int numero;
+    @JsonView(Views.SerieDetallada.class)
+    private String titulo;
+    @JsonView(Views.SerieDetallada.class)
+    private String descripcion;
+    
+    @JsonBackReference
+    @ManyToOne
+    private Serie serie;
+
+    @JsonBackReference
+    @ManyToOne
+    private Temporada temporada;
+
+    protected Capitulo() {}
+
+    public Capitulo(int numero, String titulo, String descripcion) {
+        this.numero = numero;
+        this.titulo = titulo;
+        this.descripcion = descripcion;
+    }
+
+    public void setTemporada(Temporada temporada) { this.temporada = temporada; }
+    public Temporada getTemporada() { return temporada; }
+
+    public int getNumero() { return numero; }
+    public String getTitulo() { return titulo; }
+    public String getDescripcion() { return descripcion; }
+    public Long getId() { return id; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Capitulo capitulo = (Capitulo) o;
+        return numero == capitulo.numero;
+    }
+
+    @Override
+    public int hashCode() { return Objects.hash(numero); }
+}
+
+
+========== src/main/java/es/unican/carlosalarcon/polaflix/domain/CategoriaSerie.java ==========
+package es.unican.carlosalarcon.polaflix.domain;
+
+import java.util.Objects;
+
+public class CategoriaSerie {
+    // "Estandar", "Silver", "Gold"
+    private final String tipo; 
+    private final double costeVisionado;
+
+    public CategoriaSerie(String tipo, double costeVisionado) {
+        this.tipo = tipo;
+        this.costeVisionado = costeVisionado;
+    }
+
+    public double getCosteVisionado() { return costeVisionado; }
+    public String getTipo() { return tipo; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CategoriaSerie that = (CategoriaSerie) o;
+        return Double.compare(that.costeVisionado, costeVisionado) == 0 && 
+               Objects.equals(tipo, that.tipo);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(tipo, costeVisionado);
+    }
+}
+
+
+========== src/main/java/es/unican/carlosalarcon/polaflix/domain/EstadoSerie.java ==========
+package es.unican.carlosalarcon.polaflix.domain;
+
+public enum EstadoSerie {
+    PENDIENTE,
+    EMPEZADA,
+    TERMINADA
+}
+
+
+========== src/main/java/es/unican/carlosalarcon/polaflix/domain/Factura.java ==========
+package es.unican.carlosalarcon.polaflix.domain;
+
+import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonView;
+
+@Entity 
+@Table(name = "facturas")
+public class Factura {
+    
+    @Id
+    @JsonView(Views.UsuarioBasico.class)
+    private String id;
+    
+    @ManyToOne 
+    @JoinColumn(name = "usuario_id")
+    private Usuario usuario;
+    @JsonView(Views.UsuarioBasico.class)
+    private int mes;
+    @JsonView(Views.UsuarioBasico.class)
+    private int anio;
+    
+    @ElementCollection
+    @JsonView(Views.UsuarioBasico.class)
+    private List<LineaFactura> lineas = new ArrayList<>();
+
+    protected Factura() {} 
+
+    public Factura(String id, Usuario usuario, int mes, int anio) {
+        this.id = id;
+        this.usuario = usuario;
+        this.mes = mes;
+        this.anio = anio;
+    }
+
+    public Usuario getUsuario() { return usuario; }
+    public int getMes() { return mes; }
+    public int getAnio() { return anio; }
+    public String getId() { return id; }
+
+    public void anadirCargo(LineaFactura linea) {
+        this.lineas.add(linea);
+    }
+
+    // CORRECCIÃ“N: Propiedad derivada. Se calcula al vuelo en lugar de ocupar espacio y desincronizarse.
+    public double getImporteTotal() {
+        return lineas.stream().mapToDouble(LineaFactura::getCargo).sum();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Factura factura = (Factura) o;
+        return Objects.equals(id, factura.id);
+    }
+
+    @Override
+    public int hashCode() { return Objects.hash(id); }
+}
+
+
+========== src/main/java/es/unican/carlosalarcon/polaflix/domain/IBAN.java ==========
+package es.unican.carlosalarcon.polaflix.domain;
+
+import jakarta.persistence.*;
+import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonView;
+
+@Embeddable
+public class IBAN {
+    @JsonView(Views.UsuarioBasico.class)
+    private final String numeroCuenta;
+
+    protected IBAN() { 
+        this.numeroCuenta = null; 
+    }
+
+    public IBAN(String numeroCuenta) {
+        this.numeroCuenta = numeroCuenta;
+    }
+
+    public String getNumeroCuenta() { return numeroCuenta; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IBAN iban = (IBAN) o;
+        return Objects.equals(numeroCuenta, iban.numeroCuenta);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(numeroCuenta);
+    }
+}
+
+
+========== src/main/java/es/unican/carlosalarcon/polaflix/domain/LineaFactura.java ==========
+package es.unican.carlosalarcon.polaflix.domain;
+
+import jakarta.persistence.Embeddable;
+import java.time.LocalDate;
+import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonView;
+
+@Embeddable 
+public class LineaFactura {
+    
+    @JsonView(Views.UsuarioBasico.class)
+    private LocalDate fecha;
+    @JsonView(Views.UsuarioBasico.class)
+    private String serieNombre;
+    @JsonView(Views.UsuarioBasico.class)
+    private String temporadaCapitulo;
+    @JsonView(Views.UsuarioBasico.class)
+    private double cargo;
+
+    protected LineaFactura() {} 
+
+    public LineaFactura(LocalDate fecha, String serieNombre, String temporadaCapitulo, double cargo) {
+        this.fecha = fecha;
+        this.serieNombre = serieNombre;
+        this.temporadaCapitulo = temporadaCapitulo;
+        this.cargo = cargo;
+    }
+
+    public double getCargo() { return cargo; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        LineaFactura that = (LineaFactura) o;
+        return Double.compare(that.cargo, cargo) == 0 && 
+               Objects.equals(fecha, that.fecha) && 
+               Objects.equals(serieNombre, that.serieNombre) && 
+               Objects.equals(temporadaCapitulo, that.temporadaCapitulo);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(fecha, serieNombre, temporadaCapitulo, cargo);
+    }
+}
+
+
+========== src/main/java/es/unican/carlosalarcon/polaflix/domain/Persona.java ==========
+package es.unican.carlosalarcon.polaflix.domain;
+
+import jakarta.persistence.*;
+import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonView;
+
+@Entity
+@Table(name = "personas")
+public class Persona {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @JsonView(Views.SerieDetallada.class)
+    private Long id;
+
+    @JsonView(Views.SerieDetallada.class)
+    private String nombre;
+
+    protected Persona() {}
+
+    public Persona(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public String getNombre() { return nombre; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Persona persona = (Persona) o;
+        return Objects.equals(nombre, persona.nombre);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nombre);
+    }
+}
+
+
+========== src/main/java/es/unican/carlosalarcon/polaflix/domain/PlanSuscripcion.java ==========
+package es.unican.carlosalarcon.polaflix.domain;
+
+import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonView;
+
+import jakarta.persistence.*;
+
+@Embeddable
+public class PlanSuscripcion {
+    @JsonView(Views.UsuarioBasico.class)
+    private final boolean tarifaPlana;
+    @JsonView(Views.UsuarioBasico.class)
+    private final double cuotaMensual;
+
+    protected PlanSuscripcion() {
+        this.tarifaPlana = false;
+        this.cuotaMensual = 0.0;
+    }
+
+    public PlanSuscripcion(boolean tarifaPlana, double cuotaMensual) {
+        this.tarifaPlana = tarifaPlana;
+        this.cuotaMensual = cuotaMensual;
+    }
+
+    public boolean isTarifaPlana() { return tarifaPlana; }
+    public double getCuotaMensual() { return cuotaMensual; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PlanSuscripcion that = (PlanSuscripcion) o;
+        return tarifaPlana == that.tarifaPlana && Double.compare(that.cuotaMensual, cuotaMensual) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(tarifaPlana, cuotaMensual);
+    }
+}
+
+
+========== src/main/java/es/unican/carlosalarcon/polaflix/domain/Serie.java ==========
+package es.unican.carlosalarcon.polaflix.domain;
+
+import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.Objects;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+
+@Entity
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "categoria_serie", discriminatorType = DiscriminatorType.STRING)
+public abstract class Serie {
+    
+    @Id 
+    @JsonView(Views.SerieResumida.class)
+    private String id; 
+    @JsonView(Views.SerieResumida.class)
+    private String titulo;
+    @JsonView(Views.SerieResumida.class)
+    private char inicial;
+    
+    @Lob //TODO: Cambiar etiqueta: No usar large object: Consultarlo con Pablo
+    @JsonView(Views.SerieResumida.class)
+    private String sinopsis;
+    
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JsonView(Views.SerieDetallada.class)
+    private Set<Persona> creadores = new HashSet<>();
+    
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JsonView(Views.SerieDetallada.class)
+    private Set<Persona> actores = new HashSet<>();
+    
+    @JsonManagedReference
+    @OneToMany(mappedBy = "serie", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonView(Views.SerieDetallada.class)
+    private List<Temporada> temporadas = new ArrayList<>();
+    
+    protected Serie() {}
+
+    public Serie(String id, String titulo, String sinopsis, Persona creadorPrincipal) {
+        this.id = id;
+        this.titulo = titulo;
+        this.inicial = titulo.toUpperCase().charAt(0);
+        this.sinopsis = sinopsis;
+        this.creadores.add(creadorPrincipal);
+    }
+    
+    @JsonProperty("costeVisionado")
+    @JsonView(Views.SerieResumida.class)
+    public abstract double getCosteVisionado();
+
+    public Set<Persona> getActores() { return actores; }
+    public Set<Persona> getCreadores() { return creadores; }
+    public List<Temporada> getTemporadas() { return temporadas; }
+    public String getTitulo() { return titulo; }
+
+    public void addTemporada(Temporada temporada) {
+        this.temporadas.add(temporada);
+        temporada.setSerie(this);
+    }
+
+    public boolean esUltimoCapitulo(Capitulo c) {
+        if (temporadas.isEmpty()) return false;
+        Temporada ultimaTemp = temporadas.get(temporadas.size() - 1);
+        if (ultimaTemp.getCapitulos().isEmpty()) return false;
+        Capitulo ultimoCap = ultimaTemp.getCapitulos().get(ultimaTemp.getCapitulos().size() - 1);
+        return c.equals(ultimoCap);
+    }
+
+    @JsonProperty("categoria") 
+    @JsonView(Views.SerieResumida.class)
+    public String getCategoria() {
+        return this.getClass().getAnnotation(DiscriminatorValue.class).value();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Serie serie = (Serie) o;
+        return Objects.equals(id, serie.id);
+    }
+
+    @Override
+    public int hashCode() { return Objects.hash(id); }
+}
+
+
+========== src/main/java/es/unican/carlosalarcon/polaflix/domain/SerieEstandar.java ==========
+package es.unican.carlosalarcon.polaflix.domain;
+import jakarta.persistence.*;
+
+@Entity
+@DiscriminatorValue("ESTANDAR")
+public class SerieEstandar extends Serie {
+    protected SerieEstandar() {}
+    public SerieEstandar(String id, String titulo, String sinopsis, Persona creador) { super(id, titulo, sinopsis, creador); }
+    @Override public double getCosteVisionado() { return 0.50; }
+}
+
+
+========== src/main/java/es/unican/carlosalarcon/polaflix/domain/SerieGold.java ==========
+package es.unican.carlosalarcon.polaflix.domain;
+import jakarta.persistence.*;
+
+@Entity
+@DiscriminatorValue("GOLD")
+public class SerieGold extends Serie {
+    protected SerieGold() {}
+    public SerieGold(String id, String titulo, String sinopsis, Persona creador) { super(id, titulo, sinopsis, creador); }
+    @Override public double getCosteVisionado() { return 1.50; }
+}
+
+
+========== src/main/java/es/unican/carlosalarcon/polaflix/domain/SerieSilver.java ==========
+package es.unican.carlosalarcon.polaflix.domain;
+import jakarta.persistence.*;
+
+@Entity
+@DiscriminatorValue("SILVER")
+public class SerieSilver extends Serie {
+    protected SerieSilver() {}
+    public SerieSilver(String id, String titulo, String sinopsis, Persona creador) { super(id, titulo, sinopsis, creador); }
+    @Override public double getCosteVisionado() { return 0.75; }
+}
+
+
+========== src/main/java/es/unican/carlosalarcon/polaflix/domain/Temporada.java ==========
+package es.unican.carlosalarcon.polaflix.domain;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonView;
+
+@Entity 
+@Table(name = "temporadas")
+public class Temporada {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @JsonView(Views.SerieDetallada.class)
+    private Long id; 
+
+
+    @JsonView(Views.SerieDetallada.class)
+    private String titulo;
+
+    @JsonView(Views.SerieDetallada.class)
+    private int numero;
+
+    @JsonView(Views.SerieDetallada.class)
+    private String descripcion;
+
+    @JsonBackReference
+    @ManyToOne
+    private Serie serie;
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "temporada", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonView(Views.SerieDetallada.class)
+    private List<Capitulo> capitulos = new ArrayList<>();
+
+    protected Temporada() {}
+
+    // 1. El constructor se queda solo con el nÃºmero (como estaba originalmente)
+    public Temporada(int numero) {
+        this.numero = numero;
+    }
+
+    // 2. Modificamos el setter para que genere el tÃ­tulo automÃ¡ticamente cuando se enlaza
+    public void setSerie(Serie serie) { 
+        this.serie = serie; 
+        
+        // Ahora sÃ­ podemos acceder a serie.getTitulo() porque ya no es null
+        if (this.titulo == null) {
+            this.titulo = "Temporada " + this.numero + " de " + serie.getTitulo();
+        }
+        if (this.descripcion == null) {
+            this.descripcion = "DescripciÃ³n pendiente..."; // Un valor por defecto
+        }
+    }
+    public Serie getSerie() { return serie; }
+
+    public void addCapitulo(Capitulo capitulo) {
+        this.capitulos.add(capitulo);
+        capitulo.setTemporada(this);
+    }
+
+    public List<Capitulo> getCapitulos() { return capitulos; }
+    public int getNumero() { return numero; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Temporada temporada = (Temporada) o;
+        return numero == temporada.numero;
+    }
+
+    @Override
+    public int hashCode() { return Objects.hash(numero); }
+}
+
+
+========== src/main/java/es/unican/carlosalarcon/polaflix/domain/Usuario.java ==========
+package es.unican.carlosalarcon.polaflix.domain;
+
+import jakarta.persistence.*;
+import java.util.HashSet;
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+
+@Entity
+@Table(name = "usuario")
+public class Usuario {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    private Long id;
+
+    @Column(unique = true, nullable = false)
+    @JsonView(Views.UsuarioBasico.class)
+    private String username;
+    private String contrasenha;
+
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
+    @JsonView(Views.UsuarioBasico.class)
+    private Set<Factura> facturas = new HashSet<>();
+    
+    @Embedded
+    @JsonView(Views.UsuarioBasico.class)
+    private IBAN iban;
+    @Embedded
+    @JsonView(Views.UsuarioBasico.class)
+    private PlanSuscripcion planSuscripcion;
+    
+    @ElementCollection
+    @MapKeyJoinColumn(name = "serie_id")
+    @Enumerated(EnumType.STRING)
+    private Map<Serie, EstadoSerie> estadoSeries = new HashMap<>();
+    
+    @ManyToMany
+    @JsonView(Views.UsuarioBasico.class)
+    private Set<Capitulo> capitulosVistos = new HashSet<>();
+
+    @ManyToMany
+    @MapKeyJoinColumn(name = "serie_id")
+    private Map<Serie, Capitulo> ultimoCapituloVisto = new HashMap<>();
+
+    protected Usuario() {}
+
+    public Usuario(String username, String contrasenha, IBAN iban, PlanSuscripcion planSuscripcion) {
+        this.username = username;
+        this.contrasenha = contrasenha;
+        this.iban = iban;
+        this.planSuscripcion = planSuscripcion;
+    }
+
+    public Long getId() { return id; }
+    public String getUsername() { return username; }
+    public PlanSuscripcion getPlanSuscripcion() { return planSuscripcion; }
+
+    
+    public void agregarSeriePendiente(Serie serie) {
+        if (!this.estadoSeries.containsKey(serie)) {
+            this.estadoSeries.put(serie, EstadoSerie.PENDIENTE);
+        }
+    }
+
+    public void verCapitulo(Capitulo capitulo, Factura facturaActual) {
+        Serie serie = capitulo.getTemporada().getSerie();
+        
+        this.capitulosVistos.add(capitulo);
+
+        // Solo actualiz si el capÃ­tulo es "mÃ¡s avanzado"
+        Capitulo ultimoVisto = this.ultimoCapituloVisto.get(serie);
+        if (ultimoVisto == null) {
+            this.ultimoCapituloVisto.put(serie, capitulo);
+        } else {
+            int tempNuevo = capitulo.getTemporada().getNumero();
+            int capNuevo = capitulo.getNumero();
+            int tempViejo = ultimoVisto.getTemporada().getNumero();
+            int capViejo = ultimoVisto.getNumero();
+
+            
+            if (tempNuevo > tempViejo || (tempNuevo == tempViejo && capNuevo > capViejo)) {
+                this.ultimoCapituloVisto.put(serie, capitulo);
+            }
+        }
+
+        if (serie.esUltimoCapitulo(capitulo)) {
+            this.estadoSeries.put(serie, EstadoSerie.TERMINADA);
+        } else {
+            this.estadoSeries.put(serie, EstadoSerie.EMPEZADA);
+        }
+
+        
+        if (!this.planSuscripcion.isTarifaPlana() && facturaActual != null && serie.getCosteVisionado() > 0) {
+            String tempCap = "T" + capitulo.getTemporada().getNumero() + "xC" + capitulo.getNumero();
+            facturaActual.anadirCargo(new LineaFactura(LocalDate.now(), serie.getTitulo(), tempCap, serie.getCosteVisionado()));
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Usuario usuario = (Usuario) o;
+        return Objects.equals(username, usuario.username);
+    }
+
+    @Override
+    public int hashCode() { return Objects.hash(username); }
+
+    @JsonProperty("estadoSeries")
+    @JsonView(Views.UsuarioBasico.class) 
+    public Map<String, EstadoSerie> getEstadoSeriesParaJson() {
+        Map<String, EstadoSerie> formatoLimpio = new HashMap<>();
+        for (Map.Entry<Serie, EstadoSerie> entrada : estadoSeries.entrySet()) {
+            formatoLimpio.put(entrada.getKey().getTitulo(), entrada.getValue());
+        }
+        return formatoLimpio;
+    }
+}
+
+
+========== src/main/java/es/unican/carlosalarcon/polaflix/domain/Views.java ==========
+package es.unican.carlosalarcon.polaflix.domain;
+
+public class Views {
+    
+    // Vista bÃ¡sica: Ideal para devolver listas grandes sin saturar la red
+    public static interface SerieResumida {}
+    
+    // Vista profunda: Hereda de la resumida (incluye lo anterior) y aÃ±ade detalles pesados
+    public static interface SerieDetallada extends SerieResumida {}
+    
+    // Vista para el perfil del usuario
+    public static interface UsuarioBasico {}
+}
+
+
+========== src/main/java/es/unican/carlosalarcon/polaflix/service/SerieService.java ==========
+package es.unican.carlosalarcon.polaflix.service;
+
+import es.unican.carlosalarcon.polaflix.domain.Serie;
+import es.unican.carlosalarcon.polaflix.domain.SerieRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+public class SerieService {
+
+    @Autowired
+    private SerieRepository serieRepository;
+
+    // =========================================================================
+    // Obtener catÃ¡logo (Con soporte para filtrado opcional)
+    // =========================================================================
+    @Transactional(readOnly = true)
+    public List<Serie> obtenerSeries(String inicial, String titulo) {
+        if (inicial != null && !inicial.isEmpty()) {
+            return serieRepository.findByInicialOrderByTituloAsc(inicial.charAt(0));
+        } else if (titulo != null && !titulo.isEmpty()) {
+            return serieRepository.findByTituloContainingIgnoreCase(titulo);
+        }
+        // Si no hay parÃ¡metros, devuelve todo
+        return serieRepository.findAll();
+    }
+
+    // =========================================================================
+    // Obtener una serie especÃ­fica por su ID
+    // =========================================================================
+    @Transactional(readOnly = true)
+    public Serie obtenerSeriePorId(String idSerie) {
+        return serieRepository.findById(idSerie).orElse(null);
+    }
+}
+
+
+========== src/main/java/es/unican/carlosalarcon/polaflix/service/UsuarioService.java ==========
+package es.unican.carlosalarcon.polaflix.service;
+
+import es.unican.carlosalarcon.polaflix.domain.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+
+@Service
+public class UsuarioService {
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private SerieRepository serieRepository;
+
+    @Autowired
+    private FacturaRepository facturaRepository;
+
+    @Transactional(readOnly = true)
+    public Usuario obtenerUsuario(String username) {
+        return usuarioRepository.findByUsername(username);
+    }
+
+    @Transactional
+    public void agregarSeriePendiente(String username, String serieId) {
+        Usuario usuario = usuarioRepository.findByUsername(username);
+        Serie serie = serieRepository.findById(serieId)
+                .orElseThrow(() -> new IllegalArgumentException("Serie no encontrada con ID: " + serieId));
+
+        usuario.agregarSeriePendiente(serie);
+    }
+
+    @Transactional
+    public void verCapitulo(String username, Long idCapitulo) {
+        
+        Usuario usuario = usuarioRepository.findByUsername(username);
+        if (usuario == null) throw new IllegalArgumentException("Usuario no encontrado: " + username);
+
+        Serie serie = serieRepository.findSerieByCapituloId(idCapitulo)
+                .orElseThrow(() -> new IllegalArgumentException("CapÃ­tulo no encontrado con ID: " + idCapitulo));
+                
+        Capitulo capitulo = serie.getTemporadas().stream()
+                .flatMap(t -> t.getCapitulos().stream())
+                .filter(c -> c.getId().equals(idCapitulo))
+                .findFirst().orElseThrow();
+
+        Factura factura = null;
+        if (!usuario.getPlanSuscripcion().isTarifaPlana() && serie.getCosteVisionado() > 0) {
+            int mesActual = LocalDate.now().getMonthValue();
+            int anioActual = LocalDate.now().getYear();
+            factura = facturaRepository.findByUsuarioUsernameAndMesAndAnio(username, mesActual, anioActual);
+            
+            if (factura == null) {
+                String idFactura = "F-" + usuario.getUsername() + "-" + mesActual + "-" + anioActual;
+                factura = new Factura(idFactura, usuario, mesActual, anioActual);
+            }
+        }
+
+        usuario.verCapitulo(capitulo, factura);
+        
+        if (factura != null) {
+            facturaRepository.save(factura);
+        }
+    }
+}
+
+

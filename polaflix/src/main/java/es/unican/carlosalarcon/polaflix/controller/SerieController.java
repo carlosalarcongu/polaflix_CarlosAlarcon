@@ -3,6 +3,8 @@ package es.unican.carlosalarcon.polaflix.controller;
 import es.unican.carlosalarcon.polaflix.domain.Serie;
 import es.unican.carlosalarcon.polaflix.domain.Views;
 import es.unican.carlosalarcon.polaflix.service.SerieService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,47 +14,42 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/series")
+@Tag(name = "Series", description = "API para la gestión y consulta del catálogo de series")
 public class SerieController {
 
     @Autowired
     private SerieService serieService;
 
-    // =========================================================================
-    // GET /series - Devuelve el catálogo resumido (Soporta filtrado opcional)
-    // ÚNICO MÉTODO PARA LA RAÍZ /series
-    // =========================================================================
     @GetMapping
     @JsonView(Views.SerieResumida.class)
+    @Operation(summary = "Obtener catálogo", description = "Devuelve el catálogo de series. Permite filtrar por inicial o por fragmento de título (solo uno a la vez).")
     public ResponseEntity<List<Serie>> obtenerCatalogo(
             @RequestParam(required = false) String inicial,
             @RequestParam(required = false) String titulo) {
         
-        // Regla de negocio de la API: Solo un filtro a la vez
         if (inicial != null && titulo != null) {
-            return ResponseEntity.badRequest().build(); // 400 Bad Request
+            return ResponseEntity.badRequest().build(); 
         }
 
         List<Serie> catalogo = serieService.obtenerSeries(inicial, titulo);
         
         if (!catalogo.isEmpty()) {
-            return ResponseEntity.ok(catalogo); // 200 OK
+            return ResponseEntity.ok(catalogo); 
         } else {
-            return ResponseEntity.noContent().build(); // 204 No Content
+            return ResponseEntity.noContent().build(); 
         }
     }
 
-    // =========================================================================
-    // GET /series/{id} - Devuelve la serie con todo lujo de detalles
-    // =========================================================================
     @GetMapping("/{id}")
     @JsonView(Views.SerieDetallada.class)
+    @Operation(summary = "Obtener detalle de serie", description = "Devuelve los detalles completos de una serie, incluyendo temporadas, capítulos y actores.")
     public ResponseEntity<Serie> obtenerDetalleSerie(@PathVariable("id") String id) {
         Serie serie = serieService.obtenerSeriePorId(id);
         
         if (serie != null) {
-            return ResponseEntity.ok(serie); // 200 OK
+            return ResponseEntity.ok(serie); 
         } else {
-            return ResponseEntity.notFound().build(); // 404 Not Found
+            return ResponseEntity.notFound().build();
         }
     }
 }
