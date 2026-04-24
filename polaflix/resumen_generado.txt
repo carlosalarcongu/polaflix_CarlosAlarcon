@@ -4,6 +4,8 @@ package es.unican.carlosalarcon.polaflix.controller;
 import es.unican.carlosalarcon.polaflix.domain.Serie;
 import es.unican.carlosalarcon.polaflix.domain.Views;
 import es.unican.carlosalarcon.polaflix.service.SerieService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,47 +15,42 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/series")
+@Tag(name = "Series", description = "API para la gestiÃ³n y consulta del catÃ¡logo de series")
 public class SerieController {
 
     @Autowired
     private SerieService serieService;
 
-    // =========================================================================
-    // GET /series - Devuelve el catÃ¡logo resumido (Soporta filtrado opcional)
-    // ÃšNICO MÃ‰TODO PARA LA RAÃZ /series
-    // =========================================================================
     @GetMapping
     @JsonView(Views.SerieResumida.class)
+    @Operation(summary = "Obtener catÃ¡logo", description = "Devuelve el catÃ¡logo de series. Permite filtrar por inicial o por fragmento de tÃ­tulo (solo uno a la vez).")
     public ResponseEntity<List<Serie>> obtenerCatalogo(
             @RequestParam(required = false) String inicial,
             @RequestParam(required = false) String titulo) {
         
-        // Regla de negocio de la API: Solo un filtro a la vez
         if (inicial != null && titulo != null) {
-            return ResponseEntity.badRequest().build(); // 400 Bad Request
+            return ResponseEntity.badRequest().build(); 
         }
 
         List<Serie> catalogo = serieService.obtenerSeries(inicial, titulo);
         
         if (!catalogo.isEmpty()) {
-            return ResponseEntity.ok(catalogo); // 200 OK
+            return ResponseEntity.ok(catalogo); 
         } else {
-            return ResponseEntity.noContent().build(); // 204 No Content
+            return ResponseEntity.noContent().build(); 
         }
     }
 
-    // =========================================================================
-    // GET /series/{id} - Devuelve la serie con todo lujo de detalles
-    // =========================================================================
     @GetMapping("/{id}")
     @JsonView(Views.SerieDetallada.class)
+    @Operation(summary = "Obtener detalle de serie", description = "Devuelve los detalles completos de una serie, incluyendo temporadas, capÃ­tulos y actores.")
     public ResponseEntity<Serie> obtenerDetalleSerie(@PathVariable("id") String id) {
         Serie serie = serieService.obtenerSeriePorId(id);
         
         if (serie != null) {
-            return ResponseEntity.ok(serie); // 200 OK
+            return ResponseEntity.ok(serie); 
         } else {
-            return ResponseEntity.notFound().build(); // 404 Not Found
+            return ResponseEntity.notFound().build();
         }
     }
 }
@@ -65,6 +62,8 @@ package es.unican.carlosalarcon.polaflix.controller;
 import es.unican.carlosalarcon.polaflix.domain.Usuario;
 import es.unican.carlosalarcon.polaflix.domain.Views;
 import es.unican.carlosalarcon.polaflix.service.UsuarioService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -72,16 +71,15 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 @RestController
 @RequestMapping("/usuarios")
+@Tag(name = "Usuarios", description = "API para las acciones del usuario (perfil, ver capÃ­tulos, aÃ±adir pendientes)")
 public class UsuarioController {
 
     @Autowired
     private UsuarioService usuarioService;
 
-    // =========================================================================
-    // GET /usuarios/{username} - Obtiene el perfil bÃ¡sico del usuario
-    // =========================================================================
     @GetMapping("/{username}")
     @JsonView(Views.UsuarioBasico.class)
+    @Operation(summary = "Obtener perfil de usuario", description = "Devuelve los datos del usuario, su plan y el estado de sus series.")
     public ResponseEntity<Usuario> obtenerUsuario(@PathVariable("username") String username) {
         Usuario usuario = usuarioService.obtenerUsuario(username);
         
@@ -92,40 +90,31 @@ public class UsuarioController {
         }
     }
 
-    // =========================================================================
-    // PUT /usuarios/{username}/capitulos-vistos/{idCapitulo} - Ve un capÃ­tulo
-    // =========================================================================
     @PutMapping("/{username}/capitulos-vistos/{idCapitulo}")
+    @Operation(summary = "Marcar capÃ­tulo como visto", description = "Registra que un usuario ha visto un capÃ­tulo y genera cargos en su factura si corresponde.")
     public ResponseEntity<Void> verCapitulo(
             @PathVariable("username") String username,
             @PathVariable("idCapitulo") Long idCapitulo) {
-        
         try {
             usuarioService.verCapitulo(username, idCapitulo);
-            return ResponseEntity.ok().build();
-            
+            return ResponseEntity.ok().build(); 
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
-            
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build(); 
         }
     }
 
-    // =========================================================================
-    // PUT /usuarios/{username}/series-pendientes/{idSerie} - AÃ±ade a pendientes
-    // =========================================================================
     @PutMapping("/{username}/series-pendientes/{idSerie}")
+    @Operation(summary = "AÃ±adir a pendientes", description = "AÃ±ade una serie al catÃ¡logo personal del usuario en estado PENDIENTE.")
     public ResponseEntity<Void> agregarSeriePendiente(
             @PathVariable("username") String username,
             @PathVariable("idSerie") String idSerie) {
-        
         try {
             usuarioService.agregarSeriePendiente(username, idSerie);
-            return ResponseEntity.ok().build();
-            
+            return ResponseEntity.ok().build(); 
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.notFound().build(); 
         }
     }
 }
@@ -181,6 +170,7 @@ package es.unican.carlosalarcon.polaflix.domain;
 import jakarta.persistence.*;
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 
 @Entity 
@@ -189,22 +179,24 @@ public class Capitulo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    @JsonView(Views.SerieDetallada.class)
+    @JsonView({Views.SerieDetallada.class, Views.UsuarioBasico.class})
     private Long id; 
 
 
-    @JsonView(Views.SerieDetallada.class)
+    @JsonView({Views.SerieDetallada.class, Views.UsuarioBasico.class})
     private int numero;
-    @JsonView(Views.SerieDetallada.class)
+    @JsonView({Views.SerieDetallada.class, Views.UsuarioBasico.class})
     private String titulo;
-    @JsonView(Views.SerieDetallada.class)
+    @JsonView({Views.SerieDetallada.class, Views.UsuarioBasico.class})
     private String descripcion;
     
     @JsonBackReference
+    @JsonIgnore
     @ManyToOne
     private Serie serie;
 
     @JsonBackReference
+    @JsonIgnore
     @ManyToOne
     private Temporada temporada;
 
@@ -229,11 +221,13 @@ public class Capitulo {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Capitulo capitulo = (Capitulo) o;
-        return numero == capitulo.numero;
+        return Objects.equals(id, capitulo.id);
     }
 
     @Override
-    public int hashCode() { return Objects.hash(numero); }
+    public int hashCode() { 
+        return Objects.hash(id); 
+    }
 }
 
 
@@ -728,11 +722,13 @@ public class Temporada {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Temporada temporada = (Temporada) o;
-        return numero == temporada.numero;
+        return Objects.equals(id, temporada.id);
     }
 
     @Override
-    public int hashCode() { return Objects.hash(numero); }
+    public int hashCode() { 
+        return Objects.hash(id); 
+    }
 }
 
 

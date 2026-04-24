@@ -61,10 +61,27 @@ public class Usuario {
     public String getUsername() { return username; }
     public PlanSuscripcion getPlanSuscripcion() { return planSuscripcion; }
 
+    public void actualizarDatos(String nuevaContrasena, IBAN nuevoIban, PlanSuscripcion nuevoPlan) {
+        if (nuevaContrasena != null && !nuevaContrasena.isEmpty()) {
+            this.contrasenha = nuevaContrasena;
+        }
+        if (nuevoIban != null) {
+            this.iban = nuevoIban;
+        }
+        if (nuevoPlan != null) {
+            this.planSuscripcion = nuevoPlan;
+        }
+    }
     
     public void agregarSeriePendiente(Serie serie) {
         if (!this.estadoSeries.containsKey(serie)) {
             this.estadoSeries.put(serie, EstadoSerie.PENDIENTE);
+        }
+    }
+
+    public void quitarSeriePendiente(Serie serie) {
+        if (EstadoSerie.PENDIENTE.equals(this.estadoSeries.get(serie))) {
+            this.estadoSeries.remove(serie);
         }
     }
 

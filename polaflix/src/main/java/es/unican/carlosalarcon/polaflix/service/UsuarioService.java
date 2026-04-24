@@ -25,8 +25,37 @@ public class UsuarioService {
     }
 
     @Transactional
+    public Usuario guardarOActualizarUsuario(String username, String contrasena, String ibanStr, boolean esTarifaPlana, double cuota) {
+        Usuario usuario = usuarioRepository.findByUsername(username);
+        
+        IBAN nuevoIban = new IBAN(ibanStr);
+        PlanSuscripcion nuevoPlan = new PlanSuscripcion(esTarifaPlana, cuota);
+
+        if (usuario == null) {
+            usuario = new Usuario(username, contrasena, nuevoIban, nuevoPlan);
+            usuarioRepository.save(usuario);
+        } else {
+            usuario.actualizarDatos(contrasena, nuevoIban, nuevoPlan);
+        }
+        
+        return usuario;
+    }
+
+    @Transactional
+    public void borrarUsuario(String username) {
+        Usuario usuario = usuarioRepository.findByUsername(username);
+        if (usuario != null) {
+            usuarioRepository.delete(usuario);
+        } else {
+            throw new IllegalArgumentException("El usuario a borrar no existe.");
+        }
+    }
+
+    @Transactional
     public void agregarSeriePendiente(String username, String serieId) {
         Usuario usuario = usuarioRepository.findByUsername(username);
+        if (usuario == null) throw new IllegalArgumentException("Usuario no encontrado.");
+        
         Serie serie = serieRepository.findById(serieId)
                 .orElseThrow(() -> new IllegalArgumentException("Serie no encontrada con ID: " + serieId));
 
@@ -34,8 +63,18 @@ public class UsuarioService {
     }
 
     @Transactional
-    public void verCapitulo(String username, Long idCapitulo) {
+    public void quitarSeriePendiente(String username, String serieId) {
+        Usuario usuario = usuarioRepository.findByUsername(username);
+        if (usuario == null) throw new IllegalArgumentException("Usuario no encontrado.");
         
+        Serie serie = serieRepository.findById(serieId)
+                .orElseThrow(() -> new IllegalArgumentException("Serie no encontrada con ID: " + serieId));
+
+        usuario.quitarSeriePendiente(serie);
+    }
+
+    @Transactional
+    public void verCapitulo(String username, Long idCapitulo) {
         Usuario usuario = usuarioRepository.findByUsername(username);
         if (usuario == null) throw new IllegalArgumentException("Usuario no encontrado: " + username);
 

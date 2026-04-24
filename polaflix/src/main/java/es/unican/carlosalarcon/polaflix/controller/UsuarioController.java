@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 @RestController
 @RequestMapping("/usuarios")
-@Tag(name = "Usuarios", description = "API para las acciones del usuario (perfil, ver capítulos, añadir pendientes)")
+@Tag(name = "Usuarios", description = "API para las acciones del usuario (perfil, ver capítulos, añadir/quitar pendientes, registro)")
 public class UsuarioController {
 
     @Autowired
@@ -28,6 +28,34 @@ public class UsuarioController {
             return ResponseEntity.ok(usuario); 
         } else {
             return ResponseEntity.notFound().build(); 
+        }
+    }
+
+    @PutMapping("/{username}")
+    @JsonView(Views.UsuarioBasico.class)
+    @Operation(summary = "Crear o actualizar usuario", description = "Si el usuario no existe, lo crea (Registro). Si existe, actualiza sus datos.")
+    public ResponseEntity<Usuario> guardarOActualizarUsuario(
+            @PathVariable("username") String username,
+            @RequestParam String contrasena,
+            @RequestParam String iban,
+            @RequestParam boolean esTarifaPlana,
+            @RequestParam double cuota) {
+        try {
+            Usuario usuarioActualizado = usuarioService.guardarOActualizarUsuario(username, contrasena, iban, esTarifaPlana, cuota);
+            return ResponseEntity.ok(usuarioActualizado);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @DeleteMapping("/{username}")
+    @Operation(summary = "Borrar usuario", description = "Elimina permanentemente una cuenta de usuario del sistema.")
+    public ResponseEntity<Void> borrarUsuario(@PathVariable("username") String username) {
+        try {
+            usuarioService.borrarUsuario(username);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -53,6 +81,19 @@ public class UsuarioController {
             @PathVariable("idSerie") String idSerie) {
         try {
             usuarioService.agregarSeriePendiente(username, idSerie);
+            return ResponseEntity.ok().build(); 
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build(); 
+        }
+    }
+
+    @DeleteMapping("/{username}/series-pendientes/{idSerie}")
+    @Operation(summary = "Quitar de pendientes", description = "Elimina una serie de la lista del usuario (solo si está en estado PENDIENTE).")
+    public ResponseEntity<Void> quitarSeriePendiente(
+            @PathVariable("username") String username,
+            @PathVariable("idSerie") String idSerie) {
+        try {
+            usuarioService.quitarSeriePendiente(username, idSerie);
             return ResponseEntity.ok().build(); 
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build(); 
