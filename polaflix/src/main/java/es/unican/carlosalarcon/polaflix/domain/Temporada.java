@@ -70,9 +70,11 @@ public class Temporada {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Temporada temporada = (Temporada) o;
-        return numero == temporada.numero;
+        return Objects.equals(id, temporada.id);
     }
 
     @Override
-    public int hashCode() { return Objects.hash(numero); }
+    public int hashCode() { 
+        return Objects.hash(id); 
+    }
 }
