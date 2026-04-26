@@ -2,8 +2,33 @@
     <div class="login-box">
         <img src="images/polaflix-logo.png" class="login-logo" alt="Polaflix Logo">
         
-        <input type="text" class="login-input" ng-model="$ctrl.username" placeholder="Introduce tu usuario (ej: cr7bicho)">
-        
-        <button class="login-btn" ng-click="$ctrl.entrar()">ENTRAR AL SISTEMA</button>
+        <p ng-if="$ctrl.mensaje" class="error">{{$ctrl.mensaje}}</p>
+
+        <div ng-if="!$ctrl.modoRegistro">
+            <input type="text" class="login-input" ng-model="$ctrl.username" placeholder="Introduce tu usuario">
+            <button class="login-btn" ng-click="$ctrl.entrar()">ENTRAR AL SISTEMA</button>
+            <p style="margin-top: 20px; color: #888;">
+                ¿No tienes cuenta? <a href="" ng-click="$ctrl.toggleModo()" style="color: var(--pola-red);">Regístrate aquí</a>
+            </p>
+        </div>
+
+        <div ng-if="$ctrl.modoRegistro">
+            <input type="text" class="login-input" ng-model="$ctrl.username" placeholder="Nuevo Usuario">
+            <input type="password" class="login-input" ng-model="$ctrl.password" placeholder="Contraseña">
+            <input type="text" class="login-input" ng-model="$ctrl.iban" placeholder="IBAN (ej: ES123...)">
+            
+            <div style="text-align: left; margin-bottom: 20px; color: #ccc;">
+                <label>
+                    <input type="checkbox" ng-model="$ctrl.esVip"> 
+                    Quiero Tarifa Plana VIP (20€/mes)
+                </label>
+            </div>
+
+            <button class="login-btn" ng-click="$ctrl.registrar()">CREAR CUENTA</button>
+            <p style="margin-top: 20px; color: #888;">
+                <a href="" ng-click="$ctrl.toggleModo()" style="color: #ccc;">Volver al Login</a>
+            </p>
+        </div>
+
     </div>
 </div>

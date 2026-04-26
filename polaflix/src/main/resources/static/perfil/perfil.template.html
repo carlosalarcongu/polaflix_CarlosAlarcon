@@ -1,20 +1,38 @@
 <div ng-if="$ctrl.usuario" class="fade-in">
-    <h2>Perfil de {{$ctrl.usuario.username}}</h2>
-    <div style="background: #222; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2>Perfil de {{$ctrl.usuario.username}}</h2>
+        <button class="btn-secondary" ng-click="$ctrl.editando = !$ctrl.editando">
+            {{$ctrl.editando ? 'Cancelar Edición' : 'Editar Perfil'}}
+        </button>
+    </div>
+
+    <div ng-if="!$ctrl.editando" style="background: #222; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
         <p><strong>Plan de Suscripción:</strong> {{$ctrl.usuario.planSuscripcion.tarifaPlana ? 'Tarifa Plana VIP' : 'Pago por Visión'}}</p>
         <p><strong>IBAN:</strong> {{$ctrl.usuario.iban.numeroCuenta}}</p>
+        <button class="btn-primary" style="background-color: darkred; margin-top: 15px;" ng-click="$ctrl.borrarCuenta()">Eliminar Cuenta Permanente</button>
+    </div>
+
+    <div ng-if="$ctrl.editando" style="background: #333; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+        <h3>Actualizar Datos</h3>
+        <p><input type="password" class="login-input" ng-model="$ctrl.form.password" placeholder="Nueva Contraseña (Opcional)"></p>
+        <p><input type="text" class="login-input" ng-model="$ctrl.form.iban" placeholder="Nuevo IBAN"></p>
+        <p><label><input type="checkbox" ng-model="$ctrl.form.esVip"> Tarifa Plana VIP</label></p>
+        <button class="btn-primary" ng-click="$ctrl.guardarCambios()">Guardar Cambios</button>
     </div>
 
     <h3>Resumen de tus Series</h3>
-    <ul style="font-size: 1.1em; line-height: 1.8;">
-        <li ng-repeat="(titulo, estado) in $ctrl.usuario.estadoSeries">
-            <strong>{{titulo}}</strong>: 
-            <span ng-class="{
-                'success': estado === 'TERMINADA', 
-                'error': estado === 'PENDIENTE', 
-                'info': estado === 'EMPEZADA'
-            }">{{estado}}</span>
+    <ul style="font-size: 1.1em; line-height: 1.8; list-style: none; padding: 0;">
+        <li ng-repeat="(titulo, estado) in $ctrl.usuario.estadoSeries" style="margin-bottom: 15px; display: flex; align-items: center; gap: 15px;">
+            <strong style="width: 200px;">{{titulo}}</strong>
+            
+            <span class="badge" ng-class="{
+                'badge-terminada': estado === 'TERMINADA', 
+                'badge-pendiente': estado === 'PENDIENTE', 
+                'badge-empezada': estado === 'EMPEZADA'
+            }" style="position: relative; top: 0; right: 0;">{{estado}}</span>
+
+            <button ng-if="estado === 'PENDIENTE'" class="btn-secondary" style="font-size: 0.8em; padding: 5px 10px;" ng-click="$ctrl.quitarPendiente(titulo)">❌ Quitar</button>
         </li>
     </ul>
-    <p ng-if="!$ctrl.usuario.estadoSeries">Aún no tienes actividad en tu cuenta.</p>
+    <p ng-if="!$ctrl.usuario.estadoSeries || ($ctrl.usuario.estadoSeries | json) == '{}'">Aún no tienes actividad en tu cuenta.</p>
 </div>
