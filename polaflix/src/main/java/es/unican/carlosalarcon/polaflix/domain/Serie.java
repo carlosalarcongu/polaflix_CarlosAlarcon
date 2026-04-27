@@ -54,6 +54,7 @@ public abstract class Serie {
     @JsonView(Views.SerieResumida.class)
     public abstract double getCosteVisionado();
 
+    public String getId() { return id; }
     public Set<Persona> getActores() { return actores; }
     public Set<Persona> getCreadores() { return creadores; }
     public List<Temporada> getTemporadas() { return temporadas; }

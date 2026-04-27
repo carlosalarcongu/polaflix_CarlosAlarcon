@@ -36,17 +36,17 @@ public class Usuario {
     private PlanSuscripcion planSuscripcion;
     
     @ElementCollection
-    @MapKeyJoinColumn(name = "serie_id")
+    @MapKeyColumn(name = "serie_id")
     @Enumerated(EnumType.STRING)
-    private Map<Serie, EstadoSerie> estadoSeries = new HashMap<>();
+    private Map<String, EstadoSerie> estadoSeries = new HashMap<>();
     
     @ManyToMany
     @JsonView(Views.UsuarioBasico.class)
     private Set<Capitulo> capitulosVistos = new HashSet<>();
 
     @ManyToMany
-    @MapKeyJoinColumn(name = "serie_id")
-    private Map<Serie, Capitulo> ultimoCapituloVisto = new HashMap<>();
+    @MapKeyColumn(name = "serie_id")
+    private Map<String, Capitulo> ultimoCapituloVisto = new HashMap<>();
 
     protected Usuario() {}
 
@@ -74,14 +74,14 @@ public class Usuario {
     }
     
     public void agregarSeriePendiente(Serie serie) {
-        if (!this.estadoSeries.containsKey(serie)) {
-            this.estadoSeries.put(serie, EstadoSerie.PENDIENTE);
+        if (!this.estadoSeries.containsKey(serie.getId())) {
+            this.estadoSeries.put(serie.getId(), EstadoSerie.PENDIENTE);
         }
     }
 
     public void quitarSeriePendiente(Serie serie) {
-        if (EstadoSerie.PENDIENTE.equals(this.estadoSeries.get(serie))) {
-            this.estadoSeries.remove(serie);
+        if (EstadoSerie.PENDIENTE.equals(this.estadoSeries.get(serie.getId()))) {
+            this.estadoSeries.remove(serie.getId());
         }
     }
 
@@ -90,33 +90,36 @@ public class Usuario {
         
         this.capitulosVistos.add(capitulo);
 
-        // Solo actualiz si el capítulo es "más avanzado"
-        Capitulo ultimoVisto = this.ultimoCapituloVisto.get(serie);
+        Capitulo ultimoVisto = this.ultimoCapituloVisto.get(serie.getId());
         if (ultimoVisto == null) {
-            this.ultimoCapituloVisto.put(serie, capitulo);
+            this.ultimoCapituloVisto.put(serie.getId(), capitulo);
         } else {
             int tempNuevo = capitulo.getTemporada().getNumero();
             int capNuevo = capitulo.getNumero();
             int tempViejo = ultimoVisto.getTemporada().getNumero();
             int capViejo = ultimoVisto.getNumero();
 
-            
             if (tempNuevo > tempViejo || (tempNuevo == tempViejo && capNuevo > capViejo)) {
-                this.ultimoCapituloVisto.put(serie, capitulo);
+                this.ultimoCapituloVisto.put(serie.getId(), capitulo);
             }
         }
 
         if (serie.esUltimoCapitulo(capitulo)) {
-            this.estadoSeries.put(serie, EstadoSerie.TERMINADA);
+            this.estadoSeries.put(serie.getId(), EstadoSerie.TERMINADA);
         } else {
-            this.estadoSeries.put(serie, EstadoSerie.EMPEZADA);
+            this.estadoSeries.put(serie.getId(), EstadoSerie.EMPEZADA);
         }
 
-        
         if (!this.planSuscripcion.isTarifaPlana() && facturaActual != null && serie.getCosteVisionado() > 0) {
             String tempCap = "T" + capitulo.getTemporada().getNumero() + "xC" + capitulo.getNumero();
             facturaActual.anadirCargo(new LineaFactura(LocalDate.now(), serie.getTitulo(), tempCap, serie.getCosteVisionado()));
         }
+    }
+
+    @JsonProperty("estadoSeries")
+    @JsonView(Views.UsuarioBasico.class) 
+    public Map<String, EstadoSerie> getEstadoSeriesParaJson() {
+        return this.estadoSeries;
     }
 
     @Override
@@ -130,13 +133,4 @@ public class Usuario {
     @Override
     public int hashCode() { return Objects.hash(username); }
 
-    @JsonProperty("estadoSeries")
-    @JsonView(Views.UsuarioBasico.class) 
-    public Map<String, EstadoSerie> getEstadoSeriesParaJson() {
-        Map<String, EstadoSerie> formatoLimpio = new HashMap<>();
-        for (Map.Entry<Serie, EstadoSerie> entrada : estadoSeries.entrySet()) {
-            formatoLimpio.put(entrada.getKey().getTitulo(), entrada.getValue());
-        }
-        return formatoLimpio;
-    }
 }

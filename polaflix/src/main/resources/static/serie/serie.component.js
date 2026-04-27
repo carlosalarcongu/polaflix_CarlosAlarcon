@@ -7,7 +7,7 @@ angular.module('polaflixApp').component('detalleSerie', {
         ctrl.cargando = true;
         ctrl.mensajeError = null;
         ctrl.mensajeExito = null;
-        
+        //Por si no le atino a un ususario logueado
         ctrl.username = sessionStorage.getItem('usuarioLogueado') || 'cr7bicho'; 
 
         var serieId = $routeParams.serieId;
