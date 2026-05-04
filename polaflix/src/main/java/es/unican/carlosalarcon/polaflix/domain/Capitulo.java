@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 public class Capitulo {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @JsonView({Views.SerieDetallada.class, Views.UsuarioBasico.class})
     private Long id; 
 

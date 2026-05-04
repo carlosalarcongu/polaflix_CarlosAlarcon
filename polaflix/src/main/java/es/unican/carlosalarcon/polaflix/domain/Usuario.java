@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 public class Usuario {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Column(unique = true, nullable = false)

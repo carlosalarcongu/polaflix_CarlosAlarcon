@@ -1,6 +1,7 @@
 package es.unican.carlosalarcon.polaflix.controller;
 
 import es.unican.carlosalarcon.polaflix.domain.Usuario;
+import es.unican.carlosalarcon.polaflix.domain.UsuarioDTO;
 import es.unican.carlosalarcon.polaflix.domain.Views;
 import es.unican.carlosalarcon.polaflix.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,15 +34,18 @@ public class UsuarioController {
 
     @PutMapping("/{username}")
     @JsonView(Views.UsuarioBasico.class)
-    @Operation(summary = "Crear o actualizar usuario", description = "Si el usuario no existe, lo crea (Registro). Si existe, actualiza sus datos.")
+    @Operation(summary = "Crear o actualizar usuario", description = "Si el usuario no existe, lo crea (Registro). Si existe, actualiza sus datos mediante un payload JSON.")
     public ResponseEntity<Usuario> guardarOActualizarUsuario(
             @PathVariable("username") String username,
-            @RequestParam String contrasena,
-            @RequestParam String iban,
-            @RequestParam boolean esTarifaPlana,
-            @RequestParam double cuota) {
+            @RequestBody UsuarioDTO dto) {
         try {
-            Usuario usuarioActualizado = usuarioService.guardarOActualizarUsuario(username, contrasena, iban, esTarifaPlana, cuota);
+            Usuario usuarioActualizado = usuarioService.guardarOActualizarUsuario(
+                username, 
+                dto.getContrasena(), 
+                dto.getIban(), 
+                dto.isEsTarifaPlana(), 
+                dto.getCuota()
+            );
             return ResponseEntity.ok(usuarioActualizado);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();

@@ -37,7 +37,7 @@ angular.module('polaflixApp').factory('PolaflixService', ['$http', '$q', functio
             return $http({
                 method: 'PUT',
                 url: '/usuarios/' + username,
-                params: {
+                data: {
                     contrasena: contrasena,
                     iban: iban,
                     esTarifaPlana: esTarifaPlana,
