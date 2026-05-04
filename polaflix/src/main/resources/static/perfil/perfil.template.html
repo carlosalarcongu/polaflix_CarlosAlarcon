@@ -1,12 +1,19 @@
 <div ng-if="$ctrl.usuario" class="fade-in">
     <div style="display: flex; justify-content: space-between; align-items: center;">
         <h2>Perfil de {{$ctrl.usuario.username}}</h2>
-        <button class="btn-secondary" ng-click="$ctrl.editando = !$ctrl.editando">
-            {{$ctrl.editando ? 'Cancelar Edición' : 'Editar Perfil'}}
-        </button>
+        <div>
+            <button class="btn-secondary" ng-click="$ctrl.editando = !$ctrl.editando; $ctrl.cambiandoPass = false">
+                {{$ctrl.editando ? 'Cancelar Edición' : 'Editar Perfil'}}
+            </button>
+            <button class="btn-secondary" ng-click="$ctrl.iniciarCambioPass()">
+                {{$ctrl.cambiandoPass ? 'Cancelar Cambio' : 'Cambiar Contraseña'}}
+            </button>
+        </div>
     </div>
 
-    <div ng-if="!$ctrl.editando" style="background: #222; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+    <p ng-if="$ctrl.passExito" class="success">{{$ctrl.passExito}}</p>
+
+    <div ng-if="!$ctrl.editando && !$ctrl.cambiandoPass" style="background: #222; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
         <p><strong>Plan de Suscripción:</strong> {{$ctrl.usuario.planSuscripcion.tarifaPlana ? 'Tarifa Plana VIP' : 'Pago por Visión'}}</p>
         <p><strong>IBAN:</strong> {{$ctrl.usuario.iban.numeroCuenta}}</p>
         <button class="btn-primary" style="background-color: darkred; margin-top: 15px;" ng-click="$ctrl.borrarCuenta()">Eliminar Cuenta Permanente</button>
@@ -14,10 +21,18 @@
 
     <div ng-if="$ctrl.editando" style="background: #333; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
         <h3>Actualizar Datos</h3>
-        <p><input type="password" class="login-input" ng-model="$ctrl.form.password" placeholder="Nueva Contraseña (Opcional)"></p>
         <p><input type="text" class="login-input" ng-model="$ctrl.form.iban" placeholder="Nuevo IBAN"></p>
         <p><label><input type="checkbox" ng-model="$ctrl.form.esVip"> Tarifa Plana VIP</label></p>
         <button class="btn-primary" ng-click="$ctrl.guardarCambios()">Guardar Cambios</button>
+    </div>
+
+    <div ng-if="$ctrl.cambiandoPass" style="background: #333; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+        <h3>Cambiar Contraseña</h3>
+        <p ng-if="$ctrl.passError" class="error">{{$ctrl.passError}}</p>
+        <p><input type="password" class="login-input" ng-model="$ctrl.passData.actual" placeholder="Contraseña Actual"></p>
+        <p><input type="password" class="login-input" ng-model="$ctrl.passData.nueva1" placeholder="Nueva Contraseña"></p>
+        <p><input type="password" class="login-input" ng-model="$ctrl.passData.nueva2" placeholder="Repite la Nueva Contraseña"></p>
+        <button class="btn-primary" ng-click="$ctrl.confirmarCambioPass()">Confirmar Cambio</button>
     </div>
 
     <h3>Resumen de tus Series</h3>

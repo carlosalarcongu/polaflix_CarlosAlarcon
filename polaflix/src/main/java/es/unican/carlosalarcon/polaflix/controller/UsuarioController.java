@@ -63,6 +63,19 @@ public class UsuarioController {
         }
     }
 
+    @PutMapping("/{username}/contrasena")
+    @Operation(summary = "Cambiar contraseña", description = "Cambia la contraseña validando la actual.")
+    public ResponseEntity<Void> cambiarContrasena(
+            @PathVariable("username") String username,
+            @RequestBody es.unican.carlosalarcon.polaflix.domain.CambioContrasenaDTO dto) {
+        try {
+            usuarioService.cambiarContrasena(username, dto.getActual(), dto.getNueva());
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
     @PutMapping("/{username}/capitulos-vistos/{idCapitulo}")
     @Operation(summary = "Marcar capítulo como visto", description = "Registra que un usuario ha visto un capítulo y genera cargos en su factura si corresponde.")
     public ResponseEntity<Void> verCapitulo(

@@ -4,8 +4,14 @@ angular.module('polaflixApp').component('perfilUsuario', {
         var ctrl = this;
         ctrl.usuario = null;
         ctrl.username = sessionStorage.getItem('usuarioLogueado');
+        
         ctrl.editando = false;
         ctrl.form = {};
+
+        ctrl.cambiandoPass = false;
+        ctrl.passData = { actual: '', nueva1: '', nueva2: '' };
+        ctrl.passError = '';
+        ctrl.passExito = '';
 
         ctrl.$onInit = function() {
             if (!ctrl.username) { $location.path('/login'); return; }
@@ -17,16 +23,46 @@ angular.module('polaflixApp').component('perfilUsuario', {
                 ctrl.usuario = data;
                 ctrl.form.iban = data.iban.numeroCuenta;
                 ctrl.form.esVip = data.planSuscripcion.tarifaPlana;
-                ctrl.form.password = ''; 
             });
         };
 
         ctrl.guardarCambios = function() {
             var cuota = ctrl.form.esVip ? 20.0 : 0.0;
-            PolaflixService.guardarUsuario(ctrl.username, ctrl.form.password, ctrl.form.iban, ctrl.form.esVip, cuota)
+            PolaflixService.guardarUsuario(ctrl.username, null, ctrl.form.iban, ctrl.form.esVip, cuota)
                 .then(function() {
                     ctrl.editando = false;
                     ctrl.cargarDatos(); 
+                });
+        };
+
+        ctrl.iniciarCambioPass = function() {
+            ctrl.cambiandoPass = !ctrl.cambiandoPass;
+            ctrl.passData = { actual: '', nueva1: '', nueva2: '' };
+            ctrl.passError = '';
+            ctrl.passExito = '';
+            ctrl.editando = false;
+        };
+
+        ctrl.confirmarCambioPass = function() {
+            ctrl.passError = '';
+            ctrl.passExito = '';
+            
+            if (!ctrl.passData.actual || !ctrl.passData.nueva1 || !ctrl.passData.nueva2) {
+                ctrl.passError = "Rellena todos los campos.";
+                return;
+            }
+            if (ctrl.passData.nueva1 !== ctrl.passData.nueva2) {
+                ctrl.passError = "Las nuevas contraseñas no coinciden.";
+                return;
+            }
+
+            PolaflixService.cambiarContrasena(ctrl.username, ctrl.passData.actual, ctrl.passData.nueva1)
+                .then(function() {
+                    ctrl.passExito = "Contraseña actualizada con éxito.";
+                    ctrl.cambiandoPass = false;
+                })
+                .catch(function(err) {
+                    ctrl.passError = err;
                 });
         };
 

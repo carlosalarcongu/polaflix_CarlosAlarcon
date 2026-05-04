@@ -52,6 +52,18 @@ public class UsuarioService {
     }
 
     @Transactional
+    public void cambiarContrasena(String username, String actual, String nueva) {
+        Usuario usuario = usuarioRepository.findByUsername(username);
+        if (usuario == null) throw new IllegalArgumentException("Usuario no encontrado.");
+        
+        if (!usuario.getContrasenha().equals(actual)) {
+            throw new IllegalArgumentException("La contraseña actual es incorrecta.");
+        }
+        
+        usuario.actualizarDatos(nueva, null, null);
+    }
+
+    @Transactional
     public void agregarSeriePendiente(String username, String serieId) {
         Usuario usuario = usuarioRepository.findByUsername(username);
         if (usuario == null) throw new IllegalArgumentException("Usuario no encontrado.");

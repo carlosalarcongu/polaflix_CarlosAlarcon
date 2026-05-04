@@ -60,6 +60,7 @@ public class Usuario {
     public Long getId() { return id; }
     public String getUsername() { return username; }
     public PlanSuscripcion getPlanSuscripcion() { return planSuscripcion; }
+    public String getContrasenha() { return contrasenha; }
 
     public void actualizarDatos(String nuevaContrasena, IBAN nuevoIban, PlanSuscripcion nuevoPlan) {
         if (nuevaContrasena != null && !nuevaContrasena.isEmpty()) {

@@ -51,6 +51,13 @@ angular.module('polaflixApp').factory('PolaflixService', ['$http', '$q', functio
                 .catch(err => $q.reject("Error al borrar la cuenta."));
         },
 
+        cambiarContrasena: function(username, actual, nueva) {
+            return $http.put('/usuarios/' + username + '/contrasena', {
+                actual: actual,
+                nueva: nueva
+            }).catch(err => $q.reject("Error al cambiar la contraseña. Verifica tu clave actual."));
+        },
+
         quitarDePendientes: function(username, serieId) {
             return $http.delete(`/usuarios/${username}/series-pendientes/${serieId}`)
                 .catch(err => $q.reject("Error al quitar de la lista."));
