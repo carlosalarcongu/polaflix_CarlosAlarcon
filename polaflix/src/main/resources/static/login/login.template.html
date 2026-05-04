@@ -6,6 +6,7 @@
 
         <div ng-if="!$ctrl.modoRegistro">
             <input type="text" class="login-input" ng-model="$ctrl.username" placeholder="Introduce tu usuario">
+            <input type="password" class="login-input" ng-model="$ctrl.password" placeholder="Contraseña">
             <button class="login-btn" ng-click="$ctrl.entrar()">ENTRAR AL SISTEMA</button>
             <p style="margin-top: 20px; color: #888;">
                 ¿No tienes cuenta? <a href="" ng-click="$ctrl.toggleModo()" style="color: var(--pola-red);">Regístrate aquí</a>

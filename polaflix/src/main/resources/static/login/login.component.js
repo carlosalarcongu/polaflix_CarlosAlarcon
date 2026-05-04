@@ -13,13 +13,15 @@ angular.module('polaflixApp').component('loginPolaflix', {
         ctrl.mensaje = '';
 
         ctrl.entrar = function() {
-            if (ctrl.username) {
-                PolaflixService.getUsuario(ctrl.username).then(function() {
+            if (ctrl.username && ctrl.password) {
+                PolaflixService.login(ctrl.username, ctrl.password).then(function() {
                     sessionStorage.setItem('usuarioLogueado', ctrl.username);
                     $location.path('/catalogo'); 
-                }).catch(function() {
-                    ctrl.mensaje = "El usuario no existe. Regístrate primero.";
+                }).catch(function(error) {
+                    ctrl.mensaje = error;
                 });
+            } else {
+                ctrl.mensaje = "Introduce tu usuario y contraseña.";
             }
         };
 

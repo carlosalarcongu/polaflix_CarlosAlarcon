@@ -32,6 +32,18 @@ public class UsuarioController {
         }
     }
 
+    @PostMapping("/login")
+    @JsonView(Views.UsuarioBasico.class)
+    @Operation(summary = "Iniciar sesión", description = "Comprueba las credenciales del usuario.")
+    public ResponseEntity<Usuario> login(@RequestBody es.unican.carlosalarcon.polaflix.domain.LoginDTO loginDTO) {
+        try {
+            Usuario usuario = usuarioService.login(loginDTO.getUsername(), loginDTO.getContrasena());
+            return ResponseEntity.ok(usuario);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(401).build();
+        }
+    }
+
     @PutMapping("/{username}")
     @JsonView(Views.UsuarioBasico.class)
     @Operation(summary = "Crear o actualizar usuario", description = "Si el usuario no existe, lo crea (Registro). Si existe, actualiza sus datos mediante un payload JSON.")

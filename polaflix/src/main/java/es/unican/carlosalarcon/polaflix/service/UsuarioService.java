@@ -24,6 +24,18 @@ public class UsuarioService {
         return usuarioRepository.findByUsername(username);
     }
 
+    @Transactional(readOnly = true)
+    public Usuario login(String username, String contrasena) {
+        Usuario usuario = usuarioRepository.findByUsername(username);
+        if (usuario == null) {
+            throw new IllegalArgumentException("Usuario no encontrado.");
+        }
+        if (!usuario.getContrasenha().equals(contrasena)) {
+            throw new IllegalArgumentException("Contraseña incorrecta.");
+        }
+        return usuario;
+    }
+
     @Transactional
     public Usuario guardarOActualizarUsuario(String username, String contrasena, String ibanStr, boolean esTarifaPlana, double cuota) {
         Usuario usuario = usuarioRepository.findByUsername(username);

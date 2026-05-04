@@ -91,6 +91,18 @@ public class UsuarioController {
         }
     }
 
+    @PostMapping("/login")
+    @JsonView(Views.UsuarioBasico.class)
+    @Operation(summary = "Iniciar sesiÃ³n", description = "Comprueba las credenciales del usuario.")
+    public ResponseEntity<Usuario> login(@RequestBody es.unican.carlosalarcon.polaflix.domain.LoginDTO loginDTO) {
+        try {
+            Usuario usuario = usuarioService.login(loginDTO.getUsername(), loginDTO.getContrasena());
+            return ResponseEntity.ok(usuario);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(401).build();
+        }
+    }
+
     @PutMapping("/{username}")
     @JsonView(Views.UsuarioBasico.class)
     @Operation(summary = "Crear o actualizar usuario", description = "Si el usuario no existe, lo crea (Registro). Si existe, actualiza sus datos mediante un payload JSON.")
@@ -119,6 +131,19 @@ public class UsuarioController {
             return ResponseEntity.ok().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PutMapping("/{username}/contrasena")
+    @Operation(summary = "Cambiar contraseÃ±a", description = "Cambia la contraseÃ±a validando la actual.")
+    public ResponseEntity<Void> cambiarContrasena(
+            @PathVariable("username") String username,
+            @RequestBody es.unican.carlosalarcon.polaflix.domain.CambioContrasenaDTO dto) {
+        try {
+            usuarioService.cambiarContrasena(username, dto.getActual(), dto.getNueva());
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
         }
     }
 
@@ -206,6 +231,22 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     
     // Spring Boot generarÃ¡ automÃ¡ticamente el cÃ³digo de esta consulta por nosotros
     Usuario findByUsername(String username);
+}
+
+
+========== src/main/java/es/unican/carlosalarcon/polaflix/domain/CambioContrasenaDTO.java ==========
+package es.unican.carlosalarcon.polaflix.domain;
+
+public class CambioContrasenaDTO {
+    
+    private String actual;
+    private String nueva;
+
+    public String getActual() { return actual; }
+    public void setActual(String actual) { this.actual = actual; }
+    
+    public String getNueva() { return nueva; }
+    public void setNueva(String nueva) { this.nueva = nueva; }
 }
 
 
@@ -437,6 +478,22 @@ public class LineaFactura {
     public int hashCode() {
         return Objects.hash(fecha, serieNombre, temporadaCapitulo, cargo);
     }
+}
+
+
+========== src/main/java/es/unican/carlosalarcon/polaflix/domain/LoginDTO.java ==========
+package es.unican.carlosalarcon.polaflix.domain;
+
+public class LoginDTO {
+    
+    private String username;
+    private String contrasena;
+
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
+    
+    public String getContrasena() { return contrasena; }
+    public void setContrasena(String contrasena) { this.contrasena = contrasena; }
 }
 
 
@@ -807,6 +864,7 @@ public class Usuario {
     public Long getId() { return id; }
     public String getUsername() { return username; }
     public PlanSuscripcion getPlanSuscripcion() { return planSuscripcion; }
+    public String getContrasenha() { return contrasenha; }
 
     public void actualizarDatos(String nuevaContrasena, IBAN nuevoIban, PlanSuscripcion nuevoPlan) {
         if (nuevaContrasena != null && !nuevaContrasena.isEmpty()) {
@@ -988,6 +1046,18 @@ public class UsuarioService {
         return usuarioRepository.findByUsername(username);
     }
 
+    @Transactional(readOnly = true)
+    public Usuario login(String username, String contrasena) {
+        Usuario usuario = usuarioRepository.findByUsername(username);
+        if (usuario == null) {
+            throw new IllegalArgumentException("Usuario no encontrado.");
+        }
+        if (!usuario.getContrasenha().equals(contrasena)) {
+            throw new IllegalArgumentException("ContraseÃ±a incorrecta.");
+        }
+        return usuario;
+    }
+
     @Transactional
     public Usuario guardarOActualizarUsuario(String username, String contrasena, String ibanStr, boolean esTarifaPlana, double cuota) {
         Usuario usuario = usuarioRepository.findByUsername(username);
@@ -1013,6 +1083,18 @@ public class UsuarioService {
         } else {
             throw new IllegalArgumentException("El usuario a borrar no existe.");
         }
+    }
+
+    @Transactional
+    public void cambiarContrasena(String username, String actual, String nueva) {
+        Usuario usuario = usuarioRepository.findByUsername(username);
+        if (usuario == null) throw new IllegalArgumentException("Usuario no encontrado.");
+        
+        if (!usuario.getContrasenha().equals(actual)) {
+            throw new IllegalArgumentException("La contraseÃ±a actual es incorrecta.");
+        }
+        
+        usuario.actualizarDatos(nueva, null, null);
     }
 
     @Transactional
@@ -1346,13 +1428,15 @@ angular.module('polaflixApp').component('loginPolaflix', {
         ctrl.mensaje = '';
 
         ctrl.entrar = function() {
-            if (ctrl.username) {
-                PolaflixService.getUsuario(ctrl.username).then(function() {
+            if (ctrl.username && ctrl.password) {
+                PolaflixService.login(ctrl.username, ctrl.password).then(function() {
                     sessionStorage.setItem('usuarioLogueado', ctrl.username);
                     $location.path('/catalogo'); 
-                }).catch(function() {
-                    ctrl.mensaje = "El usuario no existe. RegÃ­strate primero.";
+                }).catch(function(error) {
+                    ctrl.mensaje = error;
                 });
+            } else {
+                ctrl.mensaje = "Introduce tu usuario y contraseÃ±a.";
             }
         };
 
@@ -1388,6 +1472,7 @@ angular.module('polaflixApp').component('loginPolaflix', {
 
         <div ng-if="!$ctrl.modoRegistro">
             <input type="text" class="login-input" ng-model="$ctrl.username" placeholder="Introduce tu usuario">
+            <input type="password" class="login-input" ng-model="$ctrl.password" placeholder="ContraseÃ±a">
             <button class="login-btn" ng-click="$ctrl.entrar()">ENTRAR AL SISTEMA</button>
             <p style="margin-top: 20px; color: #888;">
                 Â¿No tienes cuenta? <a href="" ng-click="$ctrl.toggleModo()" style="color: var(--pola-red);">RegÃ­strate aquÃ­</a>
@@ -1423,8 +1508,14 @@ angular.module('polaflixApp').component('perfilUsuario', {
         var ctrl = this;
         ctrl.usuario = null;
         ctrl.username = sessionStorage.getItem('usuarioLogueado');
+        
         ctrl.editando = false;
         ctrl.form = {};
+
+        ctrl.cambiandoPass = false;
+        ctrl.passData = { actual: '', nueva1: '', nueva2: '' };
+        ctrl.passError = '';
+        ctrl.passExito = '';
 
         ctrl.$onInit = function() {
             if (!ctrl.username) { $location.path('/login'); return; }
@@ -1436,16 +1527,46 @@ angular.module('polaflixApp').component('perfilUsuario', {
                 ctrl.usuario = data;
                 ctrl.form.iban = data.iban.numeroCuenta;
                 ctrl.form.esVip = data.planSuscripcion.tarifaPlana;
-                ctrl.form.password = ''; 
             });
         };
 
         ctrl.guardarCambios = function() {
             var cuota = ctrl.form.esVip ? 20.0 : 0.0;
-            PolaflixService.guardarUsuario(ctrl.username, ctrl.form.password, ctrl.form.iban, ctrl.form.esVip, cuota)
+            PolaflixService.guardarUsuario(ctrl.username, null, ctrl.form.iban, ctrl.form.esVip, cuota)
                 .then(function() {
                     ctrl.editando = false;
                     ctrl.cargarDatos(); 
+                });
+        };
+
+        ctrl.iniciarCambioPass = function() {
+            ctrl.cambiandoPass = !ctrl.cambiandoPass;
+            ctrl.passData = { actual: '', nueva1: '', nueva2: '' };
+            ctrl.passError = '';
+            ctrl.passExito = '';
+            ctrl.editando = false;
+        };
+
+        ctrl.confirmarCambioPass = function() {
+            ctrl.passError = '';
+            ctrl.passExito = '';
+            
+            if (!ctrl.passData.actual || !ctrl.passData.nueva1 || !ctrl.passData.nueva2) {
+                ctrl.passError = "Rellena todos los campos.";
+                return;
+            }
+            if (ctrl.passData.nueva1 !== ctrl.passData.nueva2) {
+                ctrl.passError = "Las nuevas contraseÃ±as no coinciden.";
+                return;
+            }
+
+            PolaflixService.cambiarContrasena(ctrl.username, ctrl.passData.actual, ctrl.passData.nueva1)
+                .then(function() {
+                    ctrl.passExito = "ContraseÃ±a actualizada con Ã©xito.";
+                    ctrl.cambiandoPass = false;
+                })
+                .catch(function(err) {
+                    ctrl.passError = err;
                 });
         };
 
@@ -1476,12 +1597,19 @@ angular.module('polaflixApp').component('perfilUsuario', {
 <div ng-if="$ctrl.usuario" class="fade-in">
     <div style="display: flex; justify-content: space-between; align-items: center;">
         <h2>Perfil de {{$ctrl.usuario.username}}</h2>
-        <button class="btn-secondary" ng-click="$ctrl.editando = !$ctrl.editando">
-            {{$ctrl.editando ? 'Cancelar EdiciÃ³n' : 'Editar Perfil'}}
-        </button>
+        <div>
+            <button class="btn-secondary" ng-click="$ctrl.editando = !$ctrl.editando; $ctrl.cambiandoPass = false">
+                {{$ctrl.editando ? 'Cancelar EdiciÃ³n' : 'Editar Perfil'}}
+            </button>
+            <button class="btn-secondary" ng-click="$ctrl.iniciarCambioPass()">
+                {{$ctrl.cambiandoPass ? 'Cancelar Cambio' : 'Cambiar ContraseÃ±a'}}
+            </button>
+        </div>
     </div>
 
-    <div ng-if="!$ctrl.editando" style="background: #222; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+    <p ng-if="$ctrl.passExito" class="success">{{$ctrl.passExito}}</p>
+
+    <div ng-if="!$ctrl.editando && !$ctrl.cambiandoPass" style="background: #222; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
         <p><strong>Plan de SuscripciÃ³n:</strong> {{$ctrl.usuario.planSuscripcion.tarifaPlana ? 'Tarifa Plana VIP' : 'Pago por VisiÃ³n'}}</p>
         <p><strong>IBAN:</strong> {{$ctrl.usuario.iban.numeroCuenta}}</p>
         <button class="btn-primary" style="background-color: darkred; margin-top: 15px;" ng-click="$ctrl.borrarCuenta()">Eliminar Cuenta Permanente</button>
@@ -1489,10 +1617,18 @@ angular.module('polaflixApp').component('perfilUsuario', {
 
     <div ng-if="$ctrl.editando" style="background: #333; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
         <h3>Actualizar Datos</h3>
-        <p><input type="password" class="login-input" ng-model="$ctrl.form.password" placeholder="Nueva ContraseÃ±a (Opcional)"></p>
         <p><input type="text" class="login-input" ng-model="$ctrl.form.iban" placeholder="Nuevo IBAN"></p>
         <p><label><input type="checkbox" ng-model="$ctrl.form.esVip"> Tarifa Plana VIP</label></p>
         <button class="btn-primary" ng-click="$ctrl.guardarCambios()">Guardar Cambios</button>
+    </div>
+
+    <div ng-if="$ctrl.cambiandoPass" style="background: #333; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+        <h3>Cambiar ContraseÃ±a</h3>
+        <p ng-if="$ctrl.passError" class="error">{{$ctrl.passError}}</p>
+        <p><input type="password" class="login-input" ng-model="$ctrl.passData.actual" placeholder="ContraseÃ±a Actual"></p>
+        <p><input type="password" class="login-input" ng-model="$ctrl.passData.nueva1" placeholder="Nueva ContraseÃ±a"></p>
+        <p><input type="password" class="login-input" ng-model="$ctrl.passData.nueva2" placeholder="Repite la Nueva ContraseÃ±a"></p>
+        <button class="btn-primary" ng-click="$ctrl.confirmarCambioPass()">Confirmar Cambio</button>
     </div>
 
     <h3>Resumen de tus Series</h3>
@@ -1843,6 +1979,17 @@ angular.module('polaflixApp').factory('PolaflixService', ['$http', '$q', functio
                 .catch(function(error) { return $q.reject("No se pudo cargar el perfil."); });
         },
 
+        login: function(username, contrasena) {
+            return $http.post('/usuarios/login', {
+                username: username,
+                contrasena: contrasena
+            }).then(function(res) {
+                return res.data;
+            }).catch(function(err) {
+                return $q.reject("Credenciales incorrectas.");
+            });
+        },
+
         guardarUsuario: function(username, contrasena, iban, esTarifaPlana, cuota) {
             return $http({
                 method: 'PUT',
@@ -1859,6 +2006,13 @@ angular.module('polaflixApp').factory('PolaflixService', ['$http', '$q', functio
         borrarUsuario: function(username) {
             return $http.delete('/usuarios/' + username)
                 .catch(err => $q.reject("Error al borrar la cuenta."));
+        },
+
+        cambiarContrasena: function(username, actual, nueva) {
+            return $http.put('/usuarios/' + username + '/contrasena', {
+                actual: actual,
+                nueva: nueva
+            }).catch(err => $q.reject("Error al cambiar la contraseÃ±a. Verifica tu clave actual."));
         },
 
         quitarDePendientes: function(username, serieId) {

@@ -33,6 +33,17 @@ angular.module('polaflixApp').factory('PolaflixService', ['$http', '$q', functio
                 .catch(function(error) { return $q.reject("No se pudo cargar el perfil."); });
         },
 
+        login: function(username, contrasena) {
+            return $http.post('/usuarios/login', {
+                username: username,
+                contrasena: contrasena
+            }).then(function(res) {
+                return res.data;
+            }).catch(function(err) {
+                return $q.reject("Credenciales incorrectas.");
+            });
+        },
+
         guardarUsuario: function(username, contrasena, iban, esTarifaPlana, cuota) {
             return $http({
                 method: 'PUT',
