@@ -20,8 +20,8 @@
     <header class="top-header" ng-show="mostrarMenu()">
         <div class="header-top">
             <div class="logo-placeholder">Polaflix</div>
-            <h1 class="welcome-text">Hola, {{$parent.getUsername()}}</h1>
-            <div class="user-avatar" ng-click="$parent.logout()" title="Cerrar Sesión">X</div>
+            <h1 class="welcome-text">Hola, {{getUsername()}}</h1>
+            <div class="user-avatar" ng-click="logout()" title="Cerrar Sesión">X</div>
         </div>
     </header>
     <nav class="top-nav" ng-show="mostrarMenu()">
