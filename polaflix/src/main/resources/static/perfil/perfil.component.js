@@ -1,6 +1,6 @@
 angular.module('polaflixApp').component('perfilUsuario', {
     templateUrl: 'perfil/perfil.template.html',
-    controller: ['PolaflixService', '$location', function(PolaflixService, $location) {
+    controller: ['PolaflixService', '$location', '$q', function(PolaflixService, $location, $q) {
         var ctrl = this;
         ctrl.usuario = null;
         ctrl.username = sessionStorage.getItem('usuarioLogueado');
@@ -13,16 +13,38 @@ angular.module('polaflixApp').component('perfilUsuario', {
         ctrl.passError = '';
         ctrl.passExito = '';
 
+        ctrl.seriesUsuario = [];
+
         ctrl.$onInit = function() {
             if (!ctrl.username) { $location.path('/login'); return; }
             ctrl.cargarDatos();
         };
 
         ctrl.cargarDatos = function() {
-            PolaflixService.getUsuario(ctrl.username).then(function(data) {
-                ctrl.usuario = data;
-                ctrl.form.iban = data.iban.numeroCuenta;
-                ctrl.form.esVip = data.planSuscripcion.tarifaPlana;
+            $q.all([
+                PolaflixService.getUsuario(ctrl.username),
+                PolaflixService.getSeries()
+            ]).then(function(res) {
+                ctrl.usuario = res[0];
+                var catalogo = res[1];
+
+                ctrl.form.iban = ctrl.usuario.iban.numeroCuenta;
+                ctrl.form.esVip = ctrl.usuario.planSuscripcion.tarifaPlana;
+
+                ctrl.seriesUsuario = [];
+                if(ctrl.usuario.estadoSeries) {
+                    for (var idSerie in ctrl.usuario.estadoSeries) {
+                        var serieInfo = catalogo.find(s => s.id === idSerie);
+                        if(serieInfo) {
+                            ctrl.seriesUsuario.push({
+                                id: serieInfo.id,
+                                titulo: serieInfo.titulo,
+                                estado: ctrl.usuario.estadoSeries[idSerie],
+                                poster: ctrl.getPosterGeneral(serieInfo.id)
+                            });
+                        }
+                    }
+                }
             });
         };
 
@@ -67,7 +89,7 @@ angular.module('polaflixApp').component('perfilUsuario', {
         };
 
         ctrl.borrarCuenta = function() {
-            if(confirm("¿Estás completamente seguro de querer borrar tu cuenta? Esta acción no se puede deshacer.")) {
+            if(confirm("¿Estás seguro de borrar tu cuenta?")) {
                 PolaflixService.borrarUsuario(ctrl.username).then(function() {
                     sessionStorage.removeItem('usuarioLogueado');
                     $location.path('/login');
@@ -75,15 +97,17 @@ angular.module('polaflixApp').component('perfilUsuario', {
             }
         };
 
-        ctrl.quitarPendiente = function(tituloSerie) {
-            PolaflixService.getSeries().then(function(catalogo) {
-                var serie = catalogo.find(s => s.titulo === tituloSerie);
-                if (serie) {
-                    PolaflixService.quitarDePendientes(ctrl.username, serie.id).then(function() {
-                        ctrl.cargarDatos(); // Recargamos la lista
-                    });
-                }
+        ctrl.quitarPendiente = function(idSerie) {
+            PolaflixService.quitarDePendientes(ctrl.username, idSerie).then(function() {
+                ctrl.cargarDatos();
             });
+        };
+
+        ctrl.getPosterGeneral = function(idSerie) {
+            if (idSerie === 'S01') return 'images/PeakyBlinders.png';
+            if (idSerie === 'S02') return 'images/PrisonBreakS01.png';
+            if (idSerie === 'S03') return 'images/LQSAS01.png';
+            return 'images/polaflix-logo.png';
         };
     }]
 });

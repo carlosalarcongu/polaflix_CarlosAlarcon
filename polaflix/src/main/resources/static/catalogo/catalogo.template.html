@@ -1,24 +1,36 @@
-<section>
-    <h2 style="font-size: 2em; margin-bottom: 40px; color: white;">Catálogo Completo</h2>
-    
-    <div class="shelf-container">
-        <div class="shelf">
-            <div class="card-serie" ng-repeat="s in $ctrl.series">
-                
-                <span class="badge badge-pendiente" ng-if="s.estadoPersonal === 'PENDIENTE'">🕒 PENDIENTE</span>
-                <span class="badge badge-empezada" ng-if="s.estadoPersonal === 'EMPEZADA'">▶️ EMPEZADA</span>
-                <span class="badge badge-terminada" ng-if="s.estadoPersonal === 'TERMINADA'">✅ TERMINADA</span>
+<div>
+    <div class="catalogo-controls">
+        <div class="alfabeto">
+            <span ng-repeat="letra in $ctrl.abecedario" 
+                  ng-click="$ctrl.filtrarPorLetra(letra)"
+                  ng-class="{'letra-activa': $ctrl.letraSeleccionada === letra}">
+                {{letra}}
+            </span>
+        </div>
+        
+        <div class="search-box">
+            <input type="text" ng-model="$ctrl.searchQuery" placeholder="Buscar por título...">
+            <button ng-click="$ctrl.buscar()">Buscar</button>
+        </div>
+    </div>
 
-                <img ng-src="{{$ctrl.getPosterGeneral(s.id)}}" class="serie-poster" alt="{{s.titulo}}">
-                
-                <div class="card-info">
-                    <h4>{{s.titulo}}</h4>
-                    <div style="display:flex; gap: 10px; justify-content: center;">
-                        <a href="#!/series/{{s.id}}" class="btn-primary">Ver</a>
-                        <button ng-if="!s.estadoPersonal" ng-click="$ctrl.addPendiente(s.id)" class="btn-secondary">➕ Lista</button>
-                    </div>
+    <div class="serie-grid">
+        <div class="card-serie" ng-repeat="s in $ctrl.series">
+            
+            <span class="badge badge-pendiente" ng-if="s.estadoPersonal === 'PENDIENTE'">PENDIENTE</span>
+            <span class="badge badge-empezada" ng-if="s.estadoPersonal === 'EMPEZADA'">EMPEZADA</span>
+            <span class="badge badge-terminada" ng-if="s.estadoPersonal === 'TERMINADA'">TERMINADA</span>
+
+            <img ng-src="{{$ctrl.getPosterGeneral(s.id)}}" class="serie-poster" alt="{{s.titulo}}">
+            
+            <div class="card-info">
+                <span class="price-tag">{{s.costeVisionado}} € / ep</span>
+                <h4>{{s.titulo}}</h4>
+                <div style="display:flex; gap: 5px;">
+                    <a href="#!/series/{{s.id}}" class="btn-primary" style="flex: 1; text-align: center;">Ver</a>
+                    <button ng-if="!s.estadoPersonal" ng-click="$ctrl.addPendiente(s.id)" class="btn-secondary" style="flex: 1;">+ Lista</button>
                 </div>
             </div>
         </div>
     </div>
-</section>
+</div>

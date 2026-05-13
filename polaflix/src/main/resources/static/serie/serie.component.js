@@ -1,38 +1,45 @@
 angular.module('polaflixApp').component('detalleSerie', {
     templateUrl: 'serie/serie.template.html',
-    controller: ['$routeParams', 'PolaflixService', function SerieController($routeParams, PolaflixService) {
+    controller: ['$routeParams', 'PolaflixService', '$q', function($routeParams, PolaflixService, $q) {
         var ctrl = this;
-        
         ctrl.serie = null;
-        ctrl.cargando = true;
-        ctrl.mensajeError = null;
-        ctrl.mensajeExito = null;
-        //Por si no le atino a un ususario logueado
-        ctrl.username = sessionStorage.getItem('usuarioLogueado') || 'cr7bicho'; 
-
+        ctrl.usuario = null;
+        ctrl.username = sessionStorage.getItem('usuarioLogueado'); 
         var serieId = $routeParams.serieId;
 
+        ctrl.temporadaExpandida = null;
+
         ctrl.$onInit = function() {
-            PolaflixService.getSerie(serieId).then(function(data) {
-                ctrl.serie = data;
-                ctrl.cargando = false;
-            }).catch(function(error) {
-                ctrl.mensajeError = error;
-                ctrl.cargando = false;
+            $q.all([
+                PolaflixService.getSerie(serieId),
+                PolaflixService.getUsuario(ctrl.username)
+            ]).then(function(res) {
+                ctrl.serie = res[0];
+                ctrl.usuario = res[1];
+                if (ctrl.serie.temporadas && ctrl.serie.temporadas.length > 0) {
+                    ctrl.temporadaExpandida = ctrl.serie.temporadas[0].id;
+                }
             });
+        };
+
+        ctrl.toggleTemporada = function(idTemporada) {
+            if (ctrl.temporadaExpandida === idTemporada) {
+                ctrl.temporadaExpandida = null;
+            } else {
+                ctrl.temporadaExpandida = idTemporada;
+            }
+        };
+
+        ctrl.esVisto = function(idCapitulo) {
+            if(!ctrl.usuario || !ctrl.usuario.capitulosVistos) return false;
+            return ctrl.usuario.capitulosVistos.some(c => c.id === idCapitulo);
         };
 
         ctrl.marcarVisto = function(idCapitulo) {
-            ctrl.mensajeError = null;
-            ctrl.mensajeExito = null;
-            
-            PolaflixService.verCapitulo(ctrl.username, idCapitulo).then(function(mensaje) {
-                ctrl.mensajeExito = mensaje;
-            }).catch(function(error) {
-                ctrl.mensajeError = error;
+            PolaflixService.verCapitulo(ctrl.username, idCapitulo).then(function() {
+                PolaflixService.getUsuario(ctrl.username).then(u => ctrl.usuario = u);
             });
         };
-
 
         ctrl.getPosterGeneral = function(idSerie) {
             if (idSerie === 'S01') return 'images/PeakyBlinders.png';
@@ -44,11 +51,9 @@ angular.module('polaflixApp').component('detalleSerie', {
         ctrl.getPosterTemporada = function(idSerie, numTemporada) {
             var safeNum = numTemporada > 4 ? 1 : numTemporada;
             var sufijo = 'S0' + safeNum + '.png';
-
             if (idSerie === 'S01') return 'images/PeakyBlinders' + sufijo;
             if (idSerie === 'S02') return 'images/PrisonBreak' + sufijo;
             if (idSerie === 'S03') return 'images/LQSA' + sufijo;
-            
             return 'images/polaflix-logo.png';
         };
     }]

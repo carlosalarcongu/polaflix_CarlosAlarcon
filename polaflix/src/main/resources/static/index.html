@@ -2,35 +2,34 @@
 <html lang="es" ng-app="polaflixApp">
 <head>
     <meta charset="UTF-8">
-    <title>Polaflix - Tu Cine en Casa</title>
+    <title>Polaflix</title>
     <link rel="stylesheet" href="polaflix.css">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-route.js"></script>
-    
     <script src="app.module.js"></script>
     <script src="polaflix.service.js"></script>
     <script src="login/login.component.js"></script>
     <script src="catalogo/catalogo.component.js"></script>
     <script src="serie/serie.component.js"></script>
     <script src="perfil/perfil.component.js"></script>
-    
-    <script src="elenco/elenco.component.js"></script>
+    <script src="facturas/facturas.component.js"></script>
     <script src="comunidad/comunidad.component.js"></script>
 </head>
 <body ng-controller="MainController">
 
-    <aside class="sidebar" ng-show="mostrarMenu()">
-        <a href="#!/catalogo">
-            <img src="images/polaflix-logo.png" class="sidebar-logo" alt="Polaflix">
-        </a>
-        <nav>
-            <a href="#!/catalogo">Catálogo</a>
-            <a href="#!/perfil">Mi Perfil</a>
-            <a href="#!/elenco">Elenco y Actores</a>
-            <a href="#!/login" style="margin-top: 50px; color: #666;">Cambiar Usuario</a>
-            <a href="#!/comunidad">Comunidad</a>
-        </nav>
-    </aside>
+    <header class="top-header" ng-show="mostrarMenu()">
+        <div class="header-top">
+            <div class="logo-placeholder">Polaflix</div>
+            <h1 class="welcome-text">Hola, {{$parent.getUsername()}}</h1>
+            <div class="user-avatar" ng-click="$parent.logout()" title="Cerrar Sesión">X</div>
+        </div>
+    </header>
+    <nav class="top-nav" ng-show="mostrarMenu()">
+        <a href="#!/inicio">Mi Perfil</a>
+        <a href="#!/catalogo">Catálogo de Series</a>
+        <a href="#!/facturas">Mis Cargos</a>
+        <a href="#!/comunidad">Comunidad</a>
+    </nav>
 
     <main class="main-content">
         <div ng-view></div>

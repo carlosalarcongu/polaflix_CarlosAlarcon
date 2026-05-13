@@ -4,22 +4,48 @@ angular.module('polaflixApp').component('catalogoSeries', {
         var ctrl = this;
         ctrl.series = [];
         ctrl.username = sessionStorage.getItem('usuarioLogueado');
+        
+        ctrl.abecedario = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0-9".split("");
+        ctrl.letraSeleccionada = null;
+        ctrl.searchQuery = "";
 
         ctrl.$onInit = function() {
             if (!ctrl.username) { $location.path('/login'); return; }
-            
+            ctrl.cargarCatalogo();
+        };
+
+        ctrl.cargarCatalogo = function(inicial, titulo) {
             $q.all([
-                PolaflixService.getSeries(),
+                PolaflixService.getSeries(inicial, titulo),
                 PolaflixService.getUsuario(ctrl.username)
-            ]).then(function(respuestas) {
-                var catalogoData = respuestas[0];
-                var usuarioData = respuestas[1];
+            ]).then(function(res) {
+                var catalogoData = res[0];
+                var usuarioData = res[1];
                 
                 ctrl.series = catalogoData.map(function(serie) {
-                    serie.estadoPersonal = usuarioData.estadoSeries[serie.titulo] || null;
+                    serie.estadoPersonal = usuarioData.estadoSeries[serie.id] || null;
                     return serie;
                 });
             });
+        };
+
+        ctrl.filtrarPorLetra = function(letra) {
+            ctrl.searchQuery = "";
+            ctrl.letraSeleccionada = letra;
+            if(letra === '0-9') {
+                ctrl.cargarCatalogo('0', null);
+            } else {
+                ctrl.cargarCatalogo(letra, null);
+            }
+        };
+
+        ctrl.buscar = function() {
+            ctrl.letraSeleccionada = null;
+            if(ctrl.searchQuery.trim().length > 0) {
+                ctrl.cargarCatalogo(null, ctrl.searchQuery);
+            } else {
+                ctrl.cargarCatalogo();
+            }
         };
 
         ctrl.addPendiente = function(idSerie) {
@@ -35,6 +61,5 @@ angular.module('polaflixApp').component('catalogoSeries', {
             if (idSerie === 'S03') return 'images/LQSAS01.png'; 
             return 'images/polaflix-logo.png'; 
         };
-
     }]
 });

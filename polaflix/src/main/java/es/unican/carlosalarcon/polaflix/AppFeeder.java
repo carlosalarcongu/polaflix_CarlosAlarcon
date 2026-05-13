@@ -172,8 +172,227 @@ public class AppFeeder implements CommandLineRunner {
             lqsa.addTemporada(temp);
         }
 
+        // ==========================================
+        // 5. BREAKING BAD (Categoría GOLD) - 2 Temporadas
+        // ==========================================
+        Persona vince = new Persona("Vince Gilligan");
+        Persona bryan = new Persona("Bryan Cranston");
+        Persona aaron = new Persona("Aaron Paul");
+        Persona anna = new Persona("Anna Gunn");
+        Persona dean = new Persona("Dean Norris");
+
+        SerieGold breakingBad = new SerieGold(
+                "S04",
+                "Breaking Bad",
+                "Un profesor de química diagnosticado con cáncer empieza a fabricar metanfetamina junto a un exalumno para asegurar el futuro de su familia.",
+                vince
+        );
+
+        breakingBad.getActores().addAll(Arrays.asList(bryan, aaron, anna, dean));
+
+        // TEMPORADA 1
+        Temporada bbT1 = new Temporada(1);
+        bbT1.addCapitulo(new Capitulo(1, "Pilot", "Walter White decide cocinar metanfetamina tras recibir un diagnóstico devastador."));
+        bbT1.addCapitulo(new Capitulo(2, "Cat's in the Bag...", "Walter y Jesse intentan solucionar un problema inesperado."));
+        bbT1.addCapitulo(new Capitulo(3, "...And the Bag's in the River", "Walter debe tomar una decisión moral extrema."));
+        bbT1.addCapitulo(new Capitulo(4, "Cancer Man", "La familia descubre el estado de salud de Walter."));
+        bbT1.addCapitulo(new Capitulo(5, "Gray Matter", "Walter recibe una oferta económica difícil de aceptar."));
+        bbT1.addCapitulo(new Capitulo(6, "Crazy Handful of Nothin'", "Walter adopta una nueva personalidad."));
+        breakingBad.addTemporada(bbT1);
+
+        // TEMPORADA 2
+        Temporada bbT2 = new Temporada(2);
+        bbT2.addCapitulo(new Capitulo(1, "Seven Thirty-Seven", "Walter y Jesse lidian con las consecuencias de Tuco."));
+        bbT2.addCapitulo(new Capitulo(2, "Grilled", "Tuco secuestra a Walter y Jesse."));
+        bbT2.addCapitulo(new Capitulo(3, "Bit by a Dead Bee", "Walter inventa una historia para justificar su desaparición."));
+        bbT2.addCapitulo(new Capitulo(4, "Down", "Jesse toca fondo tras perderlo todo."));
+        bbT2.addCapitulo(new Capitulo(5, "Breakage", "Walter busca expandir su negocio."));
+        bbT2.addCapitulo(new Capitulo(6, "Peekaboo", "Jesse intenta recuperar un dinero robado."));
+        breakingBad.addTemporada(bbT2);
+
+
+        // ==========================================
+        // 6. AQUI NO HAY QUIEN VIVA (Categoría ESTANDAR) - 2 Temporadas
+        // ==========================================
+        Persona albertoCab = new Persona("Alberto Caballero");
+        Persona lauraCab = new Persona("Laura Caballero");
+        Persona joseLuisGil = new Persona("José Luis Gil");
+        Persona malena = new Persona("Malena Alterio");
+        Persona fernandoTejero2 = new Persona("Fernando Tejero");
+
+        SerieEstandar anhqv = new SerieEstandar(
+                "S05",
+                "Aqui no hay quien viva",
+                "Las caóticas vidas de los vecinos de Desengaño 21 provocan situaciones absurdas y conflictos constantes.",
+                albertoCab
+        );
+
+        anhqv.getCreadores().add(lauraCab);
+        anhqv.getActores().addAll(Arrays.asList(joseLuisGil, malena, fernandoTejero2));
+
+        // TEMPORADA 1
+        Temporada aqnhvT1 = new Temporada(1);
+        aqnhvT1.addCapitulo(new Capitulo(1, "Érase una mudanza", "Roberto y Lucía llegan a Desengaño 21."));
+        aqnhvT1.addCapitulo(new Capitulo(2, "Érase un rumor", "Los cotilleos desatan conflictos entre vecinos."));
+        aqnhvT1.addCapitulo(new Capitulo(3, "Érase un presidente", "Juan Cuesta afronta problemas en la comunidad."));
+        aqnhvT1.addCapitulo(new Capitulo(4, "Érase una boda", "Una celebración termina en caos."));
+        aqnhvT1.addCapitulo(new Capitulo(5, "Érase un okupa", "Un inesperado invitado revoluciona el edificio."));
+        aqnhvT1.addCapitulo(new Capitulo(6, "Érase una derrama", "Los vecinos discuten sobre nuevos gastos."));
+        anhqv.addTemporada(aqnhvT1);
+
+        // TEMPORADA 2
+        Temporada aqnhvT2 = new Temporada(2);
+        aqnhvT2.addCapitulo(new Capitulo(1, "Érase una separación", "Las tensiones aumentan entre varios vecinos."));
+        aqnhvT2.addCapitulo(new Capitulo(2, "Érase un chantaje", "Un secreto amenaza la paz comunitaria."));
+        aqnhvT2.addCapitulo(new Capitulo(3, "Érase una convivencia", "La convivencia empeora aún más."));
+        aqnhvT2.addCapitulo(new Capitulo(4, "Érase una multa", "Un problema económico afecta al edificio."));
+        aqnhvT2.addCapitulo(new Capitulo(5, "Érase una fiesta", "Una fiesta se sale de control."));
+        aqnhvT2.addCapitulo(new Capitulo(6, "Érase un escándalo", "Un escándalo altera la comunidad."));
+        anhqv.addTemporada(aqnhvT2);
+
+
+        // ==========================================
+        // 7. SUITS (Categoría SILVER) - 2 Temporadas
+        // ==========================================
+        Persona aaronKorsh = new Persona("Aaron Korsh");
+        Persona gabriel = new Persona("Gabriel Macht");
+        Persona patrick = new Persona("Patrick J. Adams");
+        Persona meghan = new Persona("Meghan Markle");
+
+        SerieSilver suits = new SerieSilver(
+                "S06",
+                "Suits",
+                "Un abogado brillante contrata a un joven con memoria fotográfica que nunca estudió derecho.",
+                aaronKorsh
+        );
+
+        suits.getActores().addAll(Arrays.asList(gabriel, patrick, meghan));
+
+        // TEMPORADA 1
+        Temporada suitsT1 = new Temporada(1);
+        suitsT1.addCapitulo(new Capitulo(1, "Pilot", "Mike Ross comienza a trabajar para Harvey Specter."));
+        suitsT1.addCapitulo(new Capitulo(2, "Errors and Omissions", "Mike afronta su primer gran caso."));
+        suitsT1.addCapitulo(new Capitulo(3, "Inside Track", "Harvey intenta cerrar un importante acuerdo."));
+        suitsT1.addCapitulo(new Capitulo(4, "Dirty Little Secrets", "Mike debe ocultar su pasado."));
+        suitsT1.addCapitulo(new Capitulo(5, "Bail Out", "Un caso amenaza la reputación del bufete."));
+        suitsT1.addCapitulo(new Capitulo(6, "Tricks of the Trade", "Harvey y Mike enfrentan nuevos desafíos."));
+        suits.addTemporada(suitsT1);
+
+        // TEMPORADA 2
+        Temporada suitsT2 = new Temporada(2);
+        suitsT2.addCapitulo(new Capitulo(1, "She Knows", "Harvey intenta proteger el secreto de Mike."));
+        suitsT2.addCapitulo(new Capitulo(2, "The Choice", "Mike toma decisiones difíciles."));
+        suitsT2.addCapitulo(new Capitulo(3, "Meet the New Boss", "Jessica afronta amenazas internas."));
+        suitsT2.addCapitulo(new Capitulo(4, "Discovery", "El bufete entra en una batalla legal."));
+        suitsT2.addCapitulo(new Capitulo(5, "Break Point", "Mike se enfrenta a un rival."));
+        suitsT2.addCapitulo(new Capitulo(6, "All In", "Harvey arriesga demasiado."));
+        suits.addTemporada(suitsT2);
+
+
+        // ==========================================
+        // 8. CHERNOBYL (Categoría GOLD) - 1 Temporada
+        // ==========================================
+        Persona craigMazin = new Persona("Craig Mazin");
+        Persona jared = new Persona("Jared Harris");
+        Persona stellan = new Persona("Stellan Skarsgård");
+
+        SerieGold chernobyl = new SerieGold(
+                "S07",
+                "Chernobyl",
+                "La reconstrucción dramática del desastre nuclear de Chernóbil de 1986.",
+                craigMazin
+        );
+
+        chernobyl.getActores().addAll(Arrays.asList(jared, stellan));
+
+        Temporada chT1 = new Temporada(1);
+        chT1.addCapitulo(new Capitulo(1, "1:23:45", "La explosión del reactor cambia la historia."));
+        chT1.addCapitulo(new Capitulo(2, "Please Remain Calm", "Las autoridades minimizan el desastre."));
+        chT1.addCapitulo(new Capitulo(3, "Open Wide, O Earth", "Los liquidadores enfrentan enormes riesgos."));
+        chT1.addCapitulo(new Capitulo(4, "The Happiness of All Mankind", "Se toman decisiones críticas para evitar otra explosión."));
+        chT1.addCapitulo(new Capitulo(5, "Vichnaya Pamyat", "Se revelan las causas reales del accidente."));
+        chernobyl.addTemporada(chT1);
+
+
+        // ==========================================
+        // 9. INAZUMA ELEVEN (Categoría ESTANDAR) - 2 Temporadas
+        // ==========================================
+        Persona level5 = new Persona("Level-5");
+
+        SerieEstandar inazuma = new SerieEstandar(
+                "S08",
+                "Inazuma Eleven",
+                "Mark Evans intenta convertir al Raimon en el mejor equipo de fútbol del país.",
+                level5
+        );
+
+        // TEMPORADA 1
+        Temporada inT1 = new Temporada(1);
+        inT1.addCapitulo(new Capitulo(1, "¡Al fútbol!", "Mark busca jugadores para salvar al Raimon."));
+        inT1.addCapitulo(new Capitulo(2, "El misterioso delantero", "Axel Blaze aparece."));
+        inT1.addCapitulo(new Capitulo(3, "El partido contra Occult", "El Raimon disputa un encuentro decisivo."));
+        inT1.addCapitulo(new Capitulo(4, "Nuevas técnicas", "El equipo aprende movimientos especiales."));
+        inT1.addCapitulo(new Capitulo(5, "El desafío", "Empieza el torneo regional."));
+        inT1.addCapitulo(new Capitulo(6, "Victoria imposible", "El Raimon sorprende a todos."));
+        inazuma.addTemporada(inT1);
+
+        // TEMPORADA 2
+        Temporada inT2 = new Temporada(2);
+        inT2.addCapitulo(new Capitulo(1, "La amenaza alienígena", "Nuevos rivales destruyen el Raimon."));
+        inT2.addCapitulo(new Capitulo(2, "El nuevo equipo", "Mark reúne nuevos compañeros."));
+        inT2.addCapitulo(new Capitulo(3, "Entrenamiento especial", "El equipo mejora sus habilidades."));
+        inT2.addCapitulo(new Capitulo(4, "Primer enfrentamiento", "El Raimon desafía a Genesis."));
+        inT2.addCapitulo(new Capitulo(5, "La remontada", "El equipo supera grandes dificultades."));
+        inT2.addCapitulo(new Capitulo(6, "Esperanza", "El Raimon vuelve a creer."));
+        inazuma.addTemporada(inT2);
+
+
+        // ==========================================
+        // 10. REX, UN POLICÍA DIFERENTE (Categoría ESTANDAR) - 2 Temporadas
+        // ==========================================
+        Persona peterHajek = new Persona("Peter Hajek");
+
+        SerieEstandar rex = new SerieEstandar(
+                "S09",
+                "Rex, un policia diferente",
+                "Un pastor alemán ayuda a la policía a resolver crímenes en Viena.",
+                peterHajek
+        );
+
+        // TEMPORADA 1
+        Temporada rexT1 = new Temporada(1);
+        rexT1.addCapitulo(new Capitulo(1, "El nuevo compañero", "Rex comienza a trabajar con su nuevo inspector."));
+        rexT1.addCapitulo(new Capitulo(2, "Un caso complicado", "Rex ayuda a resolver un asesinato."));
+        rexT1.addCapitulo(new Capitulo(3, "Pistas ocultas", "El olfato de Rex resulta clave."));
+        rexT1.addCapitulo(new Capitulo(4, "Persecución", "Una investigación se vuelve peligrosa."));
+        rexT1.addCapitulo(new Capitulo(5, "Testigo inesperado", "Rex descubre nuevas pistas."));
+        rexT1.addCapitulo(new Capitulo(6, "Caso cerrado", "El equipo resuelve el crimen."));
+        rex.addTemporada(rexT1);
+
+        // TEMPORADA 2
+        Temporada rexT2 = new Temporada(2);
+        rexT2.addCapitulo(new Capitulo(1, "Una nueva misión", "Rex afronta otro caso complejo."));
+        rexT2.addCapitulo(new Capitulo(2, "El sospechoso", "La investigación toma un giro inesperado."));
+        rexT2.addCapitulo(new Capitulo(3, "Bajo vigilancia", "Rex ayuda en una operación encubierta."));
+        rexT2.addCapitulo(new Capitulo(4, "La trampa", "La policía prepara una emboscada."));
+        rexT2.addCapitulo(new Capitulo(5, "El rescate", "Rex salva a una víctima."));
+        rexT2.addCapitulo(new Capitulo(6, "Justicia", "El caso llega a su desenlace."));
+        rex.addTemporada(rexT2);
+
+
+
         // Guardamos todo el catálogo de golpe
-        sr.saveAll(Arrays.asList(peaky, prison, lqsa));
+        sr.saveAll(Arrays.asList(
+        peaky,
+        prison,
+        lqsa,
+        breakingBad,
+        anhqv,
+        suits,
+        chernobyl,
+        inazuma,
+        rex
+    ));
     }
 
     private void feedUsuariosYVisualizaciones() {

@@ -1,31 +1,33 @@
-<section class="fade-in">
-    <h2 style="font-size: 2em; color: white;">🌍 Actividad de la Comunidad</h2>
-    <p style="color: #b3b3b3;">Busca a otros usuarios de la plataforma para descubrir qué series están siguiendo.</p>
-    
-    <div style="display: flex; gap: 10px; margin-bottom: 30px;">
-        <input type="text" ng-model="$ctrl.searchUser" placeholder="Ej: mrajoy, pepereina..." class="login-input" style="width: 300px; margin: 0;">
-        <button ng-click="$ctrl.buscar()" class="btn-primary" style="font-size: 1.1em;">🔍 Buscar Perfil</button>
-    </div>
-
-    <div ng-if="$ctrl.error" class="error">{{$ctrl.error}}</div>
-
-    <div ng-if="$ctrl.userResult" class="temporada-card" style="display: block;">
-        <h3 style="color: var(--pola-red); font-size: 1.5em; margin-top: 0;">Historial de {{$ctrl.userResult.username}}</h3>
+<div>
+    <div class="settings-panel">
+        <h3 style="color: #ff4747;">Comunidad de Usuarios</h3>
+        <p>Busca la actividad de otros usuarios de la plataforma.</p>
         
-        <div ng-if="$ctrl.userResult.estadoSeries && ($ctrl.userResult.estadoSeries | json) != '{}'">
-            <ul style="font-size: 1.1em; line-height: 2; list-style: none; padding: 0;">
-                <li ng-repeat="(titulo, estado) in $ctrl.userResult.estadoSeries" style="background: #222; padding: 10px; margin-bottom: 5px; border-radius: 4px; display: flex; justify-content: space-between;">
-                    <strong>{{titulo}}</strong>
-                    <span class="badge" ng-class="{
-                        'badge-terminada': estado === 'TERMINADA', 
-                        'badge-pendiente': estado === 'PENDIENTE', 
-                        'badge-empezada': estado === 'EMPEZADA'
-                    }" style="position: static; box-shadow: none;">{{estado}}</span>
-                </li>
-            </ul>
+        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <input type="text" ng-model="$ctrl.searchUser" placeholder="Nombre de usuario (ej: cr7bicho)" class="login-input" style="width: 300px; margin: 0;">
+            <button ng-click="$ctrl.buscar()" class="btn-primary">Buscar Perfil</button>
         </div>
-        <p ng-if="!$ctrl.userResult.estadoSeries || ($ctrl.userResult.estadoSeries | json) == '{}'" style="color: #888;">
-            Este usuario es muy reservado y aún no tiene series en su lista.
-        </p>
+        <div ng-if="$ctrl.error" class="error">{{$ctrl.error}}</div>
     </div>
-</section>
+
+    <div ng-if="$ctrl.userResult">
+        <h2>Colección Pública de {{$ctrl.userResult.username}}</h2>
+        
+        <div class="serie-grid" ng-if="$ctrl.seriesDetalles.length > 0">
+            <div class="card-serie" ng-repeat="item in $ctrl.seriesDetalles">
+                <span class="badge badge-pendiente" ng-if="item.estado === 'PENDIENTE'">PENDIENTE</span>
+                <span class="badge badge-empezada" ng-if="item.estado === 'EMPEZADA'">EMPEZADA</span>
+                <span class="badge badge-terminada" ng-if="item.estado === 'TERMINADA'">TERMINADA</span>
+                
+                <img ng-src="{{item.poster}}" class="serie-poster">
+                <div class="card-info">
+                    <h4>{{item.titulo}}</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-panel" ng-if="$ctrl.seriesDetalles.length === 0" style="text-align: center;">
+            <p>Este usuario es muy reservado y aún no tiene series en su lista.</p>
+        </div>
+    </div>
+</div>

@@ -1,33 +1,33 @@
 <div class="login-wrapper">
     <div class="login-box">
-        <img src="images/polaflix-logo.png" class="login-logo" alt="Polaflix Logo">
+        <span class="login-logo">Polaflix</span>
         
         <p ng-if="$ctrl.mensaje" class="error">{{$ctrl.mensaje}}</p>
 
         <div ng-if="!$ctrl.modoRegistro">
-            <input type="text" class="login-input" ng-model="$ctrl.username" placeholder="Introduce tu usuario">
+            <input type="text" class="login-input" ng-model="$ctrl.username" placeholder="Usuario">
             <input type="password" class="login-input" ng-model="$ctrl.password" placeholder="Contraseña">
-            <button class="login-btn" ng-click="$ctrl.entrar()">ENTRAR AL SISTEMA</button>
+            <button class="login-btn" ng-click="$ctrl.entrar()">Iniciar Sesión</button>
             <p style="margin-top: 20px; color: #888;">
-                ¿No tienes cuenta? <a href="" ng-click="$ctrl.toggleModo()" style="color: var(--pola-red);">Regístrate aquí</a>
+                ¿Eres nuevo? <a href="" ng-click="$ctrl.toggleModo()" style="color: #ff4747;">Regístrate</a>
             </p>
         </div>
 
         <div ng-if="$ctrl.modoRegistro">
             <input type="text" class="login-input" ng-model="$ctrl.username" placeholder="Nuevo Usuario">
             <input type="password" class="login-input" ng-model="$ctrl.password" placeholder="Contraseña">
-            <input type="text" class="login-input" ng-model="$ctrl.iban" placeholder="IBAN (ej: ES123...)">
+            <input type="text" class="login-input" ng-model="$ctrl.iban" placeholder="IBAN Bancario">
             
-            <div style="text-align: left; margin-bottom: 20px; color: #ccc;">
+            <div style="text-align: left; margin-bottom: 20px; color: #333;">
                 <label>
                     <input type="checkbox" ng-model="$ctrl.esVip"> 
-                    Quiero Tarifa Plana VIP (20€/mes)
+                    Plan VIP Premium (20€/mes)
                 </label>
             </div>
 
-            <button class="login-btn" ng-click="$ctrl.registrar()">CREAR CUENTA</button>
+            <button class="login-btn" ng-click="$ctrl.registrar()">Crear Cuenta</button>
             <p style="margin-top: 20px; color: #888;">
-                <a href="" ng-click="$ctrl.toggleModo()" style="color: #ccc;">Volver al Login</a>
+                <a href="" ng-click="$ctrl.toggleModo()" style="color: #666;">Volver al Login</a>
             </p>
         </div>
 

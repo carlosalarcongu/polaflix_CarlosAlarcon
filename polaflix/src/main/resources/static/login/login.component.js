@@ -4,7 +4,6 @@ angular.module('polaflixApp').component('loginPolaflix', {
         var ctrl = this;
         ctrl.modoRegistro = false; 
         
-        // Formulario
         ctrl.username = '';
         ctrl.password = '';
         ctrl.iban = '';
@@ -16,7 +15,7 @@ angular.module('polaflixApp').component('loginPolaflix', {
             if (ctrl.username && ctrl.password) {
                 PolaflixService.login(ctrl.username, ctrl.password).then(function() {
                     sessionStorage.setItem('usuarioLogueado', ctrl.username);
-                    $location.path('/catalogo'); 
+                    $location.path('/inicio'); 
                 }).catch(function(error) {
                     ctrl.mensaje = error;
                 });
@@ -31,7 +30,7 @@ angular.module('polaflixApp').component('loginPolaflix', {
                 PolaflixService.guardarUsuario(ctrl.username, ctrl.password, ctrl.iban, ctrl.esVip, cuota)
                     .then(function() {
                         sessionStorage.setItem('usuarioLogueado', ctrl.username);
-                        $location.path('/catalogo');
+                        $location.path('/inicio');
                     }).catch(function() {
                         ctrl.mensaje = "Hubo un error al crear la cuenta.";
                     });

@@ -20,18 +20,28 @@
             
             <img ng-src="{{$ctrl.getPosterTemporada($ctrl.serie.id, temp.numero)}}" class="temporada-poster">
             
-            <div class="temporada-info">
-                <h3 style="margin-top: 0;">Temporada {{temp.numero}}</h3>
-                <p style="color: #999;">Selecciona un número para marcar el capítulo como visto:</p>
+            <div class="temporada-info" style="flex-grow: 1;">
+                <h3 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 10px; cursor: pointer; color: #333;" ng-click="$ctrl.toggleTemporada(temp.id)">
+                    Temporada {{temp.numero}}
+                    <span style="float: right;">{{$ctrl.temporadaExpandida === temp.id ? '▼' : '▶'}}</span>
+                </h3>
                 
-                <div class="capitulos-grid">
-                    <button class="capitulo-btn" 
-                            title="{{cap.titulo}}" 
-                            ng-repeat="cap in temp.capitulos | orderBy:'numero'" 
-                            ng-click="$ctrl.marcarVisto(cap.id)">
-                        <span class="num-gigante">{{cap.numero}}</span>
-                        <span class="texto-pequeno">{{cap.titulo}}</span>
-                    </button>
+                <div class="capitulos-lista-vertical" ng-show="$ctrl.temporadaExpandida === temp.id">
+                    <div class="capitulo-fila" ng-repeat="cap in temp.capitulos | orderBy:'numero'">
+                        <div class="capitulo-contenido">
+                            <div class="capitulo-info">
+                                <span class="capitulo-numero">{{cap.numero}}.</span>
+                                <span class="capitulo-titulo">{{cap.titulo}}</span>
+                            </div>
+                            <div class="capitulo-descripcion">{{cap.descripcion}}</div>
+                        </div>
+                        <div class="capitulo-acciones">
+                            <a href="" class="btn-primary" ng-click="$ctrl.marcarVisto(cap.id)">Ver</a>
+                            <span class="badge" ng-class="$ctrl.esVisto(cap.id) ? 'badge-terminada' : 'badge-pendiente'" style="position: static; box-shadow: none;">
+                                {{$ctrl.esVisto(cap.id) ? 'Visto' : 'Pendiente'}}
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

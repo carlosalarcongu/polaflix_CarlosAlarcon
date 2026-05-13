@@ -1,8 +1,12 @@
 angular.module('polaflixApp').factory('PolaflixService', ['$http', '$q', function($http, $q) {
     return {
-        getSeries: function() {
-            return $http.get('/series')
-                .then(res => res.data)
+        getSeries: function(inicial, titulo) {
+            var config = { params: {} };
+            if (inicial) config.params.inicial = inicial;
+            if (titulo) config.params.titulo = titulo;
+
+            return $http.get('/series', config)
+                .then(res => res.data || [])
                 .catch(err => $q.reject("No se pudo cargar el catálogo."));
         },
 
@@ -15,7 +19,7 @@ angular.module('polaflixApp').factory('PolaflixService', ['$http', '$q', functio
         verCapitulo: function(user, capId) {
             return $http.put(`/usuarios/${user}/capitulos-vistos/${capId}`)
                 .then(function(response) {
-                    return "¡Capítulo marcado como visto con éxito!"; 
+                    return "Capítulo marcado como visto."; 
                 })
                 .catch(function(err) {
                     return $q.reject("Error al registrar visualización.");
@@ -66,7 +70,7 @@ angular.module('polaflixApp').factory('PolaflixService', ['$http', '$q', functio
             return $http.put('/usuarios/' + username + '/contrasena', {
                 actual: actual,
                 nueva: nueva
-            }).catch(err => $q.reject("Error al cambiar la contraseña. Verifica tu clave actual."));
+            }).catch(err => $q.reject("Error al cambiar la contraseña."));
         },
 
         quitarDePendientes: function(username, serieId) {

@@ -7,17 +7,17 @@ angular.module('polaflixApp', ['ngRoute'])
                 .when('/login', {
                     template: '<login-polaflix></login-polaflix>'
                 })
+                .when('/inicio', {
+                    template: '<perfil-usuario></perfil-usuario>'
+                })
                 .when('/catalogo', {
                     template: '<catalogo-series></catalogo-series>'
                 })
                 .when('/series/:serieId', {
                     template: '<detalle-serie></detalle-serie>'
                 })
-                .when('/perfil', {
-                    template: '<perfil-usuario></perfil-usuario>'
-                })
-                .when('/elenco', {
-                    template: '<elenco-series></elenco-series>' 
+                .when('/facturas', {
+                    template: '<facturas-usuario></facturas-usuario>'
                 })
                 .when('/comunidad', {
                     template: '<comunidad-polaflix></comunidad-polaflix>' 
@@ -29,5 +29,14 @@ angular.module('polaflixApp', ['ngRoute'])
 angular.module('polaflixApp').controller('MainController', ['$scope', '$location', function($scope, $location) {
     $scope.mostrarMenu = function() {
         return $location.path() !== '/login';
+    };
+    
+    $scope.getUsername = function() {
+        return sessionStorage.getItem('usuarioLogueado') || 'Invitado';
+    };
+
+    $scope.logout = function() {
+        sessionStorage.removeItem('usuarioLogueado');
+        $location.path('/login');
     };
 }]);

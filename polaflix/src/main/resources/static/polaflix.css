@@ -1,291 +1,415 @@
-:root {
-    --pola-red: #E50914;
-    --dark-bg: #141414;
-    --shelf-wood: #3e2723;
-}
 body {
     margin: 0;
-    background-color: var(--dark-bg);
-    color: white;
-    display: flex;
-    height: 100vh;
-    overflow: hidden;
-    font-family: 'Segoe UI', Tahoma, sans-serif;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #f2f2f2;
+    color: #333;
 }
 
-.sidebar {
-    width: 26em;
-    background: #000;
-    border-right: 0.1em solid #333;
+.top-header {
+    background-color: #ff4747;
+    color: white;
+    padding: 15px 40px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.header-top {
     display: flex;
-    flex-direction: column;
-    padding: 3em 2em;
-    box-shadow: 0.2em 0 1em rgba(0,0,0,0.5);
-    z-index: 100;
+    justify-content: space-between;
+    align-items: center;
 }
-.sidebar-logo {
-    width: 100%;
-    margin-bottom: 5em;
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-.sidebar-logo:hover {
-    transform: scale(1.05);
-}
-.sidebar nav {
-    display: flex;
-    flex-direction: column;
-    gap: 2em;
-}
-.sidebar nav a {
-    color: #b3b3b3;
-    text-decoration: none;
-    font-size: 1.2em;
+
+.logo-placeholder {
+    font-size: 2em;
     font-weight: bold;
-    transition: color 0.3s;
+    font-style: italic;
+    letter-spacing: -1px;
+}
+
+.welcome-text {
+    font-size: 1.2em;
+    margin: 0;
+}
+
+.user-avatar {
+    font-size: 1.5em;
+    cursor: pointer;
+    background: #fff;
+    color: #ff4747;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
-    gap: 1em;
+    justify-content: center;
 }
-.sidebar nav a:hover {
-    color: var(--pola-red);
+
+.top-nav {
+    background-color: #fff;
+    padding: 10px 40px;
+    border-bottom: 2px solid #e8e8e8;
+    display: flex;
+    gap: 20px;
 }
+
+.top-nav a {
+    color: #333;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1em;
+}
+
+.top-nav a:hover {
+    color: #ff4747;
+}
+
 .main-content {
-    flex-grow: 1;
-    padding: 4em;
-    overflow-y: auto;
-    background: linear-gradient(to bottom, #1f1f1f, var(--dark-bg));
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 20px;
 }
 
 .login-wrapper {
     display: flex;
     justify-content: center;
-    align-items: center;
-    height: 100%;
-    flex-direction: column;
-}
-.login-box {
-    background: rgba(0,0,0,0.85);
-    padding: 5em 6em;
-    border-radius: 0.8em;
-    text-align: center;
-    border: 0.1em solid #333;
-    width: 40em;
-    box-shadow: 0 1em 3em rgba(0,0,0,0.8);
-}
-.login-logo {
-    width: 100%;
-    max-width: 30em;
-    margin-bottom: 4em;
-}
-.login-input {
-    padding: 1.5em;
-    width: 100%;
-    box-sizing: border-box;
-    margin-bottom: 2.5em;
-    border-radius: 0.5em;
-    border: none;
-    font-size: 1.1em;
-    background: #333;
-    color: white;
-}
-.login-btn {
-    background: var(--pola-red);
-    color: white;
-    padding: 1.5em;
-    width: 100%;
-    border: none;
-    border-radius: 0.5em;
-    font-size: 1.2em;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-.login-btn:hover {
-    background: #b20710;
+    margin-top: 80px;
 }
 
-.shelf-container {
-    margin-top: 2em;
-    margin-bottom: 6em;
+.login-box {
+    background: #fff;
+    padding: 40px;
+    border-radius: 8px;
+    width: 400px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
-.shelf {
+
+.login-logo {
+    font-size: 2.5em;
+    color: #ff4747;
+    font-weight: bold;
+    text-align: center;
+    display: block;
+    margin-bottom: 30px;
+}
+
+.login-input {
+    display: block;
+    width: 100%;
+    margin: 15px 0;
+    padding: 12px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.login-btn {
+    background: #ff4747;
+    color: white;
+    padding: 15px;
+    width: 100%;
+    border: none;
+    border-radius: 4px;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.login-btn:hover {
+    background: #e62e04;
+}
+
+.catalogo-controls {
     display: flex;
-    gap: 2.5em;
-    padding-bottom: 1em;
-    border-bottom: 1.5em solid var(--shelf-wood);
-    box-shadow: inset 0 -0.5em 1em rgba(0,0,0,0.6);
+    justify-content: space-between;
+    align-items: center;
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
 }
+
+.alfabeto span {
+    cursor: pointer;
+    margin-right: 8px;
+    padding: 5px 8px;
+    border-radius: 4px;
+}
+
+.letra-activa {
+    background: #ff4747;
+    color: white;
+    font-weight: bold;
+}
+
+.search-box input {
+    padding: 8px;
+    border: 2px solid #ff4747;
+    border-radius: 4px 0 0 4px;
+    outline: none;
+}
+
+.search-box button {
+    background: #ff4747;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.serie-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+}
+
 .card-serie {
-    width: 22em;
-    position: relative;
-    transition: transform 0.3s;
-    background: #111;
-    border-radius: 0.4em;
+    background: #fff;
+    border-radius: 8px;
     overflow: hidden;
+    transition: box-shadow 0.3s;
+    position: relative;
 }
+
 .card-serie:hover {
-    transform: translateY(-1.5em);
-    box-shadow: 0 1.5em 2em rgba(0,0,0,0.5);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
+
 .serie-poster {
     width: 100%;
-    height: 31em;
+    height: 300px;
     object-fit: cover;
 }
+
 .card-info {
-    padding: 1.5em;
-    text-align: center;
+    padding: 15px;
 }
+
 .card-info h4 {
-    margin: 0 0 1em 0;
+    margin: 0 0 10px 0;
     font-size: 1.1em;
-    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.price-tag {
+    color: #ff4747;
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.btn-primary {
+    background: #ff4747;
+    color: white;
+    padding: 8px 12px;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.btn-secondary {
+    background: #ff9000;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-danger {
+    background: #fff;
+    color: #ff4747;
+    border: 1px solid #ff4747;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
 }
 
 .badge {
     position: absolute;
-    top: 1em;
-    right: 1em;
-    padding: 0.5em 1em;
+    top: 10px;
+    left: 10px;
+    padding: 5px 10px;
     font-size: 0.8em;
     font-weight: bold;
-    border-radius: 0.3em;
+    border-radius: 15px;
     z-index: 10;
-    box-shadow: 0 0.2em 0.5em rgba(0,0,0,0.5);
 }
 
-.badge-sin-posicion {
-    
-    font-size: 0.8em;
-    font-weight: bold;
-    border-radius: 0.3em;
-    z-index: 10;
-    box-shadow: 0 0.2em 0.5em rgba(0,0,0,0.5);
-}
-
-.badge-pendiente {
-    background: #f39c12;
-    color: #000;
-}
-.badge-empezada {
-    background: #3498db;
-    color: #fff;
-}
-.badge-terminada {
-    background: #2ecc71;
-    color: #fff;
-}
-
-.btn-primary {
-    background: var(--pola-red);
-    color: white;
-    padding: 0.8em 1.2em;
-    text-decoration: none;
-    border-radius: 0.3em;
-    font-weight: bold;
-    border: none;
-    cursor: pointer;
-}
-.btn-secondary {
-    background: #555;
-    color: white;
-    padding: 0.8em 1.2em;
-    border: none;
-    border-radius: 0.3em;
-    font-weight: bold;
-    cursor: pointer;
-}
-.btn-secondary:hover {
-    background: #777;
-}
+.badge-pendiente { background: #ff9000; color: #fff; }
+.badge-empezada { background: #0088cc; color: #fff; }
+.badge-terminada { background: #4caf50; color: #fff; }
 
 .header-detalle {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
     display: flex;
-    gap: 4em;
-    margin-bottom: 4em;
+    gap: 30px;
+    margin-bottom: 30px;
 }
+
 .poster-detalle {
-    width: 30em;
-    border-radius: 0.8em;
-    box-shadow: 0 0 2em rgba(0,0,0,0.5);
+    width: 250px;
+    border-radius: 8px;
 }
+
+.info-texto h1 {
+    margin-top: 0;
+}
+
 .temporada-card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
     display: flex;
-    gap: 2.5em;
-    background: #1a1a1a;
-    padding: 2.5em;
-    border-radius: 0.8em;
-    margin-bottom: 2.5em;
-    border-left: 0.5em solid var(--pola-red);
+    gap: 20px;
 }
+
 .temporada-poster {
-    width: 16em;
-    height: 24em;
-    border-radius: 0.6em;
+    width: 120px;
+    height: 180px;
+    border-radius: 4px;
     object-fit: cover;
-    box-shadow: 0 0.4em 0.8em rgba(0,0,0,0.5);
 }
+
+.capitulos-lista-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.capitulo-fila {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f9f9f9;
+    padding: 10px 15px;
+    border-radius: 4px;
+    border: 1px solid #eee;
+}
+
+.capitulo-info {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.capitulo-numero {
+    font-weight: bold;
+    color: #ff4747;
+    font-size: 1.1em;
+}
+
+.capitulo-titulo {
+    font-size: 1em;
+    color: #333;
+}
+
+.capitulo-acciones {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
 .capitulos-grid {
     display: flex;
-    gap: 1.5em;
+    gap: 10px;
     flex-wrap: wrap;
-    margin-top: 2em;
+    margin-top: 15px;
 }
 
-.capitulo-btn { 
-    width: 8em; 
-    height: 8em; 
-    border-radius: 1.2em; 
-    background-color: #222; 
-    color: #fff; 
-    border: 0.3em solid #555; 
-    cursor: pointer; 
-    transition: all 0.2s ease-in-out; 
-    
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    justify-content: center; 
-    
-    box-shadow: 0 0.4em 0.6em rgba(0,0,0,0.3);
-    padding: 0.5em; 
-    box-sizing: border-box; 
-}
-
-.capitulo-btn:hover { 
-    background-color: var(--pola-red); 
-    border-color: #fff; 
-    transform: scale(1.1); 
-    box-shadow: 0 0.6em 1.2em rgba(229, 9, 20, 0.5); 
-}
-
-.num-gigante {
-    font-size: 2.8em;
+.capitulo-btn {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    width: 60px;
+    height: 60px;
+    cursor: pointer;
     font-weight: bold;
-    line-height: 1;
-    margin-bottom: 0.4em;
+    font-size: 1.2em;
+    color: #333;
 }
 
-.texto-pequeno {
+.capitulo-btn:hover {
+    background: #ffe8e8;
+    border-color: #ff4747;
+    color: #ff4747;
+}
+
+.settings-panel {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.settings-panel h3 {
+    margin-top: 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.factura-table {
+    width: 100%;
+    background: #fff;
+    border-collapse: collapse;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.factura-table th {
+    background: #f2f2f2;
+    padding: 15px;
+    text-align: left;
+}
+
+.factura-table td {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.error { color: #ff4747; font-weight: bold; }
+.success { color: #4caf50; font-weight: bold; }
+
+/* --- NUEVOS ESTILOS PARA LA DESCRIPCIÓN DE CAPÍTULOS --- */
+
+/* Agrupa la info superior y la descripción debajo */
+.capitulo-contenido {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    max-width: 75%; /* Evita que el texto empuje los botones de la derecha */
+}
+
+/* Reducimos ligeramente el tamaño de la descripción para que no compita con el título */
+.capitulo-descripcion {
     font-size: 0.9em;
-    font-weight: normal;
-    color: #aaa;
-    white-space: nowrap; 
-    overflow: hidden; 
-    text-overflow: ellipsis; 
-    width: 100%; 
-    text-align: center;
-    transition: color 0.2s;
+    color: #666;
+    line-height: 1.4;
+    margin-left: 25px; /* Lo alineamos visualmente con el texto del título, saltando el número */
 }
 
-.capitulo-btn:hover .texto-pequeno {
-    color: #fff;
-}.error {
-    color: #ff6b6b;
-    font-weight: bold;
+/* Modificamos sutilmente la fila para que el contenido no quede pegado a los bordes al crecer verticalmente */
+.capitulo-fila {
+    align-items: flex-start; /* Alinea los botones arriba si la descripción es muy larga */
 }
-.success {
-    color: #46d369;
-    font-weight: bold;
+
+/* Hacemos que el botón "Ver" destaque un poco más dentro de la fila blanca */
+.capitulo-acciones .btn-primary {
+    padding: 6px 15px;
+    font-size: 0.9em;
 }
