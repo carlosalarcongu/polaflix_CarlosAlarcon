@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface SerieRepository extends JpaRepository<Serie, String> {
+public interface SerieRepository extends JpaRepository<Serie, Integer> {
     List<Serie> findByInicialOrderByTituloAsc(char inicial);
     List<Serie> findByTituloContainingIgnoreCase(String titulo);
     @Query("SELECT s FROM Serie s JOIN s.temporadas t JOIN t.capitulos c WHERE c.id = :capituloId")

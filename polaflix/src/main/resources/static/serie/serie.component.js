@@ -5,7 +5,7 @@ angular.module('polaflixApp').component('detalleSerie', {
         ctrl.serie = null;
         ctrl.usuario = null;
         ctrl.username = sessionStorage.getItem('usuarioLogueado'); 
-        var serieId = $routeParams.serieId;
+        var serieId = parseInt($routeParams.serieId, 10);
 
         ctrl.temporadaExpandida = null;
 
@@ -42,18 +42,18 @@ angular.module('polaflixApp').component('detalleSerie', {
         };
 
         ctrl.getPosterGeneral = function(idSerie) {
-            if (idSerie === 'S01') return 'images/PeakyBlinders.png';
-            if (idSerie === 'S02') return 'images/PrisonBreakS01.png';
-            if (idSerie === 'S03') return 'images/LQSAS01.png';
+            if (idSerie === 1) return 'images/PeakyBlinders.png';
+            if (idSerie === 2) return 'images/PrisonBreakS01.png';
+            if (idSerie === 3) return 'images/LQSAS01.png';
             return 'images/polaflix-logo.png';
         };
 
         ctrl.getPosterTemporada = function(idSerie, numTemporada) {
             var safeNum = numTemporada > 4 ? 1 : numTemporada;
             var sufijo = 'S0' + safeNum + '.png';
-            if (idSerie === 'S01') return 'images/PeakyBlinders' + sufijo;
-            if (idSerie === 'S02') return 'images/PrisonBreak' + sufijo;
-            if (idSerie === 'S03') return 'images/LQSA' + sufijo;
+            if (idSerie === 1) return 'images/PeakyBlinders' + sufijo;
+            if (idSerie === 2) return 'images/PrisonBreak' + sufijo;
+            if (idSerie === 3) return 'images/LQSA' + sufijo;
             return 'images/polaflix-logo.png';
         };
     }]

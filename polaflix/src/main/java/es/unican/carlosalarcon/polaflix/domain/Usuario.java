@@ -38,7 +38,7 @@ public class Usuario {
     @ElementCollection
     @MapKeyColumn(name = "serie_id")
     @Enumerated(EnumType.STRING)
-    private Map<String, EstadoSerie> estadoSeries = new HashMap<>();
+    private Map<Integer, EstadoSerie> estadoSeries = new HashMap<>();
     
     @ManyToMany
     @JsonView(Views.UsuarioBasico.class)
@@ -46,7 +46,7 @@ public class Usuario {
 
     @ManyToMany
     @MapKeyColumn(name = "serie_id")
-    private Map<String, Capitulo> ultimoCapituloVisto = new HashMap<>();
+    private Map<Integer, Capitulo> ultimoCapituloVisto = new HashMap<>();
 
     protected Usuario() {}
 
@@ -119,7 +119,7 @@ public class Usuario {
 
     @JsonProperty("estadoSeries")
     @JsonView(Views.UsuarioBasico.class) 
-    public Map<String, EstadoSerie> getEstadoSeriesParaJson() {
+    public Map<Integer, EstadoSerie> getEstadoSeriesParaJson() {
         return this.estadoSeries;
     }
 

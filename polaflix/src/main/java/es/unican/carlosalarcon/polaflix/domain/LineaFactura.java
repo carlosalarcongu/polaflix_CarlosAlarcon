@@ -1,9 +1,12 @@
 package es.unican.carlosalarcon.polaflix.domain;
 
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.ManyToOne;
+
 import java.time.LocalDate;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonView;
 
 @Embeddable 
@@ -17,6 +20,10 @@ public class LineaFactura {
     private String temporadaCapitulo;
     @JsonView(Views.UsuarioBasico.class)
     private double cargo;
+
+    @JsonBackReference
+    @ManyToOne
+    private Factura factura;
 
     protected LineaFactura() {} 
 

@@ -5,6 +5,6 @@ import jakarta.persistence.*;
 @DiscriminatorValue("ESTANDAR")
 public class SerieEstandar extends Serie {
     protected SerieEstandar() {}
-    public SerieEstandar(String id, String titulo, String sinopsis, Persona creador) { super(id, titulo, sinopsis, creador); }
+    public SerieEstandar(String titulo, String sinopsis, Persona creador) { super(titulo, sinopsis, creador); }
     @Override public double getCosteVisionado() { return 0.50; }
 }

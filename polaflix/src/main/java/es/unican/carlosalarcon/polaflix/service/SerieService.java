@@ -32,7 +32,7 @@ public class SerieService {
     // Obtener una serie específica por su ID
     // =========================================================================
     @Transactional(readOnly = true)
-    public Serie obtenerSeriePorId(String idSerie) {
+    public Serie obtenerSeriePorId(Integer idSerie) {
         return serieRepository.findById(idSerie).orElse(null);
     }
 }

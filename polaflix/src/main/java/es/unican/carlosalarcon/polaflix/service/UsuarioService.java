@@ -76,7 +76,7 @@ public class UsuarioService {
     }
 
     @Transactional
-    public void agregarSeriePendiente(String username, String serieId) {
+    public void agregarSeriePendiente(String username, Integer serieId) {
         Usuario usuario = usuarioRepository.findByUsername(username);
         if (usuario == null) throw new IllegalArgumentException("Usuario no encontrado.");
         
@@ -87,7 +87,7 @@ public class UsuarioService {
     }
 
     @Transactional
-    public void quitarSeriePendiente(String username, String serieId) {
+    public void quitarSeriePendiente(String username, Integer serieId) {
         Usuario usuario = usuarioRepository.findByUsername(username);
         if (usuario == null) throw new IllegalArgumentException("Usuario no encontrado.");
         

@@ -104,9 +104,9 @@ angular.module('polaflixApp').component('perfilUsuario', {
         };
 
         ctrl.getPosterGeneral = function(idSerie) {
-            if (idSerie === 'S01') return 'images/PeakyBlinders.png';
-            if (idSerie === 'S02') return 'images/PrisonBreakS01.png';
-            if (idSerie === 'S03') return 'images/LQSAS01.png';
+            if (idSerie === 1) return 'images/PeakyBlinders.png';
+            if (idSerie === 2) return 'images/PrisonBreakS01.png';
+            if (idSerie === 3) return 'images/LQSAS01.png';
             return 'images/polaflix-logo.png';
         };
     }]

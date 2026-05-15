@@ -16,14 +16,14 @@ import com.fasterxml.jackson.annotation.JsonView;
 public abstract class Serie {
     
     @Id 
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @JsonView(Views.SerieResumida.class)
-    private String id; 
+    private Integer id; 
     @JsonView(Views.SerieResumida.class)
     private String titulo;
     @JsonView(Views.SerieResumida.class)
     private char inicial;
     
-    @Lob //TODO: Cambiar etiqueta: No usar large object: Consultarlo con Pablo
     @JsonView(Views.SerieResumida.class)
     private String sinopsis;
     
@@ -42,8 +42,7 @@ public abstract class Serie {
     
     protected Serie() {}
 
-    public Serie(String id, String titulo, String sinopsis, Persona creadorPrincipal) {
-        this.id = id;
+    public Serie(String titulo, String sinopsis, Persona creadorPrincipal) {
         this.titulo = titulo;
         this.inicial = titulo.toUpperCase().charAt(0);
         this.sinopsis = sinopsis;
@@ -54,7 +53,7 @@ public abstract class Serie {
     @JsonView(Views.SerieResumida.class)
     public abstract double getCosteVisionado();
 
-    public String getId() { return id; }
+    public Integer getId() { return id; }
     public Set<Persona> getActores() { return actores; }
     public Set<Persona> getCreadores() { return creadores; }
     public List<Temporada> getTemporadas() { return temporadas; }

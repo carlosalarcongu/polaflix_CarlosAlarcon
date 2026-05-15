@@ -43,7 +43,7 @@ public class SerieController {
     @GetMapping("/{id}")
     @JsonView(Views.SerieDetallada.class)
     @Operation(summary = "Obtener detalle de serie", description = "Devuelve los detalles completos de una serie, incluyendo temporadas, capítulos y actores.")
-    public ResponseEntity<Serie> obtenerDetalleSerie(@PathVariable("id") String id) {
+    public ResponseEntity<Serie> obtenerDetalleSerie(@PathVariable("id") Integer id) {
         Serie serie = serieService.obtenerSeriePorId(id);
         
         if (serie != null) {

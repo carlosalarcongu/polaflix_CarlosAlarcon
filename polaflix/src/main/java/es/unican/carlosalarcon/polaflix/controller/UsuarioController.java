@@ -107,7 +107,7 @@ public class UsuarioController {
     @Operation(summary = "Añadir a pendientes", description = "Añade una serie al catálogo personal del usuario en estado PENDIENTE.")
     public ResponseEntity<Void> agregarSeriePendiente(
             @PathVariable("username") String username,
-            @PathVariable("idSerie") String idSerie) {
+            @PathVariable("idSerie") Integer idSerie) {
         try {
             usuarioService.agregarSeriePendiente(username, idSerie);
             return ResponseEntity.ok().build(); 
@@ -120,7 +120,7 @@ public class UsuarioController {
     @Operation(summary = "Quitar de pendientes", description = "Elimina una serie de la lista del usuario (solo si está en estado PENDIENTE).")
     public ResponseEntity<Void> quitarSeriePendiente(
             @PathVariable("username") String username,
-            @PathVariable("idSerie") String idSerie) {
+            @PathVariable("idSerie") Integer idSerie) {
         try {
             usuarioService.quitarSeriePendiente(username, idSerie);
             return ResponseEntity.ok().build(); 

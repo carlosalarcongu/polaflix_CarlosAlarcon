@@ -62,7 +62,7 @@ public class AppFeeder implements CommandLineRunner {
         // ==========================================
         // 2. PEAKY BLINDERS (Categoría GOLD) - 4 Temporadas (Fiel a la serie)
         // ==========================================
-        SerieGold peaky = new SerieGold("S01", "Peaky Blinders", "Una familia de gánsteres asienta su dominio en Birmingham tras la Primera Guerra Mundial, liderados por el ambicioso Tommy Shelby.", steven);
+        SerieGold peaky = new SerieGold("Peaky Blinders", "Una familia de gánsteres asienta su dominio en Birmingham tras la Primera Guerra Mundial, liderados por el ambicioso Tommy Shelby.", steven);
         peaky.getActores().addAll(Arrays.asList(cillian, paul, tom, helen, joe));
 
         // --- TEMPORADA 1 ---
@@ -111,7 +111,7 @@ public class AppFeeder implements CommandLineRunner {
         // ==========================================
         // 3. PRISON BREAK (Categoría SILVER) - 4 Temporadas (Fiel a la serie)
         // ==========================================
-        SerieSilver prison = new SerieSilver("S02", "Prison Break", "Michael Scofield elabora un plan magistral, tatuado en su cuerpo, para entrar en la prisión de Fox River y salvar a su hermano inocente del corredor de la muerte.", paulScheuring);
+        SerieSilver prison = new SerieSilver("Prison Break", "Michael Scofield elabora un plan magistral, tatuado en su cuerpo, para entrar en la prisión de Fox River y salvar a su hermano inocente del corredor de la muerte.", paulScheuring);
         prison.getActores().addAll(Arrays.asList(wentworth, dominic, amaury, robert, sarah));
 
         // --- TEMPORADA 1: Fox River ---
@@ -157,7 +157,7 @@ public class AppFeeder implements CommandLineRunner {
         // ==========================================
         // 4. LA QUE SE AVECINA (Categoría ESTANDAR) - 4 Temporadas
         // ==========================================
-        SerieEstandar lqsa = new SerieEstandar("S03", "La que se avecina", "Las disparatadas vidas y problemas cotidianos de los pintorescos vecinos de la comunidad de Mirador de Montepinar.", alberto);
+        SerieEstandar lqsa = new SerieEstandar("La que se avecina", "Las disparatadas vidas y problemas cotidianos de los pintorescos vecinos de la comunidad de Mirador de Montepinar.", alberto);
         lqsa.getCreadores().add(laura);
         lqsa.getActores().addAll(Arrays.asList(pablo, jordi, eva, nathalie, fernando));
 
@@ -182,7 +182,6 @@ public class AppFeeder implements CommandLineRunner {
         Persona dean = new Persona("Dean Norris");
 
         SerieGold breakingBad = new SerieGold(
-                "S04",
                 "Breaking Bad",
                 "Un profesor de química diagnosticado con cáncer empieza a fabricar metanfetamina junto a un exalumno para asegurar el futuro de su familia.",
                 vince
@@ -221,7 +220,6 @@ public class AppFeeder implements CommandLineRunner {
         Persona fernandoTejero2 = new Persona("Fernando Tejero");
 
         SerieEstandar anhqv = new SerieEstandar(
-                "S05",
                 "Aqui no hay quien viva",
                 "Las caóticas vidas de los vecinos de Desengaño 21 provocan situaciones absurdas y conflictos constantes.",
                 albertoCab
@@ -260,7 +258,6 @@ public class AppFeeder implements CommandLineRunner {
         Persona meghan = new Persona("Meghan Markle");
 
         SerieSilver suits = new SerieSilver(
-                "S06",
                 "Suits",
                 "Un abogado brillante contrata a un joven con memoria fotográfica que nunca estudió derecho.",
                 aaronKorsh
@@ -297,7 +294,6 @@ public class AppFeeder implements CommandLineRunner {
         Persona stellan = new Persona("Stellan Skarsgård");
 
         SerieGold chernobyl = new SerieGold(
-                "S07",
                 "Chernobyl",
                 "La reconstrucción dramática del desastre nuclear de Chernóbil de 1986.",
                 craigMazin
@@ -320,7 +316,6 @@ public class AppFeeder implements CommandLineRunner {
         Persona level5 = new Persona("Level-5");
 
         SerieEstandar inazuma = new SerieEstandar(
-                "S08",
                 "Inazuma Eleven",
                 "Mark Evans intenta convertir al Raimon en el mejor equipo de fútbol del país.",
                 level5
@@ -353,7 +348,6 @@ public class AppFeeder implements CommandLineRunner {
         Persona peterHajek = new Persona("Peter Hajek");
 
         SerieEstandar rex = new SerieEstandar(
-                "S09",
                 "Rex, un policia diferente",
                 "Un pastor alemán ayuda a la policía a resolver crímenes en Viena.",
                 peterHajek
@@ -398,9 +392,9 @@ public class AppFeeder implements CommandLineRunner {
     private void feedUsuariosYVisualizaciones() {
         IBAN ibanPrueba = new IBAN("ES0011112222333344445555");
 
-        Serie peaky = sr.findById("S01").orElseThrow();
-        Serie prison = sr.findById("S02").orElseThrow();
-        Serie lqsa = sr.findById("S03").orElseThrow();
+        Serie peaky = sr.findById(1).orElseThrow();
+        Serie prison = sr.findById(2).orElseThrow();
+        Serie lqsa = sr.findById(3).orElseThrow();
 
         Capitulo peakyS1E1 = peaky.getTemporadas().get(0).getCapitulos().get(0);
         Capitulo peakyS1E2 = peaky.getTemporadas().get(0).getCapitulos().get(1);
