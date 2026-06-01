@@ -39,8 +39,10 @@ public class UsuarioController {
         try {
             Usuario usuario = usuarioService.login(loginDTO.getUsername(), loginDTO.getContrasena());
             return ResponseEntity.ok(usuario);
-        } catch (IllegalArgumentException e) {
+        } catch (SecurityException e) {
             return ResponseEntity.status(401).build();
+        } catch (java.util.NoSuchElementException e) {
+            return ResponseEntity.status(404).build();
         }
     }
 
