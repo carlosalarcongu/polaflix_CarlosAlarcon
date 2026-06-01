@@ -30,7 +30,7 @@ public class UsuarioService {
         if (usuario == null) {
             throw new java.util.NoSuchElementException();
         }
-        if (!contrasena.equals(usuario.getContrasenha())) {
+        if (!usuario.comprobarContrasena(contrasena)) {
             throw new SecurityException();
         }
         return usuario;
@@ -100,32 +100,16 @@ public class UsuarioService {
     @Transactional
     public void verCapitulo(String username, Long idCapitulo) {
         Usuario usuario = usuarioRepository.findByUsername(username);
-        if (usuario == null) throw new IllegalArgumentException("Usuario no encontrado: " + username);
+        if (usuario == null) throw new java.util.NoSuchElementException();
 
         Serie serie = serieRepository.findSerieByCapituloId(idCapitulo)
-                .orElseThrow(() -> new IllegalArgumentException("Capítulo no encontrado con ID: " + idCapitulo));
+                .orElseThrow(() -> new java.util.NoSuchElementException());
                 
         Capitulo capitulo = serie.getTemporadas().stream()
                 .flatMap(t -> t.getCapitulos().stream())
                 .filter(c -> c.getId().equals(idCapitulo))
                 .findFirst().orElseThrow();
 
-        Factura factura = null;
-        if (!usuario.getPlanSuscripcion().isTarifaPlana() && serie.getCosteVisionado() > 0) {
-            int mesActual = LocalDate.now().getMonthValue();
-            int anioActual = LocalDate.now().getYear();
-            factura = facturaRepository.findByUsuarioUsernameAndMesAndAnio(username, mesActual, anioActual);
-            
-            if (factura == null) {
-                String idFactura = "F-" + usuario.getUsername() + "-" + mesActual + "-" + anioActual;
-                factura = new Factura(idFactura, usuario, mesActual, anioActual);
-            }
-        }
-
-        usuario.verCapitulo(capitulo, factura);
-        
-        if (factura != null) {
-            facturaRepository.save(factura);
-        }
+        usuario.verCapitulo(capitulo);
     }
 }

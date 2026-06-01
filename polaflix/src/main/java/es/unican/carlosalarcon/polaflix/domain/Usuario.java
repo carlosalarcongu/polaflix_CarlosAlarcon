@@ -87,7 +87,7 @@ public class Usuario {
         }
     }
 
-    public void verCapitulo(Capitulo capitulo, Factura facturaActual) {
+    public void verCapitulo(Capitulo capitulo) {
         Serie serie = capitulo.getTemporada().getSerie();
         
         this.capitulosVistos.add(capitulo);
@@ -112,12 +112,33 @@ public class Usuario {
             this.estadoSeries.put(serie.getId(), EstadoSerie.EMPEZADA);
         }
 
-        if (!this.planSuscripcion.isTarifaPlana() && facturaActual != null && serie.getCosteVisionado() > 0) {
+        if (!this.planSuscripcion.isTarifaPlana() && serie.getCosteVisionado() > 0) {
+            Factura facturaActual = obtenerOCrearFacturaActual();
             String tempCap = "T" + capitulo.getTemporada().getNumero() + "xC" + capitulo.getNumero();
             facturaActual.anadirCargo(new LineaFactura(LocalDate.now(), serie.getTitulo(), tempCap, serie.getCosteVisionado()));
         }
     }
 
+    private Factura obtenerOCrearFacturaActual() {
+        int mesActual = LocalDate.now().getMonthValue();
+        int anioActual = LocalDate.now().getYear();
+        
+        for (Factura f : this.facturas) {
+            if (f.getMes() == mesActual && f.getAnio() == anioActual) {
+                return f;
+            }
+        }
+        
+        String idFactura = "F-" + this.username + "-" + mesActual + "-" + anioActual;
+        Factura nuevaFactura = new Factura(idFactura, this, mesActual, anioActual);
+        this.facturas.add(nuevaFactura);
+        return nuevaFactura;
+    }
+
+    public boolean comprobarContrasena(String contrasena) {
+        return this.contrasenha.equals(contrasena);
+    }
+    
     @JsonProperty("estadoSeries")
     @JsonView(Views.UsuarioBasico.class) 
     public Map<Integer, EstadoSerie> getEstadoSeriesParaJson() {
