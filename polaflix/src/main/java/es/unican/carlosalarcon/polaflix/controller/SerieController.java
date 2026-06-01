@@ -27,7 +27,10 @@ public class SerieController {
             @RequestParam(required = false) String inicial,
             @RequestParam(required = false) String titulo) {
         
-        if (inicial != null && titulo != null) {
+        boolean tieneInicial = inicial != null && !inicial.trim().isEmpty();
+        boolean tieneTitulo = titulo != null && !titulo.trim().isEmpty();
+        
+        if (tieneInicial && tieneTitulo) {
             return ResponseEntity.badRequest().build(); 
         }
 
