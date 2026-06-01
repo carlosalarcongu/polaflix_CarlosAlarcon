@@ -61,7 +61,7 @@ public class UsuarioController {
                 dto.getCuota()
             );
             return ResponseEntity.ok(usuarioActualizado);
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
     }
@@ -72,7 +72,7 @@ public class UsuarioController {
         try {
             usuarioService.borrarUsuario(username);
             return ResponseEntity.ok().build();
-        } catch (IllegalArgumentException e) {
+        } catch (java.util.NoSuchElementException e) {
             return ResponseEntity.notFound().build();
         }
     }
@@ -85,6 +85,10 @@ public class UsuarioController {
         try {
             usuarioService.cambiarContrasena(username, dto.getActual(), dto.getNueva());
             return ResponseEntity.ok().build();
+        } catch (java.util.NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
+        } catch (SecurityException e) {
+            return ResponseEntity.status(401).build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
@@ -98,10 +102,10 @@ public class UsuarioController {
         try {
             usuarioService.verCapitulo(username, idCapitulo);
             return ResponseEntity.ok().build(); 
-        } catch (IllegalArgumentException e) {
+        } catch (java.util.NoSuchElementException e) {
             return ResponseEntity.notFound().build();
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build(); 
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
         }
     }
 
@@ -113,7 +117,7 @@ public class UsuarioController {
         try {
             usuarioService.agregarSeriePendiente(username, idSerie);
             return ResponseEntity.ok().build(); 
-        } catch (IllegalArgumentException e) {
+        } catch (java.util.NoSuchElementException e) {
             return ResponseEntity.notFound().build(); 
         }
     }
@@ -126,7 +130,7 @@ public class UsuarioController {
         try {
             usuarioService.quitarSeriePendiente(username, idSerie);
             return ResponseEntity.ok().build(); 
-        } catch (IllegalArgumentException e) {
+        } catch (java.util.NoSuchElementException e) {
             return ResponseEntity.notFound().build(); 
         }
     }

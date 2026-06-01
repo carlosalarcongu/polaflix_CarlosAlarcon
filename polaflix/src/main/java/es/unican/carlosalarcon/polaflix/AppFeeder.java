@@ -409,9 +409,9 @@ public class AppFeeder implements CommandLineRunner {
         // Viendo LQSA para relajarse y Peaky Blinders
         // ==========================================
         Usuario carlos = new Usuario("carlosalarcon", "pass123", ibanPrueba, new PlanSuscripcion(true, 20.0));
-        carlos.verCapitulo(lqsaS1E1, null);
-        carlos.verCapitulo(lqsaS3E1, null);
-        carlos.verCapitulo(peakyS1E1, null);
+        carlos.verCapitulo(lqsaS1E1);
+        carlos.verCapitulo(lqsaS3E1);
+        carlos.verCapitulo(peakyS1E1);
         ur.save(carlos);
 
         Factura facCarlos = new Factura("F-CAR-001", carlos, LocalDate.now().getMonthValue(), LocalDate.now().getYear());
@@ -422,7 +422,7 @@ public class AppFeeder implements CommandLineRunner {
         // Ha visto un poco de Prison Break y luego lo dejó
         // ==========================================
         Usuario mariano = new Usuario("mrajoy", "finfin", ibanPrueba, new PlanSuscripcion(false, 0.0));
-        mariano.verCapitulo(prisonS1E1, null);
+        mariano.verCapitulo(prisonS1E1);
         mariano.agregarSeriePendiente(lqsa); // La añade a su lista para verla después
         ur.save(mariano);
 
@@ -434,8 +434,8 @@ public class AppFeeder implements CommandLineRunner {
         // Enganchado a Peaky Blinders
         // ==========================================
         Usuario cristiano = new Usuario("cr7bicho", "siiii", ibanPrueba, new PlanSuscripcion(false, 0.0));
-        cristiano.verCapitulo(peakyS1E1, null);
-        cristiano.verCapitulo(peakyS1E2, null);
+        cristiano.verCapitulo(peakyS1E1);
+        cristiano.verCapitulo(peakyS1E2);
         ur.save(cristiano);
 
         Factura facCR7 = new Factura("F-CR7-001", cristiano, LocalDate.now().getMonthValue(), LocalDate.now().getYear());
