@@ -28,10 +28,10 @@ public class UsuarioService {
     public Usuario login(String username, String contrasena) {
         Usuario usuario = usuarioRepository.findByUsername(username);
         if (usuario == null) {
-            throw new IllegalArgumentException("Usuario no encontrado.");
+            throw new java.util.NoSuchElementException();
         }
-        if (!usuario.getContrasenha().equals(contrasena)) {
-            throw new IllegalArgumentException("Contraseña incorrecta.");
+        if (!contrasena.equals(usuario.getContrasenha())) {
+            throw new SecurityException();
         }
         return usuario;
     }
