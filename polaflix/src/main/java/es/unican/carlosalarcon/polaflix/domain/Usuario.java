@@ -17,6 +17,7 @@ public class Usuario {
     
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @JsonView(Views.UsuarioBasico.class)
     private Long id;
 
     @Column(unique = true, nullable = false)

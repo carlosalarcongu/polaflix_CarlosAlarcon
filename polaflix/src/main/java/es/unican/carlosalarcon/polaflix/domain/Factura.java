@@ -45,7 +45,7 @@ public class Factura {
         this.lineas.add(linea);
     }
 
-    // CORRECCIÓN: Propiedad derivada. Se calcula al vuelo en lugar de ocupar espacio y desincronizarse.
+    @JsonView(Views.UsuarioBasico.class)
     public double getImporteTotal() {
         return lineas.stream().mapToDouble(LineaFactura::getCargo).sum();
     }
