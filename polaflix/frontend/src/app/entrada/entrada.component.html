@@ -1,0 +1,11 @@
+<div class="login-container">
+  <div class="login-box">
+    <h1>Polaflix</h1>
+    <p>Accede con tu nombre de usuario</p>
+    
+    <input type="text" [(ngModel)]="username" placeholder="Ej: cr7bicho" />
+    <button (click)="entrar()">Entrar a la aplicación</button>
+    
+    <p class="error-msg" *ngIf="error">{{error}}</p>
+  </div>
+</div>

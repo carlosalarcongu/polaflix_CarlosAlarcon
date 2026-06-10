@@ -28,7 +28,10 @@ public class SerieController {
             @RequestParam(required = false) String inicial,
             @RequestParam(required = false) String titulo) {
         
-        if (inicial != null && titulo != null) {
+        boolean tieneInicial = inicial != null && !inicial.trim().isEmpty();
+        boolean tieneTitulo = titulo != null && !titulo.trim().isEmpty();
+        
+        if (tieneInicial && tieneTitulo) {
             return ResponseEntity.badRequest().build(); 
         }
 
@@ -60,7 +63,6 @@ public class SerieController {
 package es.unican.carlosalarcon.polaflix.controller;
 
 import es.unican.carlosalarcon.polaflix.domain.Usuario;
-import es.unican.carlosalarcon.polaflix.domain.UsuarioDTO;
 import es.unican.carlosalarcon.polaflix.domain.Views;
 import es.unican.carlosalarcon.polaflix.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -72,7 +74,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 @RestController
 @RequestMapping("/usuarios")
-@Tag(name = "Usuarios", description = "API para las acciones del usuario (perfil, ver capÃ­tulos, aÃ±adir/quitar pendientes, registro)")
+@Tag(name = "Usuarios", description = "API simplificada para acceso y visualizaciÃ³n")
 public class UsuarioController {
 
     @Autowired
@@ -80,10 +82,9 @@ public class UsuarioController {
 
     @GetMapping("/{username}")
     @JsonView(Views.UsuarioBasico.class)
-    @Operation(summary = "Obtener perfil de usuario", description = "Devuelve los datos del usuario, su plan y el estado de sus series.")
+    @Operation(summary = "Entrar al sistema", description = "Comprueba si el usuario existe y devuelve sus datos.")
     public ResponseEntity<Usuario> obtenerUsuario(@PathVariable("username") String username) {
         Usuario usuario = usuarioService.obtenerUsuario(username);
-        
         if (usuario != null) {
             return ResponseEntity.ok(usuario); 
         } else {
@@ -91,100 +92,18 @@ public class UsuarioController {
         }
     }
 
-    @PostMapping("/login")
-    @JsonView(Views.UsuarioBasico.class)
-    @Operation(summary = "Iniciar sesiÃ³n", description = "Comprueba las credenciales del usuario.")
-    public ResponseEntity<Usuario> login(@RequestBody es.unican.carlosalarcon.polaflix.domain.LoginDTO loginDTO) {
-        try {
-            Usuario usuario = usuarioService.login(loginDTO.getUsername(), loginDTO.getContrasena());
-            return ResponseEntity.ok(usuario);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(401).build();
-        }
-    }
-
-    @PutMapping("/{username}")
-    @JsonView(Views.UsuarioBasico.class)
-    @Operation(summary = "Crear o actualizar usuario", description = "Si el usuario no existe, lo crea (Registro). Si existe, actualiza sus datos mediante un payload JSON.")
-    public ResponseEntity<Usuario> guardarOActualizarUsuario(
-            @PathVariable("username") String username,
-            @RequestBody UsuarioDTO dto) {
-        try {
-            Usuario usuarioActualizado = usuarioService.guardarOActualizarUsuario(
-                username, 
-                dto.getContrasena(), 
-                dto.getIban(), 
-                dto.isEsTarifaPlana(), 
-                dto.getCuota()
-            );
-            return ResponseEntity.ok(usuarioActualizado);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-    @DeleteMapping("/{username}")
-    @Operation(summary = "Borrar usuario", description = "Elimina permanentemente una cuenta de usuario del sistema.")
-    public ResponseEntity<Void> borrarUsuario(@PathVariable("username") String username) {
-        try {
-            usuarioService.borrarUsuario(username);
-            return ResponseEntity.ok().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @PutMapping("/{username}/contrasena")
-    @Operation(summary = "Cambiar contraseÃ±a", description = "Cambia la contraseÃ±a validando la actual.")
-    public ResponseEntity<Void> cambiarContrasena(
-            @PathVariable("username") String username,
-            @RequestBody es.unican.carlosalarcon.polaflix.domain.CambioContrasenaDTO dto) {
-        try {
-            usuarioService.cambiarContrasena(username, dto.getActual(), dto.getNueva());
-            return ResponseEntity.ok().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
     @PutMapping("/{username}/capitulos-vistos/{idCapitulo}")
-    @Operation(summary = "Marcar capÃ­tulo como visto", description = "Registra que un usuario ha visto un capÃ­tulo y genera cargos en su factura si corresponde.")
+    @Operation(summary = "Marcar capÃ­tulo como visto", description = "Registra que un usuario ha visto un capÃ­tulo.")
     public ResponseEntity<Void> verCapitulo(
             @PathVariable("username") String username,
             @PathVariable("idCapitulo") Long idCapitulo) {
         try {
             usuarioService.verCapitulo(username, idCapitulo);
             return ResponseEntity.ok().build(); 
-        } catch (IllegalArgumentException e) {
+        } catch (java.util.NoSuchElementException e) {
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build(); 
-        }
-    }
-
-    @PutMapping("/{username}/series-pendientes/{idSerie}")
-    @Operation(summary = "AÃ±adir a pendientes", description = "AÃ±ade una serie al catÃ¡logo personal del usuario en estado PENDIENTE.")
-    public ResponseEntity<Void> agregarSeriePendiente(
-            @PathVariable("username") String username,
-            @PathVariable("idSerie") Integer idSerie) {
-        try {
-            usuarioService.agregarSeriePendiente(username, idSerie);
-            return ResponseEntity.ok().build(); 
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build(); 
-        }
-    }
-
-    @DeleteMapping("/{username}/series-pendientes/{idSerie}")
-    @Operation(summary = "Quitar de pendientes", description = "Elimina una serie de la lista del usuario (solo si estÃ¡ en estado PENDIENTE).")
-    public ResponseEntity<Void> quitarSeriePendiente(
-            @PathVariable("username") String username,
-            @PathVariable("idSerie") Integer idSerie) {
-        try {
-            usuarioService.quitarSeriePendiente(username, idSerie);
-            return ResponseEntity.ok().build(); 
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build(); 
         }
     }
 }
@@ -375,7 +294,7 @@ public class Factura {
         this.lineas.add(linea);
     }
 
-    // CORRECCIÃ“N: Propiedad derivada. Se calcula al vuelo en lugar de ocupar espacio y desincronizarse.
+    @JsonView(Views.UsuarioBasico.class)
     public double getImporteTotal() {
         return lineas.stream().mapToDouble(LineaFactura::getCargo).sum();
     }
@@ -435,12 +354,8 @@ public class IBAN {
 package es.unican.carlosalarcon.polaflix.domain;
 
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.ManyToOne;
-
 import java.time.LocalDate;
 import java.util.Objects;
-
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonView;
 
 @Embeddable 
@@ -448,16 +363,15 @@ public class LineaFactura {
     
     @JsonView(Views.UsuarioBasico.class)
     private LocalDate fecha;
+    
     @JsonView(Views.UsuarioBasico.class)
     private String serieNombre;
+    
     @JsonView(Views.UsuarioBasico.class)
     private String temporadaCapitulo;
+    
     @JsonView(Views.UsuarioBasico.class)
     private double cargo;
-
-    @JsonBackReference
-    @ManyToOne
-    private Factura factura;
 
     protected LineaFactura() {} 
 
@@ -827,6 +741,7 @@ public class Usuario {
     
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @JsonView(Views.UsuarioBasico.class)
     private Long id;
 
     @Column(unique = true, nullable = false)
@@ -896,7 +811,7 @@ public class Usuario {
         }
     }
 
-    public void verCapitulo(Capitulo capitulo, Factura facturaActual) {
+    public void verCapitulo(Capitulo capitulo) {
         Serie serie = capitulo.getTemporada().getSerie();
         
         this.capitulosVistos.add(capitulo);
@@ -921,12 +836,33 @@ public class Usuario {
             this.estadoSeries.put(serie.getId(), EstadoSerie.EMPEZADA);
         }
 
-        if (!this.planSuscripcion.isTarifaPlana() && facturaActual != null && serie.getCosteVisionado() > 0) {
+        if (!this.planSuscripcion.isTarifaPlana() && serie.getCosteVisionado() > 0) {
+            Factura facturaActual = obtenerOCrearFacturaActual();
             String tempCap = "T" + capitulo.getTemporada().getNumero() + "xC" + capitulo.getNumero();
             facturaActual.anadirCargo(new LineaFactura(LocalDate.now(), serie.getTitulo(), tempCap, serie.getCosteVisionado()));
         }
     }
 
+    private Factura obtenerOCrearFacturaActual() {
+        int mesActual = LocalDate.now().getMonthValue();
+        int anioActual = LocalDate.now().getYear();
+        
+        for (Factura f : this.facturas) {
+            if (f.getMes() == mesActual && f.getAnio() == anioActual) {
+                return f;
+            }
+        }
+        
+        String idFactura = "F-" + this.username + "-" + mesActual + "-" + anioActual;
+        Factura nuevaFactura = new Factura(idFactura, this, mesActual, anioActual);
+        this.facturas.add(nuevaFactura);
+        return nuevaFactura;
+    }
+
+    public boolean comprobarContrasena(String contrasena) {
+        return this.contrasenha.equals(contrasena);
+    }
+    
     @JsonProperty("estadoSeries")
     @JsonView(Views.UsuarioBasico.class) 
     public Map<Integer, EstadoSerie> getEstadoSeriesParaJson() {
@@ -1032,7 +968,6 @@ import es.unican.carlosalarcon.polaflix.domain.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDate;
 
 @Service
@@ -1052,1401 +987,586 @@ public class UsuarioService {
         return usuarioRepository.findByUsername(username);
     }
 
-    @Transactional(readOnly = true)
-    public Usuario login(String username, String contrasena) {
-        Usuario usuario = usuarioRepository.findByUsername(username);
-        if (usuario == null) {
-            throw new IllegalArgumentException("Usuario no encontrado.");
-        }
-        if (!usuario.getContrasenha().equals(contrasena)) {
-            throw new IllegalArgumentException("ContraseÃ±a incorrecta.");
-        }
-        return usuario;
-    }
-
-    @Transactional
-    public Usuario guardarOActualizarUsuario(String username, String contrasena, String ibanStr, boolean esTarifaPlana, double cuota) {
-        Usuario usuario = usuarioRepository.findByUsername(username);
-        
-        IBAN nuevoIban = new IBAN(ibanStr);
-        PlanSuscripcion nuevoPlan = new PlanSuscripcion(esTarifaPlana, cuota);
-
-        if (usuario == null) {
-            usuario = new Usuario(username, contrasena, nuevoIban, nuevoPlan);
-            usuarioRepository.save(usuario);
-        } else {
-            usuario.actualizarDatos(contrasena, nuevoIban, nuevoPlan);
-        }
-        
-        return usuario;
-    }
-
-    @Transactional
-    public void borrarUsuario(String username) {
-        Usuario usuario = usuarioRepository.findByUsername(username);
-        if (usuario != null) {
-            usuarioRepository.delete(usuario);
-        } else {
-            throw new IllegalArgumentException("El usuario a borrar no existe.");
-        }
-    }
-
-    @Transactional
-    public void cambiarContrasena(String username, String actual, String nueva) {
-        Usuario usuario = usuarioRepository.findByUsername(username);
-        if (usuario == null) throw new IllegalArgumentException("Usuario no encontrado.");
-        
-        if (!usuario.getContrasenha().equals(actual)) {
-            throw new IllegalArgumentException("La contraseÃ±a actual es incorrecta.");
-        }
-        
-        usuario.actualizarDatos(nueva, null, null);
-    }
-
-    @Transactional
-    public void agregarSeriePendiente(String username, Integer serieId) {
-        Usuario usuario = usuarioRepository.findByUsername(username);
-        if (usuario == null) throw new IllegalArgumentException("Usuario no encontrado.");
-        
-        Serie serie = serieRepository.findById(serieId)
-                .orElseThrow(() -> new IllegalArgumentException("Serie no encontrada con ID: " + serieId));
-
-        usuario.agregarSeriePendiente(serie);
-    }
-
-    @Transactional
-    public void quitarSeriePendiente(String username, Integer serieId) {
-        Usuario usuario = usuarioRepository.findByUsername(username);
-        if (usuario == null) throw new IllegalArgumentException("Usuario no encontrado.");
-        
-        Serie serie = serieRepository.findById(serieId)
-                .orElseThrow(() -> new IllegalArgumentException("Serie no encontrada con ID: " + serieId));
-
-        usuario.quitarSeriePendiente(serie);
-    }
-
     @Transactional
     public void verCapitulo(String username, Long idCapitulo) {
         Usuario usuario = usuarioRepository.findByUsername(username);
-        if (usuario == null) throw new IllegalArgumentException("Usuario no encontrado: " + username);
+        if (usuario == null) throw new java.util.NoSuchElementException();
 
         Serie serie = serieRepository.findSerieByCapituloId(idCapitulo)
-                .orElseThrow(() -> new IllegalArgumentException("CapÃ­tulo no encontrado con ID: " + idCapitulo));
+                .orElseThrow(() -> new java.util.NoSuchElementException());
                 
         Capitulo capitulo = serie.getTemporadas().stream()
                 .flatMap(t -> t.getCapitulos().stream())
                 .filter(c -> c.getId().equals(idCapitulo))
                 .findFirst().orElseThrow();
 
-        Factura factura = null;
-        if (!usuario.getPlanSuscripcion().isTarifaPlana() && serie.getCosteVisionado() > 0) {
-            int mesActual = LocalDate.now().getMonthValue();
-            int anioActual = LocalDate.now().getYear();
-            factura = facturaRepository.findByUsuarioUsernameAndMesAndAnio(username, mesActual, anioActual);
-            
-            if (factura == null) {
-                String idFactura = "F-" + usuario.getUsername() + "-" + mesActual + "-" + anioActual;
-                factura = new Factura(idFactura, usuario, mesActual, anioActual);
-            }
-        }
-
-        usuario.verCapitulo(capitulo, factura);
-        
-        if (factura != null) {
-            facturaRepository.save(factura);
-        }
+        usuario.verCapitulo(capitulo);
+        usuarioRepository.save(usuario);
     }
 }
 
 
-========== src/main/resources/static/app.module.js ==========
-angular.module('polaflixApp', ['ngRoute'])
-    .config(['$locationProvider', '$routeProvider',
-        function config($locationProvider, $routeProvider) {
-            $locationProvider.hashPrefix('!');
-
-            $routeProvider
-                .when('/login', {
-                    template: '<login-polaflix></login-polaflix>'
-                })
-                .when('/inicio', {
-                    template: '<perfil-usuario></perfil-usuario>'
-                })
-                .when('/catalogo', {
-                    template: '<catalogo-series></catalogo-series>'
-                })
-                .when('/series/:serieId', {
-                    template: '<detalle-serie></detalle-serie>'
-                })
-                .when('/facturas', {
-                    template: '<facturas-usuario></facturas-usuario>'
-                })
-                .when('/comunidad', {
-                    template: '<comunidad-polaflix></comunidad-polaflix>' 
-                })
-                .otherwise('/login');
-        }
-    ]);
-    
-angular.module('polaflixApp').controller('MainController', ['$scope', '$location', function($scope, $location) {
-    $scope.mostrarMenu = function() {
-        return $location.path() !== '/login';
-    };
-    
-    $scope.getUsername = function() {
-        return sessionStorage.getItem('usuarioLogueado') || 'Invitado';
-    };
-
-    $scope.logout = function() {
-        sessionStorage.removeItem('usuarioLogueado');
-        $location.path('/login');
-    };
-}]);
+========== frontend/src/app/app.component.html ==========
+<router-outlet></router-outlet>
 
 
-========== src/main/resources/static/catalogo/catalogo.component.js ==========
-angular.module('polaflixApp').component('catalogoSeries', {
-    templateUrl: 'catalogo/catalogo.template.html',
-    controller: ['PolaflixService', '$location', '$q', function(PolaflixService, $location, $q) {
-        var ctrl = this;
-        ctrl.series = [];
-        ctrl.username = sessionStorage.getItem('usuarioLogueado');
-        
-        ctrl.abecedario = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0-9".split("");
-        ctrl.letraSeleccionada = null;
-        ctrl.searchQuery = "";
+========== frontend/src/app/app.config.server.ts ==========
+import { mergeApplicationConfig, ApplicationConfig } from '@angular/core';
+import { provideServerRendering, withRoutes } from '@angular/ssr';
+import { appConfig } from './app.config';
+import { serverRoutes } from './app.routes.server';
 
-        ctrl.$onInit = function() {
-            if (!ctrl.username) { $location.path('/login'); return; }
-            ctrl.cargarCatalogo();
-        };
+const serverConfig: ApplicationConfig = {
+  providers: [
+    provideServerRendering(withRoutes(serverRoutes))
+  ]
+};
 
-        ctrl.cargarCatalogo = function(inicial, titulo) {
-            $q.all([
-                PolaflixService.getSeries(inicial, titulo),
-                PolaflixService.getUsuario(ctrl.username)
-            ]).then(function(res) {
-                var catalogoData = res[0];
-                var usuarioData = res[1];
-                
-                ctrl.series = catalogoData.map(function(serie) {
-                    serie.estadoPersonal = usuarioData.estadoSeries[serie.id] || null;
-                    return serie;
-                });
-            });
-        };
+export const config = mergeApplicationConfig(appConfig, serverConfig);
 
-        ctrl.filtrarPorLetra = function(letra) {
-            ctrl.searchQuery = "";
-            ctrl.letraSeleccionada = letra;
-            if(letra === '0-9') {
-                ctrl.cargarCatalogo('0', null);
-            } else {
-                ctrl.cargarCatalogo(letra, null);
-            }
-        };
 
-        ctrl.buscar = function() {
-            ctrl.letraSeleccionada = null;
-            if(ctrl.searchQuery.trim().length > 0) {
-                ctrl.cargarCatalogo(null, ctrl.searchQuery);
-            } else {
-                ctrl.cargarCatalogo();
-            }
-        };
+========== frontend/src/app/app.config.ts ==========
+import { ApplicationConfig } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { routes } from './app.routes';
+import { provideHttpClient } from '@angular/common/http';
 
-        ctrl.addPendiente = function(idSerie) {
-            PolaflixService.agregarAPendientes(ctrl.username, idSerie).then(function() {
-                var serieAfectada = ctrl.series.find(s => s.id === idSerie);
-                if (serieAfectada) serieAfectada.estadoPersonal = 'PENDIENTE';
-            });
-        };
+export const appConfig: ApplicationConfig = {
+  providers: [provideRouter(routes), provideHttpClient()]
+};
 
-        ctrl.getPosterGeneral = function(idSerie) {
-            if (idSerie === 1) return 'images/PeakyBlinders.png';
-            if (idSerie === 2) return 'images/PrisonBreakS01.png'; 
-            if (idSerie === 3) return 'images/LQSAS01.png'; 
-            return 'images/polaflix-logo.png'; 
-        };
-    }]
+
+========== frontend/src/app/app.css ==========
+
+
+========== frontend/src/app/app.html ==========
+<router-outlet></router-outlet>
+
+
+========== frontend/src/app/app.routes.server.ts ==========
+import { RenderMode, ServerRoute } from '@angular/ssr';
+
+export const serverRoutes: ServerRoute[] = [
+  {
+    path: '**',
+    renderMode: RenderMode.Prerender
+  }
+];
+
+
+========== frontend/src/app/app.routes.ts ==========
+import { Routes } from '@angular/router';
+import { EntradaComponent } from './entrada/entrada.component';
+import { InicioComponent } from './inicio/inicio.component';
+import { SerieComponent } from './serie/serie.component';
+
+export const routes: Routes = [
+  { path: '', component: EntradaComponent },
+  { path: 'inicio', component: InicioComponent },
+  { path: 'serie/:id', component: SerieComponent },
+  { path: '**', redirectTo: '' }
+];
+
+
+========== frontend/src/app/app.spec.ts ==========
+import { TestBed } from '@angular/core/testing';
+import { App } from './app';
+
+describe('App', () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [App],
+    }).compileComponents();
+  });
+
+  it('should create the app', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance;
+    expect(app).toBeTruthy();
+  });
+
+  it('should render title', async () => {
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, frontend');
+  });
 });
 
 
-========== src/main/resources/static/catalogo/catalogo.template.html ==========
-<div>
-    <div class="catalogo-controls">
-        <div class="alfabeto">
-            <span ng-repeat="letra in $ctrl.abecedario" 
-                  ng-click="$ctrl.filtrarPorLetra(letra)"
-                  ng-class="{'letra-activa': $ctrl.letraSeleccionada === letra}">
-                {{letra}}
-            </span>
-        </div>
-        
-        <div class="search-box">
-            <input type="text" ng-model="$ctrl.searchQuery" placeholder="Buscar por tÃ­tulo...">
-            <button ng-click="$ctrl.buscar()">Buscar</button>
-        </div>
-    </div>
-
-    <div class="serie-grid">
-        <div class="card-serie" ng-repeat="s in $ctrl.series">
-            
-            <span class="badge badge-pendiente" ng-if="s.estadoPersonal === 'PENDIENTE'">PENDIENTE</span>
-            <span class="badge badge-empezada" ng-if="s.estadoPersonal === 'EMPEZADA'">EMPEZADA</span>
-            <span class="badge badge-terminada" ng-if="s.estadoPersonal === 'TERMINADA'">TERMINADA</span>
-
-            <img ng-src="{{$ctrl.getPosterGeneral(s.id)}}" class="serie-poster" alt="{{s.titulo}}">
-            
-            <div class="card-info">
-                <span class="price-tag">{{s.costeVisionado}} â‚¬ / ep</span>
-                <h4>{{s.titulo}}</h4>
-                <div style="display:flex; gap: 5px;">
-                    <a href="#!/series/{{s.id}}" class="btn-primary" style="flex: 1; text-align: center;">Ver</a>
-                    <button ng-if="!s.estadoPersonal" ng-click="$ctrl.addPendiente(s.id)" class="btn-secondary" style="flex: 1;">+ Lista</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-========== src/main/resources/static/comunidad/comunidad.component.js ==========
-angular.module('polaflixApp').component('comunidadPolaflix', {
-    templateUrl: 'comunidad/comunidad.template.html',
-    controller: ['PolaflixService', '$q', function(PolaflixService, $q) {
-        var ctrl = this;
-        ctrl.searchUser = '';
-        ctrl.userResult = null;
-        ctrl.seriesDetalles = [];
-        ctrl.error = null;
-
-        ctrl.buscar = function() {
-            ctrl.error = null;
-            ctrl.userResult = null;
-            ctrl.seriesDetalles = [];
-            
-            if (ctrl.searchUser) {
-                $q.all([
-                    PolaflixService.getUsuario(ctrl.searchUser.toLowerCase()),
-                    PolaflixService.getSeries()
-                ]).then(function(res) {
-                    ctrl.userResult = res[0];
-                    var catalogo = res[1];
-                    
-                    if(ctrl.userResult.estadoSeries) {
-                        for (var idSerie in ctrl.userResult.estadoSeries) {
-                            var serieInfo = catalogo.find(s => s.id === idSerie);
-                            if(serieInfo) {
-                                ctrl.seriesDetalles.push({
-                                    titulo: serieInfo.titulo,
-                                    estado: ctrl.userResult.estadoSeries[idSerie],
-                                    poster: ctrl.getPosterGeneral(serieInfo.id)
-                                });
-                            }
-                        }
-                    }
-                }).catch(function() {
-                    ctrl.error = "No se ha encontrado a ningÃºn usuario con ese nombre.";
-                });
-            }
-        };
-
-        ctrl.getPosterGeneral = function(idSerie) {
-            if (idSerie === 1) return 'images/PeakyBlinders.png';
-            if (idSerie === 2) return 'images/PrisonBreakS01.png';
-            if (idSerie === 3) return 'images/LQSAS01.png';
-            return 'images/polaflix-logo.png';
-        };
-    }]
-});
-
-
-========== src/main/resources/static/comunidad/comunidad.template.html ==========
-<div>
-    <div class="settings-panel">
-        <h3 style="color: #ff4747;">Comunidad de Usuarios</h3>
-        <p>Busca la actividad de otros usuarios de la plataforma.</p>
-        
-        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-            <input type="text" ng-model="$ctrl.searchUser" placeholder="Nombre de usuario (ej: cr7bicho)" class="login-input" style="width: 300px; margin: 0;">
-            <button ng-click="$ctrl.buscar()" class="btn-primary">Buscar Perfil</button>
-        </div>
-        <div ng-if="$ctrl.error" class="error">{{$ctrl.error}}</div>
-    </div>
-
-    <div ng-if="$ctrl.userResult">
-        <h2>ColecciÃ³n PÃºblica de {{$ctrl.userResult.username}}</h2>
-        
-        <div class="serie-grid" ng-if="$ctrl.seriesDetalles.length > 0">
-            <div class="card-serie" ng-repeat="item in $ctrl.seriesDetalles">
-                <span class="badge badge-pendiente" ng-if="item.estado === 'PENDIENTE'">PENDIENTE</span>
-                <span class="badge badge-empezada" ng-if="item.estado === 'EMPEZADA'">EMPEZADA</span>
-                <span class="badge badge-terminada" ng-if="item.estado === 'TERMINADA'">TERMINADA</span>
-                
-                <img ng-src="{{item.poster}}" class="serie-poster">
-                <div class="card-info">
-                    <h4>{{item.titulo}}</h4>
-                </div>
-            </div>
-        </div>
-
-        <div class="settings-panel" ng-if="$ctrl.seriesDetalles.length === 0" style="text-align: center;">
-            <p>Este usuario es muy reservado y aÃºn no tiene series en su lista.</p>
-        </div>
-    </div>
-</div>
-
-
-========== src/main/resources/static/elenco/elenco.component.js ==========
-angular.module('polaflixApp').component('elencoSeries', {
-    templateUrl: 'elenco/elenco.template.html',
-    controller: ['PolaflixService', '$q', function(PolaflixService, $q) {
-        var ctrl = this;
-        ctrl.actoresMap = {};
-        ctrl.cargando = true;
-
-        ctrl.$onInit = function() {
-            PolaflixService.getSeries().then(function(seriesResumidas) {
-                
-                var promesasDetalle = seriesResumidas.map(s => PolaflixService.getSerie(s.id));
-                
-                $q.all(promesasDetalle).then(function(seriesDetalladas) {
-                    seriesDetalladas.forEach(function(serie) {
-                        if (serie && serie.actores) {
-                            serie.actores.forEach(function(actor) {
-                                if (!ctrl.actoresMap[actor.nombre]) {
-                                    ctrl.actoresMap[actor.nombre] = [];
-                                }
-                                ctrl.actoresMap[actor.nombre].push(serie.titulo);
-                            });
-                        }
-                    });
-                    ctrl.cargando = false;
-                });
-            });
-        };
-    }]
-});
-
-
-========== src/main/resources/static/elenco/elenco.template.html ==========
-<section class="fade-in">
-    <h2 style="font-size: 2em; color: white;">ðŸŽ­ Directorio de Actores</h2>
-    <p style="color: #b3b3b3;">Descubre en quÃ© series del catÃ¡logo de Polaflix participan tus actores favoritos.</p>
-
-    <div ng-if="$ctrl.cargando">
-        <h3 style="color: var(--pola-red);"><blink>Revisando los contratos de los actores...</blink></h3>
-    </div>
-
-    <div ng-if="!$ctrl.cargando" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 30px;">
-        <div class="temporada-card" style="display: block; padding: 15px;" ng-repeat="(actor, listaSeries) in $ctrl.actoresMap">
-            <h3 style="margin-top: 0; color: white; border-bottom: 1px solid #444; padding-bottom: 10px;">{{actor}}</h3>
-            <ul style="color: #bbb; padding-left: 20px;">
-                <li ng-repeat="tituloSerie in listaSeries" style="margin-bottom: 5px;">{{tituloSerie}}</li>
-            </ul>
-        </div>
-    </div>
-</section>
-
-
-========== src/main/resources/static/facturas/facturas.component.js ==========
-angular.module('polaflixApp').component('facturasUsuario', {
-    templateUrl: 'facturas/facturas.template.html',
-    controller: ['PolaflixService', '$location', function(PolaflixService, $location) {
-        var ctrl = this;
-        ctrl.username = sessionStorage.getItem('usuarioLogueado');
-        ctrl.facturas = [];
-
-        ctrl.$onInit = function() {
-            if (!ctrl.username) { $location.path('/login'); return; }
-            PolaflixService.getUsuario(ctrl.username).then(function(u) {
-                if (u.facturas && u.facturas.length > 0) {
-                    ctrl.facturas = u.facturas.sort((a,b) => b.anio - a.anio || b.mes - a.mes);
-                }
-            });
-        };
-
-        ctrl.getNombreMes = function(mesNum) {
-            const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-            return meses[mesNum - 1] || "Mes";
-        };
-        
-        ctrl.calcularTotal = function(factura) {
-            if(!factura || !factura.lineas) return 0;
-            return factura.lineas.reduce((total, l) => total + l.cargo, 0).toFixed(2);
-        };
-    }]
-});
-
-
-========== src/main/resources/static/facturas/facturas.template.html ==========
-<div>
-    <div ng-if="$ctrl.facturas.length === 0" class="settings-panel" style="text-align: center;">
-        <h3>Historial Financiero</h3>
-        <p>No tienes cargos registrados actualmente.</p>
-    </div>
-
-    <div ng-if="$ctrl.facturas.length > 0">
-        <div class="settings-panel" ng-repeat="factura in $ctrl.facturas" style="margin-bottom: 30px;">
-            <h3>Factura: {{$ctrl.getNombreMes(factura.mes)}} {{factura.anio}}</h3>
-            
-            <table class="factura-table">
-                <thead>
-                    <tr>
-                        <th>Fecha del Cargo</th>
-                        <th>Concepto / Serie</th>
-                        <th>Episodio</th>
-                        <th>Importe</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr ng-repeat="linea in factura.lineas">
-                        <td>{{linea.fecha.join('-') || linea.fecha}}</td>
-                        <td>{{linea.serieNombre}}</td>
-                        <td>{{linea.temporadaCapitulo}}</td>
-                        <td style="color: #ff4747; font-weight: bold;">{{linea.cargo}} â‚¬</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <div style="text-align: right; padding: 20px 10px 0 0; font-size: 1.2em;">
-                <span>Total del periodo: </span>
-                <span style="color: #ff4747; font-weight: bold; font-size: 1.5em;">{{$ctrl.calcularTotal(factura)}} â‚¬</span>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-========== src/main/resources/static/index.html ==========
-<!DOCTYPE html>
-<html lang="es" ng-app="polaflixApp">
-<head>
-    <meta charset="UTF-8">
-    <title>Polaflix</title>
-    <link rel="stylesheet" href="polaflix.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-route.js"></script>
-    <script src="app.module.js"></script>
-    <script src="polaflix.service.js"></script>
-    <script src="login/login.component.js"></script>
-    <script src="catalogo/catalogo.component.js"></script>
-    <script src="serie/serie.component.js"></script>
-    <script src="perfil/perfil.component.js"></script>
-    <script src="facturas/facturas.component.js"></script>
-    <script src="comunidad/comunidad.component.js"></script>
-</head>
-<body ng-controller="MainController">
-
-    <header class="top-header" ng-show="mostrarMenu()">
-        <div class="header-top">
-            <div class="logo-placeholder">Polaflix</div>
-            <h1 class="welcome-text">Hola, {{getUsername()}}</h1>
-            <div class="user-avatar" ng-click="logout()" title="Cerrar SesiÃ³n">X</div>
-        </div>
-    </header>
-    <nav class="top-nav" ng-show="mostrarMenu()">
-        <a href="#!/inicio">Mi Perfil</a>
-        <a href="#!/catalogo">CatÃ¡logo de Series</a>
-        <a href="#!/facturas">Mis Cargos</a>
-        <a href="#!/comunidad">Comunidad</a>
-    </nav>
-
-    <main class="main-content">
-        <div ng-view></div>
-    </main>
-
-</body>
-</html>
-
-
-========== src/main/resources/static/login/login.component.js ==========
-angular.module('polaflixApp').component('loginPolaflix', {
-    templateUrl: 'login/login.template.html',
-    controller: ['$location', 'PolaflixService', function LoginController($location, PolaflixService) {
-        var ctrl = this;
-        ctrl.modoRegistro = false; 
-        
-        ctrl.username = '';
-        ctrl.password = '';
-        ctrl.iban = '';
-        ctrl.esVip = false;
-        
-        ctrl.mensaje = '';
-
-        ctrl.entrar = function() {
-            if (ctrl.username && ctrl.password) {
-                PolaflixService.login(ctrl.username, ctrl.password).then(function() {
-                    sessionStorage.setItem('usuarioLogueado', ctrl.username);
-                    $location.path('/inicio'); 
-                }).catch(function(error) {
-                    ctrl.mensaje = error;
-                });
-            } else {
-                ctrl.mensaje = "Introduce tu usuario y contraseÃ±a.";
-            }
-        };
-
-        ctrl.registrar = function() {
-            if (ctrl.username && ctrl.password && ctrl.iban) {
-                var cuota = ctrl.esVip ? 20.0 : 0.0;
-                PolaflixService.guardarUsuario(ctrl.username, ctrl.password, ctrl.iban, ctrl.esVip, cuota)
-                    .then(function() {
-                        sessionStorage.setItem('usuarioLogueado', ctrl.username);
-                        $location.path('/inicio');
-                    }).catch(function() {
-                        ctrl.mensaje = "Hubo un error al crear la cuenta.";
-                    });
-            } else {
-                ctrl.mensaje = "Rellena todos los campos obligatorios.";
-            }
-        };
-
-        ctrl.toggleModo = function() {
-            ctrl.modoRegistro = !ctrl.modoRegistro;
-            ctrl.mensaje = '';
-        };
-    }]
-});
-
-
-========== src/main/resources/static/login/login.template.html ==========
-<div class="login-wrapper">
-    <div class="login-box">
-        <span class="login-logo">Polaflix</span>
-        
-        <p ng-if="$ctrl.mensaje" class="error">{{$ctrl.mensaje}}</p>
-
-        <div ng-if="!$ctrl.modoRegistro">
-            <input type="text" class="login-input" ng-model="$ctrl.username" placeholder="Usuario">
-            <input type="password" class="login-input" ng-model="$ctrl.password" placeholder="ContraseÃ±a">
-            <button class="login-btn" ng-click="$ctrl.entrar()">Iniciar SesiÃ³n</button>
-            <p style="margin-top: 20px; color: #888;">
-                Â¿Eres nuevo? <a href="" ng-click="$ctrl.toggleModo()" style="color: #ff4747;">RegÃ­strate</a>
-            </p>
-        </div>
-
-        <div ng-if="$ctrl.modoRegistro">
-            <input type="text" class="login-input" ng-model="$ctrl.username" placeholder="Nuevo Usuario">
-            <input type="password" class="login-input" ng-model="$ctrl.password" placeholder="ContraseÃ±a">
-            <input type="text" class="login-input" ng-model="$ctrl.iban" placeholder="IBAN Bancario">
-            
-            <div style="text-align: left; margin-bottom: 20px; color: #333;">
-                <label>
-                    <input type="checkbox" ng-model="$ctrl.esVip"> 
-                    Plan VIP Premium (20â‚¬/mes)
-                </label>
-            </div>
-
-            <button class="login-btn" ng-click="$ctrl.registrar()">Crear Cuenta</button>
-            <p style="margin-top: 20px; color: #888;">
-                <a href="" ng-click="$ctrl.toggleModo()" style="color: #666;">Volver al Login</a>
-            </p>
-        </div>
-
-    </div>
-</div>
-
-
-========== src/main/resources/static/perfil/perfil.component.js ==========
-angular.module('polaflixApp').component('perfilUsuario', {
-    templateUrl: 'perfil/perfil.template.html',
-    controller: ['PolaflixService', '$location', '$q', function(PolaflixService, $location, $q) {
-        var ctrl = this;
-        ctrl.usuario = null;
-        ctrl.username = sessionStorage.getItem('usuarioLogueado');
-        
-        ctrl.editando = false;
-        ctrl.form = {};
-
-        ctrl.cambiandoPass = false;
-        ctrl.passData = { actual: '', nueva1: '', nueva2: '' };
-        ctrl.passError = '';
-        ctrl.passExito = '';
-
-        ctrl.seriesUsuario = [];
-
-        ctrl.$onInit = function() {
-            if (!ctrl.username) { $location.path('/login'); return; }
-            ctrl.cargarDatos();
-        };
-
-        ctrl.cargarDatos = function() {
-            $q.all([
-                PolaflixService.getUsuario(ctrl.username),
-                PolaflixService.getSeries()
-            ]).then(function(res) {
-                ctrl.usuario = res[0];
-                var catalogo = res[1];
-
-                ctrl.form.iban = ctrl.usuario.iban.numeroCuenta;
-                ctrl.form.esVip = ctrl.usuario.planSuscripcion.tarifaPlana;
-
-                ctrl.seriesUsuario = [];
-                if(ctrl.usuario.estadoSeries) {
-                    for (var idSerie in ctrl.usuario.estadoSeries) {
-                        var serieInfo = catalogo.find(s => s.id === idSerie);
-                        if(serieInfo) {
-                            ctrl.seriesUsuario.push({
-                                id: serieInfo.id,
-                                titulo: serieInfo.titulo,
-                                estado: ctrl.usuario.estadoSeries[idSerie],
-                                poster: ctrl.getPosterGeneral(serieInfo.id)
-                            });
-                        }
-                    }
-                }
-            });
-        };
-
-        ctrl.guardarCambios = function() {
-            var cuota = ctrl.form.esVip ? 20.0 : 0.0;
-            PolaflixService.guardarUsuario(ctrl.username, null, ctrl.form.iban, ctrl.form.esVip, cuota)
-                .then(function() {
-                    ctrl.editando = false;
-                    ctrl.cargarDatos(); 
-                });
-        };
-
-        ctrl.iniciarCambioPass = function() {
-            ctrl.cambiandoPass = !ctrl.cambiandoPass;
-            ctrl.passData = { actual: '', nueva1: '', nueva2: '' };
-            ctrl.passError = '';
-            ctrl.passExito = '';
-            ctrl.editando = false;
-        };
-
-        ctrl.confirmarCambioPass = function() {
-            ctrl.passError = '';
-            ctrl.passExito = '';
-            
-            if (!ctrl.passData.actual || !ctrl.passData.nueva1 || !ctrl.passData.nueva2) {
-                ctrl.passError = "Rellena todos los campos.";
-                return;
-            }
-            if (ctrl.passData.nueva1 !== ctrl.passData.nueva2) {
-                ctrl.passError = "Las nuevas contraseÃ±as no coinciden.";
-                return;
-            }
-
-            PolaflixService.cambiarContrasena(ctrl.username, ctrl.passData.actual, ctrl.passData.nueva1)
-                .then(function() {
-                    ctrl.passExito = "ContraseÃ±a actualizada con Ã©xito.";
-                    ctrl.cambiandoPass = false;
-                })
-                .catch(function(err) {
-                    ctrl.passError = err;
-                });
-        };
-
-        ctrl.borrarCuenta = function() {
-            if(confirm("Â¿EstÃ¡s seguro de borrar tu cuenta?")) {
-                PolaflixService.borrarUsuario(ctrl.username).then(function() {
-                    sessionStorage.removeItem('usuarioLogueado');
-                    $location.path('/login');
-                });
-            }
-        };
-
-        ctrl.quitarPendiente = function(idSerie) {
-            PolaflixService.quitarDePendientes(ctrl.username, idSerie).then(function() {
-                ctrl.cargarDatos();
-            });
-        };
-
-        ctrl.getPosterGeneral = function(idSerie) {
-            if (idSerie === 1) return 'images/PeakyBlinders.png';
-            if (idSerie === 2) return 'images/PrisonBreakS01.png';
-            if (idSerie === 3) return 'images/LQSAS01.png';
-            return 'images/polaflix-logo.png';
-        };
-    }]
-});
-
-
-========== src/main/resources/static/perfil/perfil.template.html ==========
-<div ng-if="$ctrl.usuario">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2>Mi Cuenta</h2>
-        <div>
-            <button class="btn-secondary" ng-click="$ctrl.editando = !$ctrl.editando; $ctrl.cambiandoPass = false">
-                Ajustes de Perfil
-            </button>
-            <button class="btn-secondary" ng-click="$ctrl.iniciarCambioPass()">
-                Seguridad
-            </button>
-        </div>
-    </div>
-
-    <p ng-if="$ctrl.passExito" class="success">{{$ctrl.passExito}}</p>
-
-    <div class="settings-panel" ng-if="!$ctrl.editando && !$ctrl.cambiandoPass">
-        <h3>InformaciÃ³n General</h3>
-        <p><strong>Usuario:</strong> {{$ctrl.usuario.username}}</p>
-        <p><strong>Plan de SuscripciÃ³n:</strong> {{$ctrl.usuario.planSuscripcion.tarifaPlana ? 'Tarifa Plana VIP' : 'Pago por VisiÃ³n'}}</p>
-        <p><strong>IBAN:</strong> {{$ctrl.usuario.iban.numeroCuenta}}</p>
-    </div>
-
-    <div class="settings-panel" ng-if="$ctrl.editando">
-        <h3>Modificar Datos Bancarios y SuscripciÃ³n</h3>
-        <p><input type="text" class="login-input" ng-model="$ctrl.form.iban" placeholder="Nuevo IBAN"></p>
-        <p><label><input type="checkbox" ng-model="$ctrl.form.esVip"> Activar Tarifa Plana VIP</label></p>
-        <button class="btn-primary" ng-click="$ctrl.guardarCambios()">Guardar Cambios</button>
-        <button class="btn-danger" style="margin-left: 20px;" ng-click="$ctrl.borrarCuenta()">Eliminar Cuenta Definitivamente</button>
-    </div>
-
-    <div class="settings-panel" ng-if="$ctrl.cambiandoPass">
-        <h3>Modificar ContraseÃ±a</h3>
-        <p ng-if="$ctrl.passError" class="error">{{$ctrl.passError}}</p>
-        <p><input type="password" class="login-input" ng-model="$ctrl.passData.actual" placeholder="ContraseÃ±a Actual"></p>
-        <p><input type="password" class="login-input" ng-model="$ctrl.passData.nueva1" placeholder="Nueva ContraseÃ±a"></p>
-        <p><input type="password" class="login-input" ng-model="$ctrl.passData.nueva2" placeholder="Repite la Nueva ContraseÃ±a"></p>
-        <button class="btn-primary" ng-click="$ctrl.confirmarCambioPass()">Actualizar Seguridad</button>
-    </div>
-
-    <h2 style="margin-top: 40px;">Mi ColecciÃ³n</h2>
-    
-    <div class="serie-grid">
-        <div class="card-serie" ng-repeat="item in $ctrl.seriesUsuario">
-            
-            <span class="badge badge-pendiente" ng-if="item.estado === 'PENDIENTE'">PENDIENTE</span>
-            <span class="badge badge-empezada" ng-if="item.estado === 'EMPEZADA'">EMPEZADA</span>
-            <span class="badge badge-terminada" ng-if="item.estado === 'TERMINADA'">TERMINADA</span>
-
-            <img ng-src="{{item.poster}}" class="serie-poster" alt="{{item.titulo}}">
-            
-            <div class="card-info">
-                <h4>{{item.titulo}}</h4>
-                <div style="display:flex; gap: 5px;">
-                    <a href="#!/series/{{item.id}}" class="btn-primary" style="flex: 1; text-align: center;">Ver CapÃ­tulos</a>
-                    <button ng-if="item.estado === 'PENDIENTE'" ng-click="$ctrl.quitarPendiente(item.id)" class="btn-danger" style="flex: 1;">Quitar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="settings-panel" ng-if="$ctrl.seriesUsuario.length === 0" style="margin-top: 20px; text-align: center;">
-        <p>AÃºn no tienes series en tu colecciÃ³n.</p>
-        <a href="#!/catalogo" class="btn-primary">Explorar CatÃ¡logo</a>
-    </div>
-</div>
-
-
-========== src/main/resources/static/polaflix.css ==========
-body {
-    margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
-    background-color: #f2f2f2;
-    color: #333;
+========== frontend/src/app/app.ts ==========
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [RouterOutlet],
+  templateUrl: './app.html',
+  styleUrl: './app.css'
+})
+export class App {
+  title = 'frontend';
 }
 
-.top-header {
-    background-color: #ff4747;
-    color: white;
-    padding: 15px 40px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+
+========== frontend/src/app/entrada/entrada.component.css ==========
+.login-container { display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f2f2f2; font-family: Arial, sans-serif; }
+.login-box { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; width: 300px; }
+h1 { color: #E50914; margin-top: 0; }
+input { width: 100%; padding: 12px; margin: 20px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+button { width: 100%; padding: 12px; background-color: #E50914; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; }
+button:hover { background-color: #b20710; }
+.error-msg { color: #E50914; margin-top: 15px; font-weight: bold; }
+
+
+========== frontend/src/app/entrada/entrada.component.html ==========
+<div class="login-container">
+  <div class="login-box">
+    <h1>Polaflix</h1>
+    <p>Accede con tu nombre de usuario</p>
+    
+    <input type="text" [(ngModel)]="username" placeholder="Ej: cr7bicho" />
+    <button (click)="entrar()">Entrar a la aplicaciÃ³n</button>
+    
+    <p class="error-msg" *ngIf="error">{{error}}</p>
+  </div>
+</div>
+
+
+========== frontend/src/app/entrada/entrada.component.ts ==========
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
+import { PolaflixService } from '../polaflix.service';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+
+@Component({
+  selector: 'app-entrada',
+  standalone: true,
+  imports: [FormsModule, CommonModule],
+  templateUrl: './entrada.component.html'
+})
+export class EntradaComponent {
+  username: string = '';
+  error: string = '';
+
+  constructor(private polaflixService: PolaflixService, private router: Router) {}
+
+  entrar() {
+    if (!this.username.trim()) return;
+    
+    this.polaflixService.entrar(this.username).subscribe({
+      next: () => {
+        sessionStorage.setItem('usuario', this.username);
+        this.router.navigate(['/inicio']); 
+      },
+      error: () => {
+        this.error = 'El usuario no existe.';
+      }
+    });
+  }
 }
 
-.header-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+
+========== frontend/src/app/inicio/inicio.component.css ==========
+.list-container {
+    background-color: var(--panel-bg);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
 }
 
-.logo-placeholder {
-    font-size: 2em;
-    font-weight: bold;
+.empty-msg {
+    color: #888;
     font-style: italic;
-    letter-spacing: -1px;
+    padding: 10px 0;
 }
 
-.welcome-text {
-    font-size: 1.2em;
-    margin: 0;
-}
-
-.user-avatar {
-    font-size: 1.5em;
-    cursor: pointer;
-    background: #fff;
-    color: #ff4747;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.top-nav {
-    background-color: #fff;
-    padding: 10px 40px;
-    border-bottom: 2px solid #e8e8e8;
-    display: flex;
-    gap: 20px;
-}
-
-.top-nav a {
-    color: #333;
-    text-decoration: none;
-    font-weight: bold;
-    font-size: 1em;
-}
-
-.top-nav a:hover {
-    color: #ff4747;
-}
-
-.main-content {
-    max-width: 1200px;
-    margin: 30px auto;
-    padding: 0 20px;
-}
-
-.login-wrapper {
-    display: flex;
-    justify-content: center;
-    margin-top: 80px;
-}
-
-.login-box {
-    background: #fff;
-    padding: 40px;
-    border-radius: 8px;
-    width: 400px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
-
-.login-logo {
-    font-size: 2.5em;
-    color: #ff4747;
-    font-weight: bold;
-    text-align: center;
+.serie-link {
     display: block;
-    margin-bottom: 30px;
-}
-
-.login-input {
-    display: block;
-    width: 100%;
-    margin: 15px 0;
-    padding: 12px;
-    box-sizing: border-box;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-.login-btn {
-    background: #ff4747;
-    color: white;
     padding: 15px;
-    width: 100%;
-    border: none;
-    border-radius: 4px;
-    font-size: 1.1em;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.login-btn:hover {
-    background: #e62e04;
-}
-
-.catalogo-controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #fff;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-}
-
-.alfabeto span {
-    cursor: pointer;
-    margin-right: 8px;
-    padding: 5px 8px;
-    border-radius: 4px;
-}
-
-.letra-activa {
-    background: #ff4747;
-    color: white;
-    font-weight: bold;
-}
-
-.search-box input {
-    padding: 8px;
-    border: 2px solid #ff4747;
-    border-radius: 4px 0 0 4px;
-    outline: none;
-}
-
-.search-box button {
-    background: #ff4747;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 0 4px 4px 0;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.serie-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 20px;
-}
-
-.card-serie {
-    background: #fff;
-    border-radius: 8px;
-    overflow: hidden;
-    transition: box-shadow 0.3s;
-    position: relative;
-}
-
-.card-serie:hover {
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-}
-
-.serie-poster {
-    width: 100%;
-    height: 300px;
-    object-fit: cover;
-}
-
-.card-info {
-    padding: 15px;
-}
-
-.card-info h4 {
-    margin: 0 0 10px 0;
-    font-size: 1.1em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.price-tag {
-    color: #ff4747;
-    font-size: 1.2em;
-    font-weight: bold;
+    background-color: #2a2a2a;
     margin-bottom: 10px;
-    display: block;
-}
-
-.btn-primary {
-    background: #ff4747;
-    color: white;
-    padding: 8px 12px;
-    text-decoration: none;
     border-radius: 4px;
-    font-weight: bold;
-    border: none;
-    cursor: pointer;
-    display: inline-block;
-}
-
-.btn-secondary {
-    background: #ff9000;
-    color: white;
-    padding: 8px 12px;
-    border: none;
-    border-radius: 4px;
-    font-weight: bold;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
-}
-
-.btn-danger {
-    background: #fff;
-    color: #ff4747;
-    border: 1px solid #ff4747;
-    padding: 8px 12px;
-    border-radius: 4px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.badge {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    padding: 5px 10px;
-    font-size: 0.8em;
-    font-weight: bold;
-    border-radius: 15px;
-    z-index: 10;
-}
-
-.badge-pendiente { background: #ff9000; color: #fff; }
-.badge-empezada { background: #0088cc; color: #fff; }
-.badge-terminada { background: #4caf50; color: #fff; }
-
-.header-detalle {
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    display: flex;
-    gap: 30px;
-    margin-bottom: 30px;
-}
-
-.poster-detalle {
-    width: 250px;
-    border-radius: 8px;
-}
-
-.info-texto h1 {
-    margin-top: 0;
-}
-
-.temporada-card {
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    display: flex;
-    gap: 20px;
-}
-
-.temporada-poster {
-    width: 120px;
-    height: 180px;
-    border-radius: 4px;
-    object-fit: cover;
-}
-
-.capitulos-lista-vertical {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 15px;
-}
-
-.capitulo-fila {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #f9f9f9;
-    padding: 10px 15px;
-    border-radius: 4px;
-    border: 1px solid #eee;
-}
-
-.capitulo-info {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
-.capitulo-numero {
-    font-weight: bold;
-    color: #ff4747;
-    font-size: 1.1em;
-}
-
-.capitulo-titulo {
-    font-size: 1em;
-    color: #333;
-}
-
-.capitulo-acciones {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-}
-
-.capitulos-grid {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-top: 15px;
-}
-
-.capitulo-btn {
-    background: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 10px;
-    width: 60px;
-    height: 60px;
-    cursor: pointer;
-    font-weight: bold;
     font-size: 1.2em;
-    color: #333;
+    font-weight: 500;
+    transition: all 0.2s;
+    border-left: 3px solid transparent;
 }
 
-.capitulo-btn:hover {
-    background: #ffe8e8;
-    border-color: #ff4747;
-    color: #ff4747;
-}
-
-.settings-panel {
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-}
-
-.settings-panel h3 {
-    margin-top: 0;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
-}
-
-.factura-table {
-    width: 100%;
-    background: #fff;
-    border-collapse: collapse;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.factura-table th {
-    background: #f2f2f2;
-    padding: 15px;
-    text-align: left;
-}
-
-.factura-table td {
-    padding: 15px;
-    border-bottom: 1px solid #eee;
-}
-
-.error { color: #ff4747; font-weight: bold; }
-.success { color: #4caf50; font-weight: bold; }
-
-/* --- NUEVOS ESTILOS PARA LA DESCRIPCIÃ“N DE CAPÃTULOS --- */
-
-/* Agrupa la info superior y la descripciÃ³n debajo */
-.capitulo-contenido {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    max-width: 75%; /* Evita que el texto empuje los botones de la derecha */
-}
-
-/* Reducimos ligeramente el tamaÃ±o de la descripciÃ³n para que no compita con el tÃ­tulo */
-.capitulo-descripcion {
-    font-size: 0.9em;
-    color: #666;
-    line-height: 1.4;
-    margin-left: 25px; /* Lo alineamos visualmente con el texto del tÃ­tulo, saltando el nÃºmero */
-}
-
-/* Modificamos sutilmente la fila para que el contenido no quede pegado a los bordes al crecer verticalmente */
-.capitulo-fila {
-    align-items: flex-start; /* Alinea los botones arriba si la descripciÃ³n es muy larga */
-}
-
-/* Hacemos que el botÃ³n "Ver" destaque un poco mÃ¡s dentro de la fila blanca */
-.capitulo-acciones .btn-primary {
-    padding: 6px 15px;
-    font-size: 0.9em;
+.serie-link:hover {
+    background-color: #333;
+    border-left: 3px solid var(--accent-color);
+    padding-left: 20px; /* Efecto de movimiento */
 }
 
 
-========== src/main/resources/static/polaflix.service.js ==========
-angular.module('polaflixApp').factory('PolaflixService', ['$http', '$q', function($http, $q) {
-    return {
-        getSeries: function(inicial, titulo) {
-            var config = { params: {} };
-            if (inicial) config.params.inicial = inicial;
-            if (titulo) config.params.titulo = titulo;
+========== frontend/src/app/inicio/inicio.component.html ==========
+<header class="top-bar-premium">
+  <div class="logo-premium">POLAFLIX</div>
+  <nav class="nav-premium">
+    <a routerLink="/inicio" style="color: white; border-bottom: 2px solid #E50914;">Mi Perfil</a>
+    <a routerLink="/catalogo">CatÃ¡logo</a>
+  </nav>
+  <div class="user-controls">
+    <span class="user-name">{{username}}</span>
+    <button class="btn-salir" (click)="salir()">Salir</button>
+  </div>
+</header>
 
-            return $http.get('/series', config)
-                .then(res => res.data || [])
-                .catch(err => $q.reject("No se pudo cargar el catÃ¡logo."));
-        },
+<div class="container">
+  
+  <h2 class="section-title">Empezadas</h2>
+  <div class="list-container">
+    <div *ngIf="empezadas.length === 0" class="empty-msg">No tienes series empezadas. Â¡Empieza una aventura!</div>
+    <a *ngFor="let s of empezadas" [routerLink]="['/serie', s.id]" class="serie-link">
+      â–¶ {{s.titulo}}
+    </a>
+  </div>
 
-        getSerie: function(id) {
-            return $http.get('/series/' + id)
-                .then(res => res.data)
-                .catch(err => $q.reject("Serie no encontrada."));
-        },
+  <h2 class="section-title">Mi Lista (Pendientes)</h2>
+  <div class="list-container">
+    <div *ngIf="pendientes.length === 0" class="empty-msg">Tu lista estÃ¡ vacÃ­a. AÃ±ade series desde el catÃ¡logo.</div>
+    <a *ngFor="let s of pendientes" [routerLink]="['/serie', s.id]" class="serie-link">
+      + {{s.titulo}}
+    </a>
+  </div>
 
-        verCapitulo: function(user, capId) {
-            return $http.put(`/usuarios/${user}/capitulos-vistos/${capId}`)
-                .then(function(response) {
-                    return "CapÃ­tulo marcado como visto."; 
-                })
-                .catch(function(err) {
-                    return $q.reject("Error al registrar visualizaciÃ³n.");
-                });
-        },
+  <h2 class="section-title">Terminadas</h2>
+  <div class="list-container">
+    <div *ngIf="terminadas.length === 0" class="empty-msg">AÃºn no has terminado ninguna serie.</div>
+    <a *ngFor="let s of terminadas" [routerLink]="['/serie', s.id]" class="serie-link" style="color: #aaa;">
+      âœ“ {{s.titulo}}
+    </a>
+  </div>
 
-        agregarAPendientes: function(user, serieId) {
-            return $http.put(`/usuarios/${user}/series-pendientes/${serieId}`)
-                .catch(err => $q.reject("No se pudo aÃ±adir a pendientes."));
-        },
-
-        getUsuario: function(username) {
-            return $http.get('/usuarios/' + username)
-                .then(function(response) { return response.data; })
-                .catch(function(error) { return $q.reject("No se pudo cargar el perfil."); });
-        },
-
-        login: function(username, contrasena) {
-            return $http.post('/usuarios/login', {
-                username: username,
-                contrasena: contrasena
-            }).then(function(res) {
-                return res.data;
-            }).catch(function(err) {
-                return $q.reject("Credenciales incorrectas.");
-            });
-        },
-
-        guardarUsuario: function(username, contrasena, iban, esTarifaPlana, cuota) {
-            return $http({
-                method: 'PUT',
-                url: '/usuarios/' + username,
-                data: {
-                    contrasena: contrasena,
-                    iban: iban,
-                    esTarifaPlana: esTarifaPlana,
-                    cuota: cuota
-                }
-            }).then(res => res.data).catch(err => $q.reject("Error al guardar el usuario."));
-        },
-
-        borrarUsuario: function(username) {
-            return $http.delete('/usuarios/' + username)
-                .catch(err => $q.reject("Error al borrar la cuenta."));
-        },
-
-        cambiarContrasena: function(username, actual, nueva) {
-            return $http.put('/usuarios/' + username + '/contrasena', {
-                actual: actual,
-                nueva: nueva
-            }).catch(err => $q.reject("Error al cambiar la contraseÃ±a."));
-        },
-
-        quitarDePendientes: function(username, serieId) {
-            return $http.delete(`/usuarios/${username}/series-pendientes/${serieId}`)
-                .catch(err => $q.reject("Error al quitar de la lista."));
-        }
-    };
-}]);
+</div>
 
 
-========== src/main/resources/static/serie/serie.component.js ==========
-angular.module('polaflixApp').component('detalleSerie', {
-    templateUrl: 'serie/serie.template.html',
-    controller: ['$routeParams', 'PolaflixService', '$q', function($routeParams, PolaflixService, $q) {
-        var ctrl = this;
-        ctrl.serie = null;
-        ctrl.usuario = null;
-        ctrl.username = sessionStorage.getItem('usuarioLogueado'); 
-        var serieId = parseInt($routeParams.serieId, 10);
+========== frontend/src/app/inicio/inicio.component.ts ==========
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router, RouterModule } from '@angular/router';
+import { PolaflixService } from '../polaflix.service';
+import { forkJoin } from 'rxjs';
 
-        ctrl.temporadaExpandida = null;
+@Component({
+  selector: 'app-inicio',
+  standalone: true,
+  imports: [CommonModule, RouterModule],
+  templateUrl: './inicio.component.html',
+  styleUrls: ['./inicio.component.css'] // FÃ­jate en esto
+})
+export class InicioComponent implements OnInit {
+  username: string = '';
+  empezadas: any[] = [];
+  pendientes: any[] = [];
+  terminadas: any[] = [];
 
-        ctrl.$onInit = function() {
-            $q.all([
-                PolaflixService.getSerie(serieId),
-                PolaflixService.getUsuario(ctrl.username)
-            ]).then(function(res) {
-                ctrl.serie = res[0];
-                ctrl.usuario = res[1];
-                if (ctrl.serie.temporadas && ctrl.serie.temporadas.length > 0) {
-                    ctrl.temporadaExpandida = ctrl.serie.temporadas[0].id;
-                }
-            });
-        };
+  constructor(private polaflixService: PolaflixService, private router: Router) {}
 
-        ctrl.toggleTemporada = function(idTemporada) {
-            if (ctrl.temporadaExpandida === idTemporada) {
-                ctrl.temporadaExpandida = null;
-            } else {
-                ctrl.temporadaExpandida = idTemporada;
-            }
-        };
+  ngOnInit() {
+    this.username = sessionStorage.getItem('usuario') || '';
+    if (!this.username) {
+      this.router.navigate(['/']);
+      return;
+    }
 
-        ctrl.esVisto = function(idCapitulo) {
-            if(!ctrl.usuario || !ctrl.usuario.capitulosVistos) return false;
-            return ctrl.usuario.capitulosVistos.some(c => c.id === idCapitulo);
-        };
+    forkJoin({
+      usuario: this.polaflixService.entrar(this.username),
+      series: this.polaflixService.getSeries()
+    }).subscribe(({usuario, series}) => {
+      if (usuario.estadoSeries) {
+        Object.keys(usuario.estadoSeries).forEach(idStr => {
+          const id = parseInt(idStr, 10);
+          const estado = usuario.estadoSeries[idStr];
+          const serie = series.find(s => s.id === id);
+          if (serie) {
+            if (estado === 'EMPEZADA') this.empezadas.push(serie);
+            if (estado === 'PENDIENTE') this.pendientes.push(serie);
+            if (estado === 'TERMINADA') this.terminadas.push(serie);
+          }
+        });
+      }
+    });
+  }
 
-        ctrl.marcarVisto = function(idCapitulo) {
-            PolaflixService.verCapitulo(ctrl.username, idCapitulo).then(function() {
-                PolaflixService.getUsuario(ctrl.username).then(u => ctrl.usuario = u);
-            });
-        };
+  salir() {
+    sessionStorage.clear();
+    this.router.navigate(['/']);
+  }
+}
 
-        ctrl.getPosterGeneral = function(idSerie) {
-            if (idSerie === 1) return 'images/PeakyBlinders.png';
-            if (idSerie === 2) return 'images/PrisonBreakS01.png';
-            if (idSerie === 3) return 'images/LQSAS01.png';
-            return 'images/polaflix-logo.png';
-        };
 
-        ctrl.getPosterTemporada = function(idSerie, numTemporada) {
-            var safeNum = numTemporada > 4 ? 1 : numTemporada;
-            var sufijo = 'S0' + safeNum + '.png';
-            if (idSerie === 1) return 'images/PeakyBlinders' + sufijo;
-            if (idSerie === 2) return 'images/PrisonBreak' + sufijo;
-            if (idSerie === 3) return 'images/LQSA' + sufijo;
-            return 'images/polaflix-logo.png';
-        };
-    }]
+========== frontend/src/app/polaflix.service.ts ==========
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class PolaflixService {
+  constructor(private http: HttpClient) { }
+
+  entrar(username: string): Observable<any> {
+    return this.http.get(`/usuarios/${username}`);
+  }
+
+  getSeries(): Observable<any[]> {
+    return this.http.get<any[]>('/series');
+  }
+
+  getSerie(idSerie: number): Observable<any> {
+    return this.http.get(`/series/${idSerie}`);
+  }
+
+  marcarComoVisto(username: string, idCapitulo: number): Observable<any> {
+    return this.http.put(`/usuarios/${username}/capitulos-vistos/${idCapitulo}`, {});
+  }
+}
+
+
+========== frontend/src/app/polaflix.spec.ts ==========
+import { TestBed } from '@angular/core/testing';
+
+import { Polaflix } from './polaflix';
+
+describe('Polaflix', () => {
+  let service: Polaflix;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({});
+    service = TestBed.inject(Polaflix);
+  });
+
+  it('should be created', () => {
+    expect(service).toBeTruthy();
+  });
 });
 
 
-========== src/main/resources/static/serie/serie.template.html ==========
-<div ng-if="$ctrl.serie" class="fade-in">
+========== frontend/src/app/polaflix.ts ==========
+import { Service } from '@angular/core';
+
+@Service()
+export class Polaflix {}
+
+
+========== frontend/src/app/serie/serie.component.css ==========
+.serie-hero {
+    margin-bottom: 40px;
+    padding-bottom: 30px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.serie-title {
+    font-size: 3em;
+    margin: 0 0 15px 0;
+}
+
+.serie-meta {
+    color: #999;
+    font-size: 1.1em;
+    margin-bottom: 20px;
+}
+
+.serie-sinopsis {
+    font-size: 1.2em;
+    line-height: 1.5;
+    max-width: 800px;
+}
+
+.temporada-header {
+    background-color: var(--panel-bg);
+    padding: 20px;
+    margin-top: 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.2s;
+}
+
+.temporada-header:hover {
+    background-color: #2a2a2a;
+}
+
+.temporada-header h3 {
+    margin: 0;
+    font-size: 1.3em;
+}
+
+.icon-arrow {
+    font-size: 1.2em;
+    color: #888;
+}
+
+.capitulos-container {
+    background-color: #111;
+    padding: 10px 20px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.capitulo-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.capitulo-row:last-child {
+    border-bottom: none;
+}
+
+.cap-info {
+    max-width: 70%;
+}
+
+.cap-title {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.cap-desc {
+    color: #999;
+    font-size: 0.95em;
+    line-height: 1.4;
+}
+
+.cap-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+
+========== frontend/src/app/serie/serie.component.html ==========
+<header class="top-bar-premium">
+  <div class="logo-premium">POLAFLIX</div>
+  <nav class="nav-premium">
+    <a routerLink="/inicio">Mi Perfil</a>
+    <a routerLink="/catalogo">CatÃ¡logo</a>
+  </nav>
+  <div class="user-controls">
+    <span class="user-name">{{username}}</span>
+    <button class="btn-salir" (click)="salir()">Salir</button>
+  </div>
+</header>
+
+<div class="container" *ngIf="serie">
+  
+  <div class="serie-hero">
+    <h1 class="serie-title">{{serie.titulo}}</h1>
+    <div class="serie-meta">
+      <span class="badge" style="background: #333;">CategorÃ­a: {{serie.categoria}}</span>
+      <span style="margin-left: 15px;">Coste: {{serie.costeVisionado}}â‚¬ / capÃ­tulo</span>
+    </div>
+    <p class="serie-sinopsis">{{serie.sinopsis}}</p>
+  </div>
+
+  <h2 class="section-title">Episodios</h2>
+
+  <div *ngFor="let temp of serie.temporadas">
     
-    <div class="header-detalle">
-        <img ng-src="{{$ctrl.getPosterGeneral($ctrl.serie.id)}}" class="poster-detalle">
-        <div class="info-texto">
-            <h1 style="color: var(--pola-red); margin-top: 0; font-size: 3em;">{{$ctrl.serie.titulo}}</h1>
-            <p class="sinopsis" style="font-size: 1.2em; line-height: 1.6;">{{$ctrl.serie.sinopsis}}</p>
-            <p><strong>CategorÃ­a:</strong> <span class="badge-sin-posicion badge-empezada">{{$ctrl.serie.categoria}}</span></p>
-            <p><strong>Precio por CapÃ­tulo:</strong> {{$ctrl.serie.costeVisionado}} â‚¬</p>
-        </div>
+    <div class="temporada-header" (click)="toggleTemporada(temp.id)">
+      <h3>Temporada {{temp.numero}}</h3>
+      <span class="icon-arrow">{{temporadaExpandida === temp.id ? 'â–¼' : 'â–¶'}}</span>
     </div>
 
-    <p ng-if="$ctrl.mensajeError" class="error">{{$ctrl.mensajeError}}</p>
-    <p ng-if="$ctrl.mensajeExito" class="success">{{$ctrl.mensajeExito}}</p>
-
-    <div class="listado-episodios" style="margin-top: 40px;">
-        <h2 style="border-bottom: 1px solid #444; padding-bottom: 10px;">Episodios</h2>
-
-        <div class="temporada-card" ng-repeat="temp in $ctrl.serie.temporadas | orderBy:'numero'">
-            
-            <img ng-src="{{$ctrl.getPosterTemporada($ctrl.serie.id, temp.numero)}}" class="temporada-poster">
-            
-            <div class="temporada-info" style="flex-grow: 1;">
-                <h3 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 10px; cursor: pointer; color: #333;" ng-click="$ctrl.toggleTemporada(temp.id)">
-                    Temporada {{temp.numero}}
-                    <span style="float: right;">{{$ctrl.temporadaExpandida === temp.id ? 'â–¼' : 'â–¶'}}</span>
-                </h3>
-                
-                <div class="capitulos-lista-vertical" ng-show="$ctrl.temporadaExpandida === temp.id">
-                    <div class="capitulo-fila" ng-repeat="cap in temp.capitulos | orderBy:'numero'">
-                        <div class="capitulo-contenido">
-                            <div class="capitulo-info">
-                                <span class="capitulo-numero">{{cap.numero}}.</span>
-                                <span class="capitulo-titulo">{{cap.titulo}}</span>
-                            </div>
-                            <div class="capitulo-descripcion">{{cap.descripcion}}</div>
-                        </div>
-                        <div class="capitulo-acciones">
-                            <a href="" class="btn-primary" ng-click="$ctrl.marcarVisto(cap.id)">Ver</a>
-                            <span class="badge" ng-class="$ctrl.esVisto(cap.id) ? 'badge-terminada' : 'badge-pendiente'" style="position: static; box-shadow: none;">
-                                {{$ctrl.esVisto(cap.id) ? 'Visto' : 'Pendiente'}}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <div class="capitulos-container" *ngIf="temporadaExpandida === temp.id">
+      
+      <div class="capitulo-row" *ngFor="let cap of temp.capitulos">
+        
+        <div class="cap-info">
+          <div class="cap-title">{{cap.numero}}. {{cap.titulo}}</div>
+          <div class="cap-desc">{{cap.descripcion}}</div>
         </div>
+
+        <div class="cap-actions">
+          <button class="btn-primary" (click)="marcarVisto(cap.id)">Ver ahora</button>
+          <span class="badge" [ngClass]="esVisto(cap.id) ? 'badge-visto' : 'badge-pendiente'">
+            {{esVisto(cap.id) ? 'âœ“ Visto' : 'Pendiente'}}
+          </span>
+        </div>
+
+      </div>
+
     </div>
+
+  </div>
+
 </div>
+
+
+========== frontend/src/app/serie/serie.component.ts ==========
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { PolaflixService } from '../polaflix.service';
+
+@Component({
+  selector: 'app-serie',
+  standalone: true,
+  imports: [CommonModule, RouterModule],
+  templateUrl: './serie.component.html',
+  styleUrls: ['./serie.component.css']
+})
+export class SerieComponent implements OnInit {
+  serie: any;
+  usuario: any;
+  username: string = '';
+  temporadaExpandida: number | null = null;
+
+  constructor(
+    private route: ActivatedRoute, 
+    private router: Router,
+    private polaflixService: PolaflixService
+  ) {}
+
+  ngOnInit(): void {
+    this.username = sessionStorage.getItem('usuario') || '';
+    if (!this.username) { this.router.navigate(['/']); return; }
+
+    const idSerie = Number(this.route.snapshot.paramMap.get('id'));
+    this.polaflixService.getSerie(idSerie).subscribe(s => {
+      this.serie = s;
+      if(s.temporadas && s.temporadas.length > 0) {
+          this.temporadaExpandida = s.temporadas[0].id;
+      }
+    });
+    this.polaflixService.entrar(this.username).subscribe(u => this.usuario = u);
+  }
+
+  toggleTemporada(idTemp: number) {
+      if (this.temporadaExpandida === idTemp) {
+          this.temporadaExpandida = null;
+      } else {
+          this.temporadaExpandida = idTemp;
+      }
+  }
+
+  esVisto(idCapitulo: number): boolean {
+    if (!this.usuario || !this.usuario.capitulosVistos) return false;
+    return this.usuario.capitulosVistos.some((c: any) => c.id === idCapitulo);
+  }
+
+  marcarVisto(idCapitulo: number) {
+    this.polaflixService.marcarComoVisto(this.username, idCapitulo).subscribe(() => {
+      this.polaflixService.entrar(this.username).subscribe(u => this.usuario = u);
+    });
+  }
+
+  salir() {
+    sessionStorage.clear();
+    this.router.navigate(['/']);
+  }
+}
 
 

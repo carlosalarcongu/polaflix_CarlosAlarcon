@@ -18,8 +18,7 @@ public class AppFeeder implements CommandLineRunner {
     @Autowired
     protected SerieRepository sr;
 
-    @Autowired
-    protected FacturaRepository fr;
+    
 
     @Override
     @Transactional
@@ -28,7 +27,7 @@ public class AppFeeder implements CommandLineRunner {
         feedUsuariosYVisualizaciones();
 
         System.out.println("===================================================================");
-        System.out.println("✅ Base de datos de Polaflix poblada con MEGA catálogo VIP, usuarios y facturas.");
+        System.out.println("✅ Base de datos de Polaflix poblada con catalogo y usuarios.");
         System.out.println("===================================================================");
     }
 
@@ -392,9 +391,9 @@ public class AppFeeder implements CommandLineRunner {
     private void feedUsuariosYVisualizaciones() {
         IBAN ibanPrueba = new IBAN("ES0011112222333344445555");
 
-        Serie peaky = sr.findById(1).orElseThrow();
-        Serie prison = sr.findById(2).orElseThrow();
-        Serie lqsa = sr.findById(3).orElseThrow();
+        Serie peaky = sr.findByTituloContainingIgnoreCase("Peaky").get(0);
+        Serie prison = sr.findByTituloContainingIgnoreCase("Prison Break").get(0);
+        Serie lqsa = sr.findByTituloContainingIgnoreCase("La que se avecina").get(0);
 
         Capitulo peakyS1E1 = peaky.getTemporadas().get(0).getCapitulos().get(0);
         Capitulo peakyS1E2 = peaky.getTemporadas().get(0).getCapitulos().get(1);
@@ -402,54 +401,27 @@ public class AppFeeder implements CommandLineRunner {
         Capitulo prisonS1E1 = prison.getTemporadas().get(0).getCapitulos().get(0);
 
         Capitulo lqsaS1E1 = lqsa.getTemporadas().get(0).getCapitulos().get(0);
-        Capitulo lqsaS3E1 = lqsa.getTemporadas().get(2).getCapitulos().get(0); // T3 E1
+        Capitulo lqsaS3E1 = lqsa.getTemporadas().get(2).getCapitulos().get(0);
 
-        // ==========================================
-        // CARLOS ALARCON (Suscripción Tarifa Plana)
-        // Viendo LQSA para relajarse y Peaky Blinders
-        // ==========================================
         Usuario carlos = new Usuario("carlosalarcon", "pass123", ibanPrueba, new PlanSuscripcion(true, 20.0));
         carlos.verCapitulo(lqsaS1E1);
         carlos.verCapitulo(lqsaS3E1);
         carlos.verCapitulo(peakyS1E1);
         ur.save(carlos);
 
-        Factura facCarlos = new Factura("F-CAR-001", carlos, LocalDate.now().getMonthValue(), LocalDate.now().getYear());
-        fr.save(facCarlos);
-
-        // ==========================================
-        // MARIANO RAJOY (Pago por Visión - Básico)
-        // Ha visto un poco de Prison Break y luego lo dejó
-        // ==========================================
         Usuario mariano = new Usuario("mrajoy", "finfin", ibanPrueba, new PlanSuscripcion(false, 0.0));
         mariano.verCapitulo(prisonS1E1);
-        mariano.agregarSeriePendiente(lqsa); // La añade a su lista para verla después
+        mariano.agregarSeriePendiente(lqsa);
         ur.save(mariano);
 
-        Factura facMariano = new Factura("F-MR-001", mariano, LocalDate.now().getMonthValue(), LocalDate.now().getYear());
-        fr.save(facMariano);
-
-        // ==========================================
-        // CRISTIANO RONALDO (Pago por Visión - Consumidor Elite)
-        // Enganchado a Peaky Blinders
-        // ==========================================
         Usuario cristiano = new Usuario("cr7bicho", "siiii", ibanPrueba, new PlanSuscripcion(false, 0.0));
         cristiano.verCapitulo(peakyS1E1);
         cristiano.verCapitulo(peakyS1E2);
         ur.save(cristiano);
 
-        Factura facCR7 = new Factura("F-CR7-001", cristiano, LocalDate.now().getMonthValue(), LocalDate.now().getYear());
-        fr.save(facCR7);
-
-        // ==========================================
-        // PEPE REINA (Suscripción Tarifa Plana)
-        // Usuario que aún no ha visto nada este mes
-        // ==========================================
         Usuario pepe = new Usuario("pepereina", "camarero", ibanPrueba, new PlanSuscripcion(true, 20.0));
         pepe.agregarSeriePendiente(prison);
         ur.save(pepe);
-
-        Factura facPepe = new Factura("F-PEPE-001", pepe, LocalDate.now().getMonthValue(), LocalDate.now().getYear());
-        fr.save(facPepe);
     }
+
 }

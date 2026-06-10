@@ -1,0 +1,31 @@
+.list-container {
+    background-color: var(--panel-bg);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+.empty-msg {
+    color: #888;
+    font-style: italic;
+    padding: 10px 0;
+}
+
+.serie-link {
+    display: block;
+    padding: 15px;
+    background-color: #2a2a2a;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    font-size: 1.2em;
+    font-weight: 500;
+    transition: all 0.2s;
+    border-left: 3px solid transparent;
+}
+
+.serie-link:hover {
+    background-color: #333;
+    border-left: 3px solid var(--accent-color);
+    padding-left: 20px; /* Efecto de movimiento */
+}

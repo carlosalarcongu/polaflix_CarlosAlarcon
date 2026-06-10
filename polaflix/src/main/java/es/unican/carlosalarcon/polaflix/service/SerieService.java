@@ -14,9 +14,6 @@ public class SerieService {
     @Autowired
     private SerieRepository serieRepository;
 
-    // =========================================================================
-    // Obtener catálogo (Con soporte para filtrado opcional)
-    // =========================================================================
     @Transactional(readOnly = true)
     public List<Serie> obtenerSeries(String inicial, String titulo) {
         if (inicial != null && !inicial.isEmpty()) {
@@ -24,15 +21,15 @@ public class SerieService {
         } else if (titulo != null && !titulo.isEmpty()) {
             return serieRepository.findByTituloContainingIgnoreCase(titulo);
         }
-        // Si no hay parámetros, devuelve todo
         return serieRepository.findAll();
     }
 
-    // =========================================================================
-    // Obtener una serie específica por su ID
-    // =========================================================================
     @Transactional(readOnly = true)
     public Serie obtenerSeriePorId(Integer idSerie) {
-        return serieRepository.findById(idSerie).orElse(null);
+        Serie serie = serieRepository.findSerieConTemporadasPorId(idSerie).orElse(null);
+        if (serie != null) {
+            serie.getTemporadas().forEach(t -> t.getCapitulos().size());
+        }
+        return serie;
     }
 }

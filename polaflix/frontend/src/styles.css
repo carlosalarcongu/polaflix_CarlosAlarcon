@@ -1,0 +1,133 @@
+/* frontend/src/styles.css */
+@import url('https://fonts.googleapis.com/css2?family=Helvetica+Neue:wght@400;700&display=swap');
+
+:root {
+  --bg-color: #141414; /* Gris casi negro profundo */
+  --text-color: #e5e5e5;
+  --accent-color: #E50914; /* Rojo característico */
+  --hover-color: #b20710;
+  --panel-bg: #1f1f1f; /* Cajas ligeramente más claras */
+  --border-color: #333;
+}
+
+body {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: var(--text-color);
+  background-color: var(--bg-color);
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  color: #fff;
+  font-weight: 700;
+}
+
+a {
+  color: #fff;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--accent-color);
+}
+
+.top-bar-premium {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  background-color: #000; /* Cabecera negra sólida */
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+.logo-premium {
+  color: var(--accent-color);
+  font-size: 2em;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.nav-premium {
+  display: flex;
+  gap: 30px;
+  align-items: center;
+}
+
+.nav-premium a {
+  font-size: 1.1em;
+  font-weight: 500;
+}
+
+.user-controls {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.user-name {
+  font-size: 1.1em;
+  font-weight: bold;
+}
+
+.btn-salir {
+  background-color: transparent;
+  color: #fff;
+  border: 1px solid #fff;
+  padding: 5px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.btn-salir:hover {
+  background-color: #fff;
+  color: #000;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.section-title {
+  font-size: 1.5em;
+  margin-bottom: 20px;
+  border-left: 4px solid var(--accent-color);
+  padding-left: 10px;
+}
+
+.btn-primary {
+  background-color: var(--accent-color);
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1em;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: var(--hover-color);
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 3px;
+  font-size: 0.8em;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.badge-visto, .badge-terminada { background-color: #4caf50; color: #fff; }
+.badge-pendiente { background-color: #ff9800; color: #fff; }
+.badge-empezada { background: #0088cc; color: #fff; }

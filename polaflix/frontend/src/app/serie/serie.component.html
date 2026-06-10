@@ -1,0 +1,40 @@
+<header class="top-bar-premium">
+  <div class="logo-premium">POLAFLIX</div>
+  <nav class="nav-premium">
+    <a routerLink="/inicio">Mi Perfil</a>
+    <a routerLink="/catalogo">Catálogo</a>
+  </nav>
+  <div class="user-controls">
+    <span class="user-name">{{username}}</span>
+    <button class="btn-salir" (click)="salir()">Salir</button>
+  </div>
+</header>
+
+<div *ngFor="let temp of serie.temporadas">
+    
+    <div class="temporada-header" (click)="toggleTemporada(temp.numero)">
+      <h3>Temporada {{temp.numero}}</h3>
+      <span class="icon-arrow">{{temporadaExpandida === temp.numero ? '▼' : '▶'}}</span>
+    </div>
+
+    <div class="capitulos-container" *ngIf="temporadaExpandida === temp.numero">
+      
+      <div class="capitulo-row" *ngFor="let cap of temp.capitulos">
+        
+        <div class="cap-info">
+          <div class="cap-title">{{cap.numero}}. {{cap.titulo}}</div>
+          <div class="cap-desc">{{cap.descripcion}}</div>
+        </div>
+
+        <div class="cap-actions">
+          <button class="btn-primary" (click)="marcarVisto(cap.id)">Ver ahora</button>
+          <span class="badge" [ngClass]="esVisto(cap.id) ? 'badge-visto' : 'badge-pendiente'">
+            {{esVisto(cap.id) ? '✓ Visto' : 'Pendiente'}}
+          </span>
+        </div>
+
+      </div>
+
+    </div>
+
+</div>
