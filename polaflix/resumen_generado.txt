@@ -136,6 +136,11 @@ import java.util.Optional;
 public interface SerieRepository extends JpaRepository<Serie, Integer> {
     List<Serie> findByInicialOrderByTituloAsc(char inicial);
     List<Serie> findByTituloContainingIgnoreCase(String titulo);
+    
+    // Para forzar la carga de temporadas
+    @Query("SELECT s FROM Serie s LEFT JOIN FETCH s.temporadas WHERE s.id = :id")
+    Optional<Serie> findSerieConTemporadasPorId(@Param("id") Integer id);
+
     @Query("SELECT s FROM Serie s JOIN s.temporadas t JOIN t.capitulos c WHERE c.id = :capituloId")
     Optional<Serie> findSerieByCapituloId(@Param("capituloId") Long capituloId);
 }
@@ -937,9 +942,6 @@ public class SerieService {
     @Autowired
     private SerieRepository serieRepository;
 
-    // =========================================================================
-    // Obtener catÃ¡logo (Con soporte para filtrado opcional)
-    // =========================================================================
     @Transactional(readOnly = true)
     public List<Serie> obtenerSeries(String inicial, String titulo) {
         if (inicial != null && !inicial.isEmpty()) {
@@ -947,16 +949,16 @@ public class SerieService {
         } else if (titulo != null && !titulo.isEmpty()) {
             return serieRepository.findByTituloContainingIgnoreCase(titulo);
         }
-        // Si no hay parÃ¡metros, devuelve todo
         return serieRepository.findAll();
     }
 
-    // =========================================================================
-    // Obtener una serie especÃ­fica por su ID
-    // =========================================================================
     @Transactional(readOnly = true)
     public Serie obtenerSeriePorId(Integer idSerie) {
-        return serieRepository.findById(idSerie).orElse(null);
+        Serie serie = serieRepository.findSerieConTemporadasPorId(idSerie).orElse(null);
+        if (serie != null) {
+            serie.getTemporadas().forEach(t -> t.getCapitulos().size());
+        }
+        return serie;
     }
 }
 
@@ -1118,6 +1120,7 @@ input { width: 100%; padding: 12px; margin: 20px 0; border: 1px solid #ccc; bord
 button { width: 100%; padding: 12px; background-color: #E50914; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; }
 button:hover { background-color: #b20710; }
 .error-msg { color: #E50914; margin-top: 15px; font-weight: bold; }
+p {color: #555; margin-top: 20px;}
 
 
 ========== frontend/src/app/entrada/entrada.component.html ==========
@@ -1145,7 +1148,8 @@ import { CommonModule } from '@angular/common';
   selector: 'app-entrada',
   standalone: true,
   imports: [FormsModule, CommonModule],
-  templateUrl: './entrada.component.html'
+  templateUrl: './entrada.component.html',
+  styleUrls: ['./entrada.component.css']
 })
 export class EntradaComponent {
   username: string = '';
@@ -1246,8 +1250,8 @@ export class EntradaComponent {
 
 
 ========== frontend/src/app/inicio/inicio.component.ts ==========
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, Inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { PolaflixService } from '../polaflix.service';
 import { forkJoin } from 'rxjs';
@@ -1257,7 +1261,7 @@ import { forkJoin } from 'rxjs';
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './inicio.component.html',
-  styleUrls: ['./inicio.component.css'] // FÃ­jate en esto
+  styleUrls: ['./inicio.component.css']
 })
 export class InicioComponent implements OnInit {
   username: string = '';
@@ -1265,36 +1269,53 @@ export class InicioComponent implements OnInit {
   pendientes: any[] = [];
   terminadas: any[] = [];
 
-  constructor(private polaflixService: PolaflixService, private router: Router) {}
+  constructor(
+    private polaflixService: PolaflixService, 
+    private router: Router,
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private cdr: ChangeDetectorRef // <-- AÃ±adido
+  ) {}
 
   ngOnInit() {
-    this.username = sessionStorage.getItem('usuario') || '';
-    if (!this.username) {
-      this.router.navigate(['/']);
-      return;
-    }
-
-    forkJoin({
-      usuario: this.polaflixService.entrar(this.username),
-      series: this.polaflixService.getSeries()
-    }).subscribe(({usuario, series}) => {
-      if (usuario.estadoSeries) {
-        Object.keys(usuario.estadoSeries).forEach(idStr => {
-          const id = parseInt(idStr, 10);
-          const estado = usuario.estadoSeries[idStr];
-          const serie = series.find(s => s.id === id);
-          if (serie) {
-            if (estado === 'EMPEZADA') this.empezadas.push(serie);
-            if (estado === 'PENDIENTE') this.pendientes.push(serie);
-            if (estado === 'TERMINADA') this.terminadas.push(serie);
-          }
-        });
+    if (isPlatformBrowser(this.platformId)) {
+      this.username = sessionStorage.getItem('usuario') || '';
+      
+      if (!this.username) {
+        this.router.navigate(['/']);
+        return;
       }
-    });
+
+      forkJoin({
+        usuario: this.polaflixService.entrar(this.username),
+        series: this.polaflixService.getSeries()
+      }).subscribe(({usuario, series}) => {
+        this.empezadas = [];
+        this.pendientes = [];
+        this.terminadas = [];
+        
+        if (usuario.estadoSeries) {
+          Object.keys(usuario.estadoSeries).forEach(idStr => {
+            const id = parseInt(idStr, 10);
+            const estado = usuario.estadoSeries[idStr];
+            const serie = series.find(s => s.id === id);
+            
+            if (serie) {
+              if (estado === 'EMPEZADA') this.empezadas.push(serie);
+              if (estado === 'PENDIENTE') this.pendientes.push(serie);
+              if (estado === 'TERMINADA') this.terminadas.push(serie);
+            }
+          });
+        }
+        // Obligamos a Angular a actualizar la pantalla inmediatamente
+        this.cdr.detectChanges(); 
+      });
+    }
   }
 
   salir() {
-    sessionStorage.clear();
+    if (isPlatformBrowser(this.platformId)) {
+      sessionStorage.clear();
+    }
     this.router.navigate(['/']);
   }
 }
@@ -1460,27 +1481,14 @@ export class Polaflix {}
   </div>
 </header>
 
-<div class="container" *ngIf="serie">
-  
-  <div class="serie-hero">
-    <h1 class="serie-title">{{serie.titulo}}</h1>
-    <div class="serie-meta">
-      <span class="badge" style="background: #333;">CategorÃ­a: {{serie.categoria}}</span>
-      <span style="margin-left: 15px;">Coste: {{serie.costeVisionado}}â‚¬ / capÃ­tulo</span>
-    </div>
-    <p class="serie-sinopsis">{{serie.sinopsis}}</p>
-  </div>
-
-  <h2 class="section-title">Episodios</h2>
-
-  <div *ngFor="let temp of serie.temporadas">
+<div *ngFor="let temp of serie.temporadas">
     
-    <div class="temporada-header" (click)="toggleTemporada(temp.id)">
+    <div class="temporada-header" (click)="toggleTemporada(temp.numero)">
       <h3>Temporada {{temp.numero}}</h3>
-      <span class="icon-arrow">{{temporadaExpandida === temp.id ? 'â–¼' : 'â–¶'}}</span>
+      <span class="icon-arrow">{{temporadaExpandida === temp.numero ? 'â–¼' : 'â–¶'}}</span>
     </div>
 
-    <div class="capitulos-container" *ngIf="temporadaExpandida === temp.id">
+    <div class="capitulos-container" *ngIf="temporadaExpandida === temp.numero">
       
       <div class="capitulo-row" *ngFor="let cap of temp.capitulos">
         
@@ -1500,14 +1508,12 @@ export class Polaflix {}
 
     </div>
 
-  </div>
-
 </div>
 
 
 ========== frontend/src/app/serie/serie.component.ts ==========
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, Inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { PolaflixService } from '../polaflix.service';
 
@@ -1527,29 +1533,45 @@ export class SerieComponent implements OnInit {
   constructor(
     private route: ActivatedRoute, 
     private router: Router,
-    private polaflixService: PolaflixService
+    private polaflixService: PolaflixService,
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private cdr: ChangeDetectorRef // <-- AÃ±adido
   ) {}
 
   ngOnInit(): void {
-    this.username = sessionStorage.getItem('usuario') || '';
-    if (!this.username) { this.router.navigate(['/']); return; }
-
-    const idSerie = Number(this.route.snapshot.paramMap.get('id'));
-    this.polaflixService.getSerie(idSerie).subscribe(s => {
-      this.serie = s;
-      if(s.temporadas && s.temporadas.length > 0) {
-          this.temporadaExpandida = s.temporadas[0].id;
+    if (isPlatformBrowser(this.platformId)) {
+      this.username = sessionStorage.getItem('usuario') || '';
+      
+      if (!this.username) { 
+        this.router.navigate(['/']); 
+        return; 
       }
-    });
-    this.polaflixService.entrar(this.username).subscribe(u => this.usuario = u);
+
+      const idSerie = Number(this.route.snapshot.paramMap.get('id'));
+      
+      this.polaflixService.getSerie(idSerie).subscribe(s => {
+        this.serie = s;
+        if (s.temporadas && s.temporadas.length > 0) {
+            // Expandimos por "numero", no por "id"
+            this.temporadaExpandida = s.temporadas[0].numero; 
+        }
+        this.cdr.detectChanges(); // Forzamos dibujado
+      });
+      
+      this.polaflixService.entrar(this.username).subscribe(u => {
+        this.usuario = u;
+        this.cdr.detectChanges(); // Forzamos dibujado
+      });
+    }
   }
 
-  toggleTemporada(idTemp: number) {
-      if (this.temporadaExpandida === idTemp) {
+  toggleTemporada(numeroTemp: number) {
+      if (this.temporadaExpandida === numeroTemp) {
           this.temporadaExpandida = null;
       } else {
-          this.temporadaExpandida = idTemp;
+          this.temporadaExpandida = numeroTemp;
       }
+      this.cdr.detectChanges(); // Forzamos dibujado
   }
 
   esVisto(idCapitulo: number): boolean {
@@ -1558,13 +1580,20 @@ export class SerieComponent implements OnInit {
   }
 
   marcarVisto(idCapitulo: number) {
-    this.polaflixService.marcarComoVisto(this.username, idCapitulo).subscribe(() => {
-      this.polaflixService.entrar(this.username).subscribe(u => this.usuario = u);
-    });
+    if (isPlatformBrowser(this.platformId)) {
+      this.polaflixService.marcarComoVisto(this.username, idCapitulo).subscribe(() => {
+        this.polaflixService.entrar(this.username).subscribe(u => {
+          this.usuario = u;
+          this.cdr.detectChanges(); // Forzamos dibujado
+        });
+      });
+    }
   }
 
   salir() {
-    sessionStorage.clear();
+    if (isPlatformBrowser(this.platformId)) {
+      sessionStorage.clear();
+    }
     this.router.navigate(['/']);
   }
 }

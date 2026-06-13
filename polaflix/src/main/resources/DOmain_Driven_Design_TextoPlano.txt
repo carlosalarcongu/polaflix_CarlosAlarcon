@@ -1,0 +1,51 @@
+# Arquitectura del Dominio (Domain-Driven Design)
+
+El diseño del modelo de dominio de Polaflix se ha estructurado siguiendo estrictamente los patrones tácticos de **Domain-Driven Design (DDD)**. Se ha priorizado la creación de un **Modelo de Dominio Rico** (Rich Domain Model), donde la lógica de negocio y las invariantes están encapsuladas dentro de las propias clases, evitando el antipatrón de modelo anémico.
+
+## 1. Clasificación de Elementos del Dominio
+
+### Entities (Entidades)
+Las entidades poseen una identidad única y un ciclo de vida propio. Su igualdad se basa en su identificador, no en sus atributos.
+
+* **Usuario:** Identidad global definida por su `id` autogenerado y su `username` único. Gestiona la lógica central de consumo de contenido y la delegación de facturación.
+* **Serie:** Identidad global delegada a un `id` numérico (`Integer`). Es la entidad raíz del catálogo. Al usar un ID autogenerado, se delega la identidad a la persistencia, asegurando un desacoplamiento de la clave natural de negocio (el título).
+* **Temporada:** Entidad con identidad local. Estructuralmente dependiente de una `Serie`. 
+* **Capítulo:** Entidad con identidad local. Es la unidad mínima de consumo, carente de significado sin la `Temporada` que la alberga.
+* **Factura:** Identidad global semántica (`F-username-mes-anio`). Agrupa un conjunto de cargos generados en un marco temporal específico.
+* **Persona:** Identidad global (`id`). Representa actores y creadores. Su existencia aislada evita duplicidad de datos en la base de datos cuando participan en múltiples series.
+
+### Value Objects (Objetos de Valor)
+Conceptos del dominio que se definen por el valor de sus atributos. Son estrictamente inmutables y carecen de identidad propia.
+
+* **IBAN:** Encapsula el número de cuenta. Si un usuario cambia de cuenta, el objeto `IBAN` entero es reemplazado.
+* **PlanSuscripcion:** Define las condiciones del servicio (booleano de tarifa plana y cuota). No tiene sentido su existencia independiente.
+* **LineaFactura:** Representa un cargo inmutable en el tiempo (fecha, concepto e importe). Integrado (`@Embeddable`) puramente dentro de la factura.
+* **EstadoSerie:** (`Enum`) Representa el estado estático de progreso (`PENDIENTE`, `EMPEZADA`, `TERMINADA`).
+
+---
+
+## 2. Aggregates y Aggregate Roots
+
+Los Aggregates definen las fronteras de consistencia transaccional. La regla de oro aplicada es que **las transacciones no deben cruzar los límites de un Aggregate**.
+
+1.  **Aggregate: Usuario (Root: `Usuario`)**
+    * El usuario es la frontera de consistencia para el seguimiento del contenido. Protege la regla de negocio que dicta cómo y cuándo una serie pasa a estado `EMPEZADA` o `TERMINADA`. 
+    * **Diseño ID-Reference:** El aggregate `Usuario` almacena el seguimiento de series a través de un `Map<Integer, EstadoSerie>`, referenciando a la `Serie` por su identificador numérico y no por una referencia directa a la entidad en memoria. Esto reduce el acoplamiento y evita la carga indiscriminada de grafos de objetos por parte de Hibernate.
+
+2.  **Aggregate: Serie (Root: `Serie`)**
+    * Encapsula `Temporada` y `Capitulo`. El acceso, creación y eliminación de temporadas y capítulos debe pasar forzosamente por la raíz (`Serie`). Esto se refleja en la persistencia con `cascade = CascadeType.ALL` y `orphanRemoval = true`, garantizando que si se elimina una serie, no queden capítulos huérfanos.
+
+3.  **Aggregate: Facturación (Root: `Factura`)**
+    * Frontera que protege las invariantes económicas. Garantiza que el cálculo del importe total (`getImporteTotal()`) siempre sea la suma exacta y consistente de los *Value Objects* `LineaFactura` internos.
+
+4.  **Aggregate: Persona (Root: `Persona`)**
+    * Aggregate independiente, referenciado desde `Serie` mediante una relación Many-to-Many (`@ManyToMany`), permitiendo la reutilización de directores y actores en el catálogo general.
+
+---
+
+## 3. Lógica de Dominio Centralizada (Rich Domain Model)
+El dominio no expone *setters* indiscriminados. Todas las mutaciones de estado ocurren mediante operaciones ricas con significado de negocio. Un claro ejemplo es el método `Usuario.verCapitulo(Capitulo capitulo)`. Este método actúa como un núcleo orquestador que:
+1. Actualiza el *set* de capítulos vistos.
+2. Calcula lógicamente si el capítulo actual es más avanzado que el anterior para actualizar el marcador de la serie.
+3. Evalúa mediante delegación (`serie.esUltimoCapitulo()`) si debe transicionar el estado a `TERMINADA`.
+4. Evalúa las reglas del `PlanSuscripcion` para inyectar o no un cargo en el Aggregate de Facturación correspondiente.
