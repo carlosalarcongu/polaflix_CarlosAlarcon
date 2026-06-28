@@ -76,10 +76,4 @@ export class SerieComponent implements OnInit {
     }
   }
 
-  salir() {
-    if (isPlatformBrowser(this.platformId)) {
-      sessionStorage.clear();
-    }
-    this.router.navigate(['/']);
-  }
 }

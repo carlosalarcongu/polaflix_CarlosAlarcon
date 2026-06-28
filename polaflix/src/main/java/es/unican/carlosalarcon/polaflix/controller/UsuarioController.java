@@ -31,7 +31,7 @@ public class UsuarioController {
     }
 
     @PutMapping("/{username}/capitulos-vistos/{idCapitulo}")
-    @Operation(summary = "Marcar capítulo como visto", description = "Registra que un usuario ha visto un capítulo.")
+    @Operation(summary = "Marcar capÃ­tulo como visto", description = "Registra que un usuario ha visto un capÃ­tulo.")
     public ResponseEntity<Void> verCapitulo(
             @PathVariable("username") String username,
             @PathVariable("idCapitulo") Long idCapitulo) {
@@ -42,6 +42,32 @@ public class UsuarioController {
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build(); 
+        }
+    }
+
+    @PutMapping("/{username}/series-archivadas/{idSerie}")
+    @Operation(summary = "Archivar serie")
+    public ResponseEntity<Void> archivarSerie(
+            @PathVariable("username") String username,
+            @PathVariable("idSerie") Integer idSerie) {
+        try {
+            usuarioService.archivarSerie(username, idSerie);
+            return ResponseEntity.ok().build();
+        } catch (java.util.NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/{username}/series-archivadas/{idSerie}")
+    @Operation(summary = "Desarchivar serie")
+    public ResponseEntity<Void> desarchivarSerie(
+            @PathVariable("username") String username,
+            @PathVariable("idSerie") Integer idSerie) {
+        try {
+            usuarioService.desarchivarSerie(username, idSerie);
+            return ResponseEntity.ok().build();
+        } catch (java.util.NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
         }
     }
 }

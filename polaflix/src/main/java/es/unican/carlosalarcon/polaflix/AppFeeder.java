@@ -391,10 +391,13 @@ public class AppFeeder implements CommandLineRunner {
     private void feedUsuariosYVisualizaciones() {
         IBAN ibanPrueba = new IBAN("ES0011112222333344445555");
 
+        // 1. Recuperamos las series de la BD
         Serie peaky = sr.findByTituloContainingIgnoreCase("Peaky").get(0);
         Serie prison = sr.findByTituloContainingIgnoreCase("Prison Break").get(0);
         Serie lqsa = sr.findByTituloContainingIgnoreCase("La que se avecina").get(0);
+        Serie chernobyl = sr.findByTituloContainingIgnoreCase("Chernobyl").get(0);
 
+        // 2. Extraemos los capítulos necesarios
         Capitulo peakyS1E1 = peaky.getTemporadas().get(0).getCapitulos().get(0);
         Capitulo peakyS1E2 = peaky.getTemporadas().get(0).getCapitulos().get(1);
 
@@ -403,12 +406,26 @@ public class AppFeeder implements CommandLineRunner {
         Capitulo lqsaS1E1 = lqsa.getTemporadas().get(0).getCapitulos().get(0);
         Capitulo lqsaS3E1 = lqsa.getTemporadas().get(2).getCapitulos().get(0);
 
+        // Extraemos el último capítulo de la última temporada de Chernobyl (T1xC5)
+        Capitulo chernobylFin = chernobyl.getTemporadas().get(0).getCapitulos().get(4);
+
+        // 3. Poblamos el usuario principal
         Usuario carlos = new Usuario("carlosalarcon", "pass123", ibanPrueba, new PlanSuscripcion(true, 20.0));
+        
+        // EMPEZADAS: Ve capítulos iniciales/intermedios
         carlos.verCapitulo(lqsaS1E1);
         carlos.verCapitulo(lqsaS3E1);
         carlos.verCapitulo(peakyS1E1);
+        
+        // TERMINADAS: Ve el último capítulo absoluto de la serie
+        carlos.verCapitulo(chernobylFin);
+        
+        // PENDIENTES: Se añade a su lista sin verla
+        carlos.agregarSeriePendiente(prison);
+        
         ur.save(carlos);
 
+        // 4. Poblamos el resto de usuarios
         Usuario mariano = new Usuario("mrajoy", "finfin", ibanPrueba, new PlanSuscripcion(false, 0.0));
         mariano.verCapitulo(prisonS1E1);
         mariano.agregarSeriePendiente(lqsa);
@@ -423,5 +440,4 @@ public class AppFeeder implements CommandLineRunner {
         pepe.agregarSeriePendiente(prison);
         ur.save(pepe);
     }
-
 }

@@ -26,10 +26,10 @@ public class UsuarioService {
     @Transactional
     public void verCapitulo(String username, Long idCapitulo) {
         Usuario usuario = usuarioRepository.findByUsername(username);
-        if (usuario == null) throw new java.util.NoSuchElementException();
+        if (usuario == null) throw new java.util.NoSuchElementException("Usuario no encontrado");
 
         Serie serie = serieRepository.findSerieByCapituloId(idCapitulo)
-                .orElseThrow(() -> new java.util.NoSuchElementException());
+                .orElseThrow(() -> new java.util.NoSuchElementException("Serie no encontrada"));
                 
         Capitulo capitulo = serie.getTemporadas().stream()
                 .flatMap(t -> t.getCapitulos().stream())
@@ -37,6 +37,22 @@ public class UsuarioService {
                 .findFirst().orElseThrow();
 
         usuario.verCapitulo(capitulo);
+        usuarioRepository.save(usuario);
+    }
+
+    @Transactional
+    public void archivarSerie(String username, Integer idSerie) {
+        Usuario usuario = usuarioRepository.findByUsername(username);
+        if (usuario == null) throw new java.util.NoSuchElementException();
+        usuario.archivarSerie(idSerie);
+        usuarioRepository.save(usuario);
+    }
+
+    @Transactional
+    public void desarchivarSerie(String username, Integer idSerie) {
+        Usuario usuario = usuarioRepository.findByUsername(username);
+        if (usuario == null) throw new java.util.NoSuchElementException();
+        usuario.desarchivarSerie(idSerie);
         usuarioRepository.save(usuario);
     }
 }

@@ -49,7 +49,19 @@ public class Usuario {
     @MapKeyColumn(name = "serie_id")
     private Map<Integer, Capitulo> ultimoCapituloVisto = new HashMap<>();
 
+    @ElementCollection
+    @JsonView(Views.UsuarioBasico.class)
+    private Set<Integer> seriesArchivadas = new HashSet<>();
+
     protected Usuario() {}
+
+    public void archivarSerie(Integer serieId) {
+        this.seriesArchivadas.add(serieId);
+    }
+
+    public void desarchivarSerie(Integer serieId) {
+        this.seriesArchivadas.remove(serieId);
+    }
 
     public Usuario(String username, String contrasenha, IBAN iban, PlanSuscripcion planSuscripcion) {
         this.username = username;

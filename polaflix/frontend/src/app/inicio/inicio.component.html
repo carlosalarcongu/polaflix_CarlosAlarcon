@@ -1,38 +1,29 @@
-<header class="top-bar-premium">
-  <div class="logo-premium">POLAFLIX</div>
-  <nav class="nav-premium">
-    <a routerLink="/inicio" style="color: white; border-bottom: 2px solid #E50914;">Mi Perfil</a>
-    <a routerLink="/catalogo">Catálogo</a>
-  </nav>
-  <div class="user-controls">
-    <span class="user-name">{{username}}</span>
-    <button class="btn-salir" (click)="salir()">Salir</button>
-  </div>
-</header>
-
 <div class="container">
   
   <h2 class="section-title">Empezadas</h2>
   <div class="list-container">
-    <div *ngIf="empezadas.length === 0" class="empty-msg">No tienes series empezadas. ¡Empieza una aventura!</div>
-    <a *ngFor="let s of empezadas" [routerLink]="['/serie', s.id]" class="serie-link">
-      ▶ {{s.titulo}}
+    <div *ngIf="empezadas().length === 0" class="empty-msg">No hay series.</div>
+    <a *ngFor="let s of empezadas()" [routerLink]="['/serie', s.id]" class="serie-link" style="display:flex; justify-content:space-between;">
+      <span>▶ {{s.titulo}}</span>
+      <button class="btn-primary" (click)="archivar(s.id, $event)">📥 Archivar</button>
     </a>
   </div>
 
   <h2 class="section-title">Mi Lista (Pendientes)</h2>
   <div class="list-container">
-    <div *ngIf="pendientes.length === 0" class="empty-msg">Tu lista está vacía. Añade series desde el catálogo.</div>
-    <a *ngFor="let s of pendientes" [routerLink]="['/serie', s.id]" class="serie-link">
-      + {{s.titulo}}
+    <div *ngIf="pendientes().length === 0" class="empty-msg">No hay series.</div>
+    <a *ngFor="let s of pendientes()" [routerLink]="['/serie', s.id]" class="serie-link" style="display:flex; justify-content:space-between;">
+      <span>+ {{s.titulo}}</span>
+      <button class="btn-primary" (click)="archivar(s.id, $event)">📥 Archivar</button>
     </a>
   </div>
 
   <h2 class="section-title">Terminadas</h2>
   <div class="list-container">
-    <div *ngIf="terminadas.length === 0" class="empty-msg">Aún no has terminado ninguna serie.</div>
-    <a *ngFor="let s of terminadas" [routerLink]="['/serie', s.id]" class="serie-link" style="color: #aaa;">
-      ✓ {{s.titulo}}
+    <div *ngIf="terminadas().length === 0" class="empty-msg">No hay series.</div>
+    <a *ngFor="let s of terminadas()" [routerLink]="['/serie', s.id]" class="serie-link" style="color: #aaa; display:flex; justify-content:space-between;">
+      <span>✓ {{s.titulo}}</span>
+      <button class="btn-primary" (click)="archivar(s.id, $event)">📥 Archivar</button>
     </a>
   </div>
 

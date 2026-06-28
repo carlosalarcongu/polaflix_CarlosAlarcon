@@ -1,0 +1,26 @@
+<div class="container">
+  <h2 class="section-title">Archivo de Series</h2>
+  
+  <div class="list-container">
+    <div *ngIf="archivadas().length === 0" class="empty-msg">No hay series archivadas.</div>
+    
+    <div *ngFor="let s of archivadas()" style="margin-bottom: 15px;">
+      <div 
+        style="display:flex; justify-content:space-between; background-color: #2a2a2a; padding: 15px; border-radius: 4px; cursor: pointer;"
+        (click)="toggleDetalle(s.id)">
+        <span style="font-size: 1.2em; font-weight: 500;">{{s.titulo}}</span>
+        <button class="btn-primary" style="background-color: #555;" (click)="desarchivar(s.id, $event)">↑ Desarchivar</button>
+      </div>
+
+      <div *ngIf="expandidaId() === s.id && detallesExtra()[s.id]" style="background-color: #111; padding: 15px; border-bottom-left-radius: 4px; border-bottom-right-radius: 4px;">
+        <p><strong>Sinopsis:</strong> {{detallesExtra()[s.id].sinopsis}}</p>
+        <p>
+          <strong>Actores principales:</strong>
+          <span *ngFor="let actor of detallesExtra()[s.id].actores | slice:0:2; let isLast = last">
+            {{$any(actor).nombre}}{{isLast ? '' : ', '}}
+          </span>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

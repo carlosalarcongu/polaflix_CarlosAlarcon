@@ -1,1 +1,12 @@
-<router-outlet></router-outlet>
+<router-outlet>
+<header class="top-bar-premium">
+  <div class="logo-premium">POLAFLIX</div>
+  <nav class="nav-premium">
+    <a routerLink="/inicio">Mi Perfil</a>
+    <a routerLink="/archivo">Ver Archivo</a>
+  </nav>
+  <div class="user-controls">
+    <span class="user-name">{{ username }}</span>
+  </div>
+</header>
+</router-outlet>

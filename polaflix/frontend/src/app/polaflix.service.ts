@@ -23,4 +23,12 @@ export class PolaflixService {
   marcarComoVisto(username: string, idCapitulo: number): Observable<any> {
     return this.http.put(`/usuarios/${username}/capitulos-vistos/${idCapitulo}`, {});
   }
+
+  archivarSerie(username: string, idSerie: number): Observable<any> {
+    return this.http.put(`/usuarios/${username}/series-archivadas/${idSerie}`, {});
+  }
+
+  desarchivarSerie(username: string, idSerie: number): Observable<any> {
+    return this.http.delete(`/usuarios/${username}/series-archivadas/${idSerie}`);
+  }
 }
