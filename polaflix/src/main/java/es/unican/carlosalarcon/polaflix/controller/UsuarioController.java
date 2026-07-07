@@ -46,7 +46,7 @@ public class UsuarioController {
     }
 
     @PutMapping("/{username}/series-archivadas/{idSerie}")
-    @Operation(summary = "Archivar serie")
+    @Operation(summary = "Archivar serie", description = "Permite a un usuario archivar una serie.")
     public ResponseEntity<Void> archivarSerie(
             @PathVariable("username") String username,
             @PathVariable("idSerie") Integer idSerie) {
@@ -59,7 +59,7 @@ public class UsuarioController {
     }
 
     @DeleteMapping("/{username}/series-archivadas/{idSerie}")
-    @Operation(summary = "Desarchivar serie")
+    @Operation(summary = "Desarchivar serie", description = "Permite a un usuario desarchivar una serie.")
     public ResponseEntity<Void> desarchivarSerie(
             @PathVariable("username") String username,
             @PathVariable("idSerie") Integer idSerie) {
