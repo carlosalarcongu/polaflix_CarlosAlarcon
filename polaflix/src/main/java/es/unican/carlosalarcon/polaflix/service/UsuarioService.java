@@ -43,7 +43,7 @@ public class UsuarioService {
     @Transactional
     public void archivarSerie(String username, Integer idSerie) {
         Usuario usuario = usuarioRepository.findByUsername(username);
-        if (usuario == null) throw new java.util.NoSuchElementException();
+        if (usuario == null) throw new java.util.NoSuchElementException("Usuario no encontrado");
         usuario.archivarSerie(idSerie);
         usuarioRepository.save(usuario);
     }
@@ -51,7 +51,7 @@ public class UsuarioService {
     @Transactional
     public void desarchivarSerie(String username, Integer idSerie) {
         Usuario usuario = usuarioRepository.findByUsername(username);
-        if (usuario == null) throw new java.util.NoSuchElementException();
+        if (usuario == null) throw new java.util.NoSuchElementException("Usuario no encontrado");
         usuario.desarchivarSerie(idSerie);
         usuarioRepository.save(usuario);
     }
