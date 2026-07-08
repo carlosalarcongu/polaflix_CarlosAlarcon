@@ -93,7 +93,7 @@ public class UsuarioController {
     }
 
     @PutMapping("/{username}/capitulos-vistos/{idCapitulo}")
-    @Operation(summary = "Marcar capÃ­tulo como visto", description = "Registra que un usuario ha visto un capÃ­tulo.")
+    @Operation(summary = "Marcar capÃƒÂ­tulo como visto", description = "Registra que un usuario ha visto un capÃƒÂ­tulo.")
     public ResponseEntity<Void> verCapitulo(
             @PathVariable("username") String username,
             @PathVariable("idCapitulo") Long idCapitulo) {
@@ -104,6 +104,35 @@ public class UsuarioController {
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build(); 
+        }
+
+
+        
+    }
+
+    @PutMapping("/{username}/series-archivadas/{idSerie}")
+    @Operation(summary = "Archivar serie", description = "Permite a un usuario archivar una serie.")
+    public ResponseEntity<Void> archivarSerie(
+            @PathVariable("username") String username,
+            @PathVariable("idSerie") Integer idSerie) {
+        try {
+            usuarioService.archivarSerie(username, idSerie);
+            return ResponseEntity.ok().build();
+        } catch (java.util.NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/{username}/series-archivadas/{idSerie}")
+    @Operation(summary = "Desarchivar serie", description = "Permite a un usuario desarchivar una serie.")
+    public ResponseEntity<Void> desarchivarSerie(
+            @PathVariable("username") String username,
+            @PathVariable("idSerie") Integer idSerie) {
+        try {
+            usuarioService.desarchivarSerie(username, idSerie);
+            return ResponseEntity.ok().build();
+        } catch (java.util.NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
         }
     }
 }
@@ -778,7 +807,19 @@ public class Usuario {
     @MapKeyColumn(name = "serie_id")
     private Map<Integer, Capitulo> ultimoCapituloVisto = new HashMap<>();
 
+    @ElementCollection
+    @JsonView(Views.UsuarioBasico.class)
+    private Set<Integer> seriesArchivadas = new HashSet<>();
+
     protected Usuario() {}
+
+    public void archivarSerie(Integer serieId) {
+        this.seriesArchivadas.add(serieId);
+    }
+
+    public void desarchivarSerie(Integer serieId) {
+        this.seriesArchivadas.remove(serieId);
+    }
 
     public Usuario(String username, String contrasenha, IBAN iban, PlanSuscripcion planSuscripcion) {
         this.username = username;
@@ -992,10 +1033,10 @@ public class UsuarioService {
     @Transactional
     public void verCapitulo(String username, Long idCapitulo) {
         Usuario usuario = usuarioRepository.findByUsername(username);
-        if (usuario == null) throw new java.util.NoSuchElementException();
+        if (usuario == null) throw new java.util.NoSuchElementException("Usuario no encontrado");
 
         Serie serie = serieRepository.findSerieByCapituloId(idCapitulo)
-                .orElseThrow(() -> new java.util.NoSuchElementException());
+                .orElseThrow(() -> new java.util.NoSuchElementException("Serie no encontrada"));
                 
         Capitulo capitulo = serie.getTemporadas().stream()
                 .flatMap(t -> t.getCapitulos().stream())
@@ -1005,11 +1046,38 @@ public class UsuarioService {
         usuario.verCapitulo(capitulo);
         usuarioRepository.save(usuario);
     }
+
+    @Transactional
+    public void archivarSerie(String username, Integer idSerie) {
+        Usuario usuario = usuarioRepository.findByUsername(username);
+        if (usuario == null) throw new java.util.NoSuchElementException("Usuario no encontrado");
+        usuario.archivarSerie(idSerie);
+        usuarioRepository.save(usuario);
+    }
+
+    @Transactional
+    public void desarchivarSerie(String username, Integer idSerie) {
+        Usuario usuario = usuarioRepository.findByUsername(username);
+        if (usuario == null) throw new java.util.NoSuchElementException("Usuario no encontrado");
+        usuario.desarchivarSerie(idSerie);
+        usuarioRepository.save(usuario);
+    }
 }
 
 
 ========== frontend/src/app/app.component.html ==========
-<router-outlet></router-outlet>
+<router-outlet>
+<header class="top-bar-premium">
+  <div class="logo-premium">POLAFLIX</div>
+  <nav class="nav-premium">
+    <a routerLink="/inicio">Mi Perfil</a>
+    <a routerLink="/archivo">Ver Archivo</a>
+  </nav>
+  <div class="user-controls">
+    <span class="user-name">{{ username }}</span>
+  </div>
+</header>
+</router-outlet>
 
 
 ========== frontend/src/app/app.config.server.ts ==========
@@ -1042,7 +1110,18 @@ export const appConfig: ApplicationConfig = {
 
 
 ========== frontend/src/app/app.html ==========
-<router-outlet></router-outlet>
+<router-outlet>
+<header class="top-bar-premium">
+  <div class="logo-premium">POLAFLIX</div>
+  <nav class="nav-premium">
+    <a routerLink="/inicio">Mi Perfil</a>
+    <a routerLink="/archivo">Ver Archivo</a>
+  </nav>
+  <div class="user-controls">
+    <span class="user-name">{{ username }}</span>
+  </div>
+</header>
+</router-outlet>
 
 
 ========== frontend/src/app/app.routes.server.ts ==========
@@ -1058,15 +1137,16 @@ export const serverRoutes: ServerRoute[] = [
 
 ========== frontend/src/app/app.routes.ts ==========
 import { Routes } from '@angular/router';
-import { EntradaComponent } from './entrada/entrada.component';
 import { InicioComponent } from './inicio/inicio.component';
 import { SerieComponent } from './serie/serie.component';
+import { ArchivoComponent } from './archivo/archivo.component';
 
 export const routes: Routes = [
-  { path: '', component: EntradaComponent },
+  { path: '', redirectTo: 'inicio', pathMatch: 'full' },
   { path: 'inicio', component: InicioComponent },
+  { path: 'archivo', component: ArchivoComponent },
   { path: 'serie/:id', component: SerieComponent },
-  { path: '**', redirectTo: '' }
+  { path: '**', redirectTo: 'inicio' }
 ];
 
 
@@ -1097,77 +1177,131 @@ describe('App', () => {
 
 
 ========== frontend/src/app/app.ts ==========
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
+import { RouterOutlet, RouterModule } from '@angular/router';
+import { isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, RouterModule],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App {
-  title = 'frontend';
+export class App implements OnInit {
+  username = 'carlosalarcon';
+
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+
+  ngOnInit() {
+    if (isPlatformBrowser(this.platformId)) {
+      sessionStorage.setItem('usuario', this.username);
+    }
+  }
 }
 
 
-========== frontend/src/app/entrada/entrada.component.css ==========
-.login-container { display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f2f2f2; font-family: Arial, sans-serif; }
-.login-box { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; width: 300px; }
-h1 { color: #E50914; margin-top: 0; }
-input { width: 100%; padding: 12px; margin: 20px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-button { width: 100%; padding: 12px; background-color: #E50914; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; }
-button:hover { background-color: #b20710; }
-.error-msg { color: #E50914; margin-top: 15px; font-weight: bold; }
-p {color: #555; margin-top: 20px;}
-
-
-========== frontend/src/app/entrada/entrada.component.html ==========
-<div class="login-container">
-  <div class="login-box">
-    <h1>Polaflix</h1>
-    <p>Accede con tu nombre de usuario</p>
+========== frontend/src/app/archivo/archivo.component.html ==========
+<div class="container">
+  <h2 class="section-title">Archivo de Series</h2>
+  
+  <div class="list-container">
+    <div *ngIf="archivadas().length === 0" class="empty-msg">No hay series archivadas.</div>
     
-    <input type="text" [(ngModel)]="username" placeholder="Ej: cr7bicho" />
-    <button (click)="entrar()">Entrar a la aplicaciÃ³n</button>
-    
-    <p class="error-msg" *ngIf="error">{{error}}</p>
+    <div *ngFor="let s of archivadas()" style="margin-bottom: 15px;">
+      <div 
+        style="display:flex; justify-content:space-between; background-color: #2a2a2a; padding: 15px; border-radius: 4px; cursor: pointer;"
+        (click)="toggleDetalle(s.id)">
+        <span style="font-size: 1.2em; font-weight: 500;">{{s.titulo}}</span>
+        <button class="btn-primary" style="background-color: #555;" (click)="desarchivar(s.id, $event)">â†‘ Desarchivar</button>
+      </div>
+
+      <div *ngIf="expandidaId() === s.id && detallesExtra()[s.id]" style="background-color: #111; padding: 15px; border-bottom-left-radius: 4px; border-bottom-right-radius: 4px;">
+        <p><strong>Sinopsis:</strong> {{detallesExtra()[s.id].sinopsis}}</p>
+        <p>
+          <strong>Actores principales:</strong>
+          <span *ngFor="let actor of detallesExtra()[s.id].actores | slice:0:2; let isLast = last">
+            {{$any(actor).nombre}}{{isLast ? '' : ', '}}
+          </span>
+        </p>
+      </div>
+    </div>
   </div>
 </div>
 
 
-========== frontend/src/app/entrada/entrada.component.ts ==========
-import { Component } from '@angular/core';
+========== frontend/src/app/archivo/archivo.component.ts ==========
+import { Component, OnInit, Inject, PLATFORM_ID, signal, computed } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { PolaflixService } from '../polaflix.service';
-import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { forkJoin } from 'rxjs';
 
 @Component({
-  selector: 'app-entrada',
+  selector: 'app-archivo',
   standalone: true,
-  imports: [FormsModule, CommonModule],
-  templateUrl: './entrada.component.html',
-  styleUrls: ['./entrada.component.css']
+  imports: [CommonModule],
+  templateUrl: './archivo.component.html'
 })
-export class EntradaComponent {
-  username: string = '';
-  error: string = '';
+export class ArchivoComponent implements OnInit {
+  username = signal<string>('');
+  usuarioData = signal<any>(null);
+  seriesCat = signal<any[]>([]);
+  detallesExtra = signal<Record<number, any>>({});
+  expandidaId = signal<number | null>(null);
 
-  constructor(private polaflixService: PolaflixService, private router: Router) {}
+  archivadas = computed(() => {
+    const u = this.usuarioData();
+    const s = this.seriesCat();
+    if (!u || !s || !u.seriesArchivadas) return [];
+    return s.filter(serie => u.seriesArchivadas.includes(serie.id));
+  });
 
-  entrar() {
-    if (!this.username.trim()) return;
-    
-    this.polaflixService.entrar(this.username).subscribe({
-      next: () => {
-        sessionStorage.setItem('usuario', this.username);
-        this.router.navigate(['/inicio']); 
-      },
-      error: () => {
-        this.error = 'El usuario no existe.';
+  constructor(
+    private polaflixService: PolaflixService,
+    private router: Router,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {}
+
+  ngOnInit() {
+    if (isPlatformBrowser(this.platformId)) {
+      const u = sessionStorage.getItem('usuario') || '';
+      if (!u) {
+        this.router.navigate(['/']);
+        return;
       }
+      this.username.set(u);
+      this.cargarDatos();
+    }
+  }
+  
+  cargarDatos() {
+    forkJoin({
+      usuario: this.polaflixService.entrar(this.username()),
+      series: this.polaflixService.getSeries()
+    }).subscribe(({usuario, series}) => {
+      this.usuarioData.set(usuario);
+      this.seriesCat.set(series);
+    });
+  }
+
+  toggleDetalle(idSerie: number) {
+    if (this.expandidaId() === idSerie) {
+      this.expandidaId.set(null);
+    } else {
+      this.expandidaId.set(idSerie);
+      if (!this.detallesExtra()[idSerie]) {
+        this.polaflixService.getSerie(idSerie).subscribe(detalles => {
+          this.detallesExtra.update(prev => ({ ...prev, [idSerie]: detalles }));
+        });
+      }
+    }
+  }
+
+  desarchivar(idSerie: number, event: Event) {
+    event.stopPropagation();
+    this.polaflixService.desarchivarSerie(this.username(), idSerie).subscribe(() => {
+      this.cargarDatos();
     });
   }
 }
@@ -1208,41 +1342,32 @@ export class EntradaComponent {
 
 
 ========== frontend/src/app/inicio/inicio.component.html ==========
-<header class="top-bar-premium">
-  <div class="logo-premium">POLAFLIX</div>
-  <nav class="nav-premium">
-    <a routerLink="/inicio" style="color: white; border-bottom: 2px solid #E50914;">Mi Perfil</a>
-    <a routerLink="/catalogo">CatÃ¡logo</a>
-  </nav>
-  <div class="user-controls">
-    <span class="user-name">{{username}}</span>
-    <button class="btn-salir" (click)="salir()">Salir</button>
-  </div>
-</header>
-
 <div class="container">
   
   <h2 class="section-title">Empezadas</h2>
   <div class="list-container">
-    <div *ngIf="empezadas.length === 0" class="empty-msg">No tienes series empezadas. Â¡Empieza una aventura!</div>
-    <a *ngFor="let s of empezadas" [routerLink]="['/serie', s.id]" class="serie-link">
-      â–¶ {{s.titulo}}
+    <div *ngIf="empezadas().length === 0" class="empty-msg">No hay series.</div>
+    <a *ngFor="let s of empezadas()" [routerLink]="['/serie', s.id]" class="serie-link" style="display:flex; justify-content:space-between;">
+      <span>â–¶ {{s.titulo}}</span>
+      <button class="btn-primary" (click)="archivar(s.id, $event)">ðŸ“¥ Archivar</button>
     </a>
   </div>
 
   <h2 class="section-title">Mi Lista (Pendientes)</h2>
   <div class="list-container">
-    <div *ngIf="pendientes.length === 0" class="empty-msg">Tu lista estÃ¡ vacÃ­a. AÃ±ade series desde el catÃ¡logo.</div>
-    <a *ngFor="let s of pendientes" [routerLink]="['/serie', s.id]" class="serie-link">
-      + {{s.titulo}}
+    <div *ngIf="pendientes().length === 0" class="empty-msg">No hay series.</div>
+    <a *ngFor="let s of pendientes()" [routerLink]="['/serie', s.id]" class="serie-link" style="display:flex; justify-content:space-between;">
+      <span>+ {{s.titulo}}</span>
+      <button class="btn-primary" (click)="archivar(s.id, $event)">ðŸ“¥ Archivar</button>
     </a>
   </div>
 
   <h2 class="section-title">Terminadas</h2>
   <div class="list-container">
-    <div *ngIf="terminadas.length === 0" class="empty-msg">AÃºn no has terminado ninguna serie.</div>
-    <a *ngFor="let s of terminadas" [routerLink]="['/serie', s.id]" class="serie-link" style="color: #aaa;">
-      âœ“ {{s.titulo}}
+    <div *ngIf="terminadas().length === 0" class="empty-msg">No hay series.</div>
+    <a *ngFor="let s of terminadas()" [routerLink]="['/serie', s.id]" class="serie-link" style="color: #aaa; display:flex; justify-content:space-between;">
+      <span>âœ“ {{s.titulo}}</span>
+      <button class="btn-primary" (click)="archivar(s.id, $event)">ðŸ“¥ Archivar</button>
     </a>
   </div>
 
@@ -1250,7 +1375,7 @@ export class EntradaComponent {
 
 
 ========== frontend/src/app/inicio/inicio.component.ts ==========
-import { Component, OnInit, Inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, Inject, PLATFORM_ID, signal, computed } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { PolaflixService } from '../polaflix.service';
@@ -1264,61 +1389,68 @@ import { forkJoin } from 'rxjs';
   styleUrls: ['./inicio.component.css']
 })
 export class InicioComponent implements OnInit {
-  username: string = '';
-  empezadas: any[] = [];
-  pendientes: any[] = [];
-  terminadas: any[] = [];
+  username = signal<string>('');
+  usuarioData = signal<any>(null);
+  seriesData = signal<any[]>([]);
+
+  empezadas = computed(() => this.filtrarSeries('EMPEZADA'));
+  pendientes = computed(() => this.filtrarSeries('PENDIENTE'));
+  terminadas = computed(() => this.filtrarSeries('TERMINADA'));
 
   constructor(
-    private polaflixService: PolaflixService, 
+    private polaflixService: PolaflixService,
     private router: Router,
-    @Inject(PLATFORM_ID) private platformId: Object,
-    private cdr: ChangeDetectorRef // <-- AÃ±adido
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
   ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {
-      this.username = sessionStorage.getItem('usuario') || '';
-      
-      if (!this.username) {
+      const u = sessionStorage.getItem('usuario') || '';
+      if (!u) {
         this.router.navigate(['/']);
         return;
       }
-
-      forkJoin({
-        usuario: this.polaflixService.entrar(this.username),
-        series: this.polaflixService.getSeries()
-      }).subscribe(({usuario, series}) => {
-        this.empezadas = [];
-        this.pendientes = [];
-        this.terminadas = [];
-        
-        if (usuario.estadoSeries) {
-          Object.keys(usuario.estadoSeries).forEach(idStr => {
-            const id = parseInt(idStr, 10);
-            const estado = usuario.estadoSeries[idStr];
-            const serie = series.find(s => s.id === id);
-            
-            if (serie) {
-              if (estado === 'EMPEZADA') this.empezadas.push(serie);
-              if (estado === 'PENDIENTE') this.pendientes.push(serie);
-              if (estado === 'TERMINADA') this.terminadas.push(serie);
-            }
-          });
-        }
-        // Obligamos a Angular a actualizar la pantalla inmediatamente
-        this.cdr.detectChanges(); 
-      });
+      this.username.set(u);
+      this.cargarDatos();
     }
   }
 
-  salir() {
-    if (isPlatformBrowser(this.platformId)) {
-      sessionStorage.clear();
-    }
-    this.router.navigate(['/']);
+  cargarDatos() {
+    forkJoin({
+      usuario: this.polaflixService.entrar(this.username()),
+      series: this.polaflixService.getSeries()
+    }).subscribe(({usuario, series}) => {
+      this.usuarioData.set(usuario);
+      this.seriesData.set(series);
+    });
+  }
+
+  filtrarSeries(estadoDeseado: string) {
+    const u = this.usuarioData();
+    const s = this.seriesData();
+    if (!u || !s) return [];
+    
+    return s.filter(serie => {
+      const estaEnEstado = u.estadoSeries?.[serie.id] === estadoDeseado;
+      const estaArchivada = u.seriesArchivadas?.includes(serie.id);
+      return estaEnEstado && !estaArchivada;
+    });
+  }
+
+  archivar(idSerie: number, event: Event) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.polaflixService.archivarSerie(this.username(), idSerie).subscribe(() => {
+      this.cargarDatos();
+    });
   }
 }
+
+
+//ahorrarme el archivar aqui (linea 66)
+//De la linea 30 ahorrarme la comprobacion del isplatfrombrowser
+//Lineas 45-53 quitrlas porque se puede hacer con lo q esta cargado antes en archivo.component.ts
+//Lineas 4 y 54 quitarlas y poner una excepcion mia de no usuario en UsuarioServicejava
 
 
 ========== frontend/src/app/polaflix.service.ts ==========
@@ -1346,6 +1478,14 @@ export class PolaflixService {
 
   marcarComoVisto(username: string, idCapitulo: number): Observable<any> {
     return this.http.put(`/usuarios/${username}/capitulos-vistos/${idCapitulo}`, {});
+  }
+
+  archivarSerie(username: string, idSerie: number): Observable<any> {
+    return this.http.put(`/usuarios/${username}/series-archivadas/${idSerie}`, {});
+  }
+
+  desarchivarSerie(username: string, idSerie: number): Observable<any> {
+    return this.http.delete(`/usuarios/${username}/series-archivadas/${idSerie}`);
   }
 }
 
@@ -1469,17 +1609,6 @@ export class Polaflix {}
 
 
 ========== frontend/src/app/serie/serie.component.html ==========
-<header class="top-bar-premium">
-  <div class="logo-premium">POLAFLIX</div>
-  <nav class="nav-premium">
-    <a routerLink="/inicio">Mi Perfil</a>
-    <a routerLink="/catalogo">CatÃ¡logo</a>
-  </nav>
-  <div class="user-controls">
-    <span class="user-name">{{username}}</span>
-    <button class="btn-salir" (click)="salir()">Salir</button>
-  </div>
-</header>
 
 <div *ngFor="let temp of serie.temporadas">
     
@@ -1590,12 +1719,6 @@ export class SerieComponent implements OnInit {
     }
   }
 
-  salir() {
-    if (isPlatformBrowser(this.platformId)) {
-      sessionStorage.clear();
-    }
-    this.router.navigate(['/']);
-  }
 }
 
 

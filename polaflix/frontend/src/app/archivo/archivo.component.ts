@@ -1,5 +1,5 @@
-import { Component, OnInit, Inject, PLATFORM_ID, signal, computed } from '@angular/core';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { Component, OnInit, signal, computed } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { PolaflixService } from '../polaflix.service';
 import { forkJoin } from 'rxjs';
@@ -26,23 +26,18 @@ export class ArchivoComponent implements OnInit {
 
   constructor(
     private polaflixService: PolaflixService,
-    private router: Router,
-    @Inject(PLATFORM_ID) private platformId: Object
+    private router: Router
   ) {}
 
   ngOnInit() {
-    if (isPlatformBrowser(this.platformId)) {
-      const u = sessionStorage.getItem('usuario') || '';
-      if (!u) {
-        this.router.navigate(['/']);
-        return;
-      }
-      this.username.set(u);
-      this.cargarDatos();
+    const u = sessionStorage.getItem('usuario') || 'carlosalarcon';
+    if (!u) {
+      this.router.navigate(['/']);
+      return;
     }
-  }
+    this.username.set(u);
 
-  cargarDatos() {
+    
     forkJoin({
       usuario: this.polaflixService.entrar(this.username()),
       series: this.polaflixService.getSeries()
@@ -68,7 +63,11 @@ export class ArchivoComponent implements OnInit {
   desarchivar(idSerie: number, event: Event) {
     event.stopPropagation();
     this.polaflixService.desarchivarSerie(this.username(), idSerie).subscribe(() => {
-      this.cargarDatos();
+      const u = this.usuarioData();
+      if (u && u.seriesArchivadas) {
+        u.seriesArchivadas = u.seriesArchivadas.filter((id: number) => id !== idSerie);
+        this.usuarioData.set({ ...u }); 
+      }
     });
   }
 }

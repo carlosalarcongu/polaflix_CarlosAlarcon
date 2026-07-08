@@ -1,5 +1,5 @@
-import { Component, OnInit, Inject, PLATFORM_ID, signal, computed } from '@angular/core';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { Component, OnInit, signal, computed } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { PolaflixService } from '../polaflix.service';
 import { forkJoin } from 'rxjs';
@@ -22,23 +22,17 @@ export class InicioComponent implements OnInit {
 
   constructor(
     private polaflixService: PolaflixService,
-    private router: Router,
-    @Inject(PLATFORM_ID) private platformId: Object
+    private router: Router
   ) {}
 
   ngOnInit() {
-    if (isPlatformBrowser(this.platformId)) {
-      const u = sessionStorage.getItem('usuario') || '';
-      if (!u) {
-        this.router.navigate(['/']);
-        return;
-      }
-      this.username.set(u);
-      this.cargarDatos();
+    const u = sessionStorage.getItem('usuario') || 'carlosalarcon';
+    if (!u) {
+      this.router.navigate(['/']);
+      return;
     }
-  }
-
-  cargarDatos() {
+    this.username.set(u);
+    
     forkJoin({
       usuario: this.polaflixService.entrar(this.username()),
       series: this.polaflixService.getSeries()
@@ -64,7 +58,19 @@ export class InicioComponent implements OnInit {
     event.preventDefault();
     event.stopPropagation();
     this.polaflixService.archivarSerie(this.username(), idSerie).subscribe(() => {
-      this.cargarDatos();
+      
+      const u = this.usuarioData();
+      if (u) {
+        if (!u.seriesArchivadas) u.seriesArchivadas = [];
+        u.seriesArchivadas.push(idSerie);
+        this.usuarioData.set({ ...u });
+      }
     });
   }
 }
+
+
+//ahorrarme el archivar aqui (linea 66)
+//De la linea 30 ahorrarme la comprobacion del isplatfrombrowser
+//Lineas 45-53 quitrlas porque se puede hacer con lo q esta cargado antes en archivo.component.ts
+//Lineas 4 y 54 quitarlas y poner una excepcion mia de no usuario en UsuarioServicejava

@@ -2,6 +2,7 @@ package es.unican.carlosalarcon.polaflix.controller;
 
 import es.unican.carlosalarcon.polaflix.domain.Usuario;
 import es.unican.carlosalarcon.polaflix.domain.Views;
+import es.unican.carlosalarcon.polaflix.exception.UsuarioNoEncontradoException;
 import es.unican.carlosalarcon.polaflix.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -38,11 +39,14 @@ public class UsuarioController {
         try {
             usuarioService.verCapitulo(username, idCapitulo);
             return ResponseEntity.ok().build(); 
-        } catch (java.util.NoSuchElementException e) {
+        } catch (UsuarioNoEncontradoException e) {
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build(); 
         }
+
+
+
     }
 
     @PutMapping("/{username}/series-archivadas/{idSerie}")
@@ -53,7 +57,7 @@ public class UsuarioController {
         try {
             usuarioService.archivarSerie(username, idSerie);
             return ResponseEntity.ok().build();
-        } catch (java.util.NoSuchElementException e) {
+        } catch (UsuarioNoEncontradoException e) {
             return ResponseEntity.notFound().build();
         }
     }
@@ -66,7 +70,7 @@ public class UsuarioController {
         try {
             usuarioService.desarchivarSerie(username, idSerie);
             return ResponseEntity.ok().build();
-        } catch (java.util.NoSuchElementException e) {
+        } catch (UsuarioNoEncontradoException e) {
             return ResponseEntity.notFound().build();
         }
     }

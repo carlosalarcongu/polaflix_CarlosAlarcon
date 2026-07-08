@@ -1,6 +1,7 @@
 package es.unican.carlosalarcon.polaflix.service;
 
 import es.unican.carlosalarcon.polaflix.domain.*;
+import es.unican.carlosalarcon.polaflix.exception.UsuarioNoEncontradoException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +27,7 @@ public class UsuarioService {
     @Transactional
     public void verCapitulo(String username, Long idCapitulo) {
         Usuario usuario = usuarioRepository.findByUsername(username);
-        if (usuario == null) throw new java.util.NoSuchElementException("Usuario no encontrado");
+        if (usuario == null) throw new UsuarioNoEncontradoException(username);
 
         Serie serie = serieRepository.findSerieByCapituloId(idCapitulo)
                 .orElseThrow(() -> new java.util.NoSuchElementException("Serie no encontrada"));
@@ -43,7 +44,7 @@ public class UsuarioService {
     @Transactional
     public void archivarSerie(String username, Integer idSerie) {
         Usuario usuario = usuarioRepository.findByUsername(username);
-        if (usuario == null) throw new java.util.NoSuchElementException("Usuario no encontrado");
+        if (usuario == null) throw new UsuarioNoEncontradoException(username);
         usuario.archivarSerie(idSerie);
         usuarioRepository.save(usuario);
     }
@@ -51,7 +52,7 @@ public class UsuarioService {
     @Transactional
     public void desarchivarSerie(String username, Integer idSerie) {
         Usuario usuario = usuarioRepository.findByUsername(username);
-        if (usuario == null) throw new java.util.NoSuchElementException("Usuario no encontrado");
+        if (usuario == null) throw new UsuarioNoEncontradoException(username);
         usuario.desarchivarSerie(idSerie);
         usuarioRepository.save(usuario);
     }
