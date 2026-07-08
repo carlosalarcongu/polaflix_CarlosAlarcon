@@ -68,9 +68,3 @@ export class InicioComponent implements OnInit {
     });
   }
 }
-
-
-//ahorrarme el archivar aqui (linea 66)
-//De la linea 30 ahorrarme la comprobacion del isplatfrombrowser
-//Lineas 45-53 quitrlas porque se puede hacer con lo q esta cargado antes en archivo.component.ts
-//Lineas 4 y 54 quitarlas y poner una excepcion mia de no usuario en UsuarioServicejava
