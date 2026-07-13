@@ -16,6 +16,7 @@ export class ArchivoComponent implements OnInit {
   seriesCat = signal<any[]>([]);
   detallesExtra = signal<Record<number, any>>({});
   expandidaId = signal<number | null>(null);
+  expandirTodas = signal<boolean>(false);
 
   archivadas = computed(() => {
     const u = this.usuarioData();
@@ -59,6 +60,23 @@ export class ArchivoComponent implements OnInit {
       }
     }
   }
+
+  //Actividad de expandir todas rapidanmente
+  toggleExpandirTodas() {
+    const mostrar = !this.expandirTodas();
+    this.expandirTodas.set(mostrar);
+    if (!mostrar) {
+      this.expandidaId.set(null);
+    } else {  
+      for (const serie of this.archivadas()) {
+        if (!this.detallesExtra()[serie.id]) {
+          this.polaflixService.getSerie(serie.id).subscribe(detalles => {
+            this.detallesExtra.update(prev => ({ ...prev, [serie.id]: detalles }));
+          });
+        }
+      }}
+  }
+  //
 
   desarchivar(idSerie: number, event: Event) {
     event.stopPropagation();

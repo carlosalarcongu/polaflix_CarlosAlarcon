@@ -15,6 +15,7 @@ export class SerieComponent implements OnInit {
   usuario: any;
   username: string = '';
   temporadaExpandida: number | null = null;
+  
 
   constructor(
     private route: ActivatedRoute, 
@@ -59,6 +60,7 @@ export class SerieComponent implements OnInit {
       }
       this.cdr.detectChanges(); // Forzamos dibujado
   }
+  
 
   esVisto(idCapitulo: number): boolean {
     if (!this.usuario || !this.usuario.capitulosVistos) return false;
